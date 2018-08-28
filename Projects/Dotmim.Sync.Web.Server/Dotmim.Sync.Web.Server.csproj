@@ -12,6 +12,7 @@ Can't work without a Server provider, you have to choose an existing one to be a
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyName>Dotmim.Sync.Web.Server</AssemblyName>
     <RootNamespace>Dotmim.Sync.Web.Server</RootNamespace>
+    <AssemblyVersion>0.2.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
