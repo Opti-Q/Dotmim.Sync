@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.IO;
 using Dotmim.Sync.Messages;
 
 namespace Dotmim.Sync
@@ -221,12 +222,20 @@ namespace Dotmim.Sync
                 this.LocalProvider.SetCancellationToken(cancellationToken);
                 this.RemoteProvider.SetCancellationToken(cancellationToken);
 
+                var batchDirectory = this.Configuration.BatchDirectory;
+                Debug.WriteLine($"Dotmim.Sync - using BatchDirectory: {batchDirectory}");
+
+                if (!Directory.Exists(batchDirectory))
+                    Directory.CreateDirectory(batchDirectory);
+
                 // ----------------------------------------
                 // 0) Begin Session / Get the Configuration from remote provider
                 //    If the configuration object is provided by the client, the server will be updated with it.
                 // ----------------------------------------
                 (context, this.Configuration) = await this.RemoteProvider.BeginSessionAsync(context,
                     new MessageBeginSession { SyncConfiguration = this.Configuration });
+
+
 
                 if (cancellationToken.IsCancellationRequested)
                     cancellationToken.ThrowIfCancellationRequested();
@@ -376,7 +385,7 @@ namespace Dotmim.Sync
                             ScopeInfo = scope,
                             Schema = this.Configuration.Schema,
                             DownloadBatchSizeInKB = this.Configuration.DownloadBatchSizeInKB,
-                            BatchDirectory = this.Configuration.BatchDirectory,
+                            BatchDirectory = batchDirectory,//this.Configuration.BatchDirectory,
                             Policy = clientPolicy,
                             Filters = this.Configuration.Filters,
                             SerializationFormat = this.Configuration.SerializationFormat
@@ -477,7 +486,7 @@ namespace Dotmim.Sync
                             ScopeInfo = scope,
                             Schema = this.Configuration.Schema,
                             DownloadBatchSizeInKB = this.Configuration.DownloadBatchSizeInKB,
-                            BatchDirectory = this.Configuration.BatchDirectory,
+                            BatchDirectory = batchDirectory,// this.Configuration.BatchDirectory,
                             Policy = serverPolicy,
                             Filters = this.Configuration.Filters,
                             SerializationFormat = this.Configuration.SerializationFormat
