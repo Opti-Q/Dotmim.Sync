@@ -273,7 +273,7 @@ namespace Dotmim.Sync.Web.Server
                 httpMessageBeginSession = (httpMessage.Content as JObject).ToObject<HttpMessageBeginSession>();
 
             // client specific path
-            var batchDirectory = httpMessageBeginSession.SyncConfiguration.BatchDirectory;
+            var batchDirectory = this.Configuration?.BatchDirectory ?? httpMessageBeginSession.SyncConfiguration.BatchDirectory;
             
             // the Conf is hosted by the server ? if not, get the client configuration
             httpMessageBeginSession.SyncConfiguration = 

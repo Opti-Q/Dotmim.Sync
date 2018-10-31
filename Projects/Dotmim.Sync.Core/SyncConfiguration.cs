@@ -55,7 +55,8 @@ namespace Dotmim.Sync
         /// Gets or Sets the directory used for batch mode.
         /// Default value is [Windows Temp Path]/[DotmimSync]
         /// </summary>
-        [DataMember(Name="BD")]
+        //[DataMember(Name="BD")]
+        [JsonIgnore]
         public String BatchDirectory { get; set; }
 
         /// <summary>
