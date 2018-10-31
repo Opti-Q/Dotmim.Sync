@@ -691,15 +691,28 @@ namespace Dotmim.Sync.Web.Server
         //}
 
         public async Task<(SyncContext, SyncConfiguration)> BeginSessionAsync(SyncContext ctx, MessageBeginSession message)
-            => await this.LocalProvider.BeginSessionAsync(ctx, message);
+        {
+            if (this.Configuration.BatchDirectory != null)
+                message.SyncConfiguration.BatchDirectory = this.Configuration.BatchDirectory;
+
+            return await this.LocalProvider.BeginSessionAsync(ctx, message);
+        } 
         public async Task<(SyncContext, List<ScopeInfo>)> EnsureScopesAsync(SyncContext ctx, MessageEnsureScopes message)
             => await this.LocalProvider.EnsureScopesAsync(ctx, message);
         public async Task<(SyncContext, DmSet)> EnsureSchemaAsync(SyncContext ctx, MessageEnsureSchema message)
             => await this.LocalProvider.EnsureSchemaAsync(ctx, message);
         public async Task<SyncContext> EnsureDatabaseAsync(SyncContext ctx, MessageEnsureDatabase message)
             => await this.LocalProvider.EnsureDatabaseAsync(ctx, message);
-        public async Task<(SyncContext, BatchInfo, ChangesSelected)> GetChangeBatchAsync(SyncContext ctx, MessageGetChangesBatch message)
-            => await this.LocalProvider.GetChangeBatchAsync(ctx, message);
+
+        public async Task<(SyncContext, BatchInfo, ChangesSelected)> GetChangeBatchAsync(SyncContext ctx,
+            MessageGetChangesBatch message)
+        {
+            if (this.Configuration.BatchDirectory != null)
+                message.BatchDirectory = this.Configuration.BatchDirectory;
+            
+            return await this.LocalProvider.GetChangeBatchAsync(ctx, message);
+        }
+
         public async Task<(SyncContext, ChangesApplied)> ApplyChangesAsync(SyncContext ctx, MessageApplyChanges message)
             => await this.LocalProvider.ApplyChangesAsync(ctx, message);
         public async Task<(SyncContext, Int64)> GetLocalTimestampAsync(SyncContext ctx, MessageTimestamp message)
