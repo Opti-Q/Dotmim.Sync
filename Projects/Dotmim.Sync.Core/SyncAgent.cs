@@ -19,12 +19,25 @@ namespace Dotmim.Sync
     /// </summary>
     public class SyncAgent : IDisposable
     {
+        private SyncConfiguration _configuration;
 
         /// <summary>
         /// Gets or Sets the configuration object.
         /// This object will be passed to the remote provider, and will be handle by it.
         /// </summary>
-        public SyncConfiguration Configuration { get; private set; }
+        public SyncConfiguration Configuration
+        {
+            get => _configuration;
+            private set
+            {
+                var batchDir = _configuration?.BatchDirectory;
+                _configuration = value;
+
+                // keep the original batch directory - don't let the server dictate it to you!
+                if (!string.IsNullOrEmpty(batchDir) && _configuration != null)
+                    _configuration.BatchDirectory = batchDir;
+            }
+        }
 
         /// <summary>
         /// Defines the state that a synchronization session is in.
@@ -212,6 +225,7 @@ namespace Dotmim.Sync
             Guid fromId = Guid.Empty;
             long lastSyncTS = 0L;
             bool isNew = true;
+            string batchDirectory = null;
 
             try
             {
@@ -222,7 +236,9 @@ namespace Dotmim.Sync
                 this.LocalProvider.SetCancellationToken(cancellationToken);
                 this.RemoteProvider.SetCancellationToken(cancellationToken);
 
-                var batchDirectory = this.Configuration.BatchDirectory;
+                // create unique batch folder for this sync-session
+                // this makes cleanup much easier afterwards
+                batchDirectory = Path.Combine(this.Configuration.BatchDirectory, Guid.NewGuid().ToString("N"));
                 Debug.WriteLine($"Dotmim.Sync - using BatchDirectory: {batchDirectory}");
 
                 if (!Directory.Exists(batchDirectory))
@@ -234,7 +250,6 @@ namespace Dotmim.Sync
                 // ----------------------------------------
                 (context, this.Configuration) = await this.RemoteProvider.BeginSessionAsync(context,
                     new MessageBeginSession { SyncConfiguration = this.Configuration });
-
 
 
                 if (cancellationToken.IsCancellationRequested)
@@ -599,9 +614,12 @@ namespace Dotmim.Sync
                 // End the current session
                 context = await this.RemoteProvider.EndSessionAsync(context);
                 context = await this.LocalProvider.EndSessionAsync(context);
-
+                
                 this.SessionState = SyncSessionState.Ready;
                 this.SessionStateChanged?.Invoke(this, this.SessionState);
+
+                if (batchDirectory != null && Directory.Exists(batchDirectory))
+                    Directory.Delete(batchDirectory, true);
             }
 
             return context;

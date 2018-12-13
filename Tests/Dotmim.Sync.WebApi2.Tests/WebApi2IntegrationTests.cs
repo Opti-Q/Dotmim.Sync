@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
@@ -188,10 +189,12 @@ namespace Dotmim.Sync.Tests
         SyncAgent agent;
         private Func<SyncConfiguration> configurationProvider;
         private IDisposable webApp;
-        
+        private string batchDir;
+
         public SqliteSyncHttpTests(SqliteSyncHttpFixture fixture)
         {
             this.fixture = fixture;
+            this.batchDir = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString("N"));
             
             configurationProvider = () => new SyncConfiguration(fixture.Tables);
 
@@ -210,7 +213,9 @@ namespace Dotmim.Sync.Tests
                 config.Services.Replace(typeof(IHttpControllerActivator), new TestControllerActivator(
                     () =>
                     {
-                        proxyServerProvider.Configuration = configurationProvider();
+                        var syncConfig = configurationProvider();
+                        syncConfig.BatchDirectory = Path.Combine(batchDir, "server");
+                        proxyServerProvider.Configuration = syncConfig;
                         return proxyServerProvider;
                     }));
                 appBuilder.UseWebApi(config);
@@ -220,7 +225,7 @@ namespace Dotmim.Sync.Tests
             proxyClientProvider = new WebProxyClientProvider(new Uri(fixture.BaseAddress, "api/values"));
 
             agent = new SyncAgent(clientProvider, proxyClientProvider);
-
+            agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
         }
 
         [Fact, TestPriority(1)]
@@ -274,6 +279,7 @@ namespace Dotmim.Sync.Tests
             
             Assert.Equal(1, session.TotalChangesDownloaded);
             Assert.Equal(0, session.TotalChangesUploaded);
+
         }
 
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(4)]
@@ -804,6 +810,21 @@ namespace Dotmim.Sync.Tests
             proxyClientProvider?.Dispose();
             agent?.Dispose();
             webApp?.Dispose();
+
+            
+            // IF the server directory still is there, it should at least be empty
+            var serverDir = Path.Combine(this.batchDir, "server");
+            if(Directory.Exists(serverDir))
+                Assert.Equal(Directory.EnumerateFileSystemEntries(serverDir).Count(), 0); // "temporary data should be deleted"
+
+            // IF the client directory still is there, it should at least be empty
+            var clientDir = Path.Combine(this.batchDir, "client");
+            if (Directory.Exists(clientDir))
+                Assert.Equal(Directory.EnumerateFileSystemEntries(clientDir).Count(), 0); // "temporary data should be deleted"
+
+
+            if (Directory.Exists(this.batchDir))
+                Directory.Delete(this.batchDir, true);
         }
     }
 }

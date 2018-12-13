@@ -416,6 +416,22 @@ namespace Dotmim.Sync.Web.Server
             if (scopeInfo == null)
                 throw new ArgumentException("GetChangeBatch ScopeInfo could not be null");
 
+            void CleanUp(BatchInfo bi)
+            {
+                if (httpMessageContent.BatchPartInfo.IsLastBatch)
+                {
+                    this.LocalProvider.CacheManager.Remove("GetChangeBatch_BatchInfo");
+                    this.LocalProvider.CacheManager.Remove("GetChangeBatch_ChangesSelected");
+                    // clean up batch directory
+                    if (Configuration.BatchDirectory != null && bi.Directory != null)
+                    {
+                        var dir = Path.Combine(Configuration.BatchDirectory, bi.Directory);
+                        if (Directory.Exists(dir))
+                            Directory.Delete(dir, true);
+                    }
+                }
+            }
+
             // if we get the first batch info request, made it.
             // Server is able to define if it's in memory or not
             if (httpMessageContent.BatchIndexRequested == 0)
@@ -467,6 +483,8 @@ namespace Dotmim.Sync.Web.Server
 
                 httpMessage.SyncContext = syncContext;
                 httpMessage.Content = httpMessageContent;
+
+                CleanUp(bi);
                 return httpMessage;
             }
 
@@ -486,14 +504,9 @@ namespace Dotmim.Sync.Web.Server
 
             // load the batchpart set directly, to be able to send it back
             httpMessageContent.Set = httpMessageContent.BatchPartInfo.GetBatch().DmSetSurrogate;
-
-            if (httpMessageContent.BatchPartInfo.IsLastBatch)
-            {
-                this.LocalProvider.CacheManager.Remove("GetChangeBatch_BatchInfo");
-                this.LocalProvider.CacheManager.Remove("GetChangeBatch_ChangesSelected");
-            }
-
             httpMessage.Content = httpMessageContent;
+
+            CleanUp(batchInfo);
             return httpMessage;
         }
 
@@ -587,8 +600,7 @@ namespace Dotmim.Sync.Web.Server
                 httpMessageContent.Set.Dispose();
                 httpMessageContent.Set = null;
             }
-
-
+            
             // if it's last batch sent
             if (bpi.IsLastBatch)
             {
@@ -604,6 +616,14 @@ namespace Dotmim.Sync.Web.Server
                     });
 
                 this.LocalProvider.CacheManager.Remove("ApplyChanges_BatchInfo");
+                
+                // clean up batch directory
+                if (Configuration.BatchDirectory != null && batchInfo.Directory != null)
+                {
+                    var dir = Path.Combine(Configuration.BatchDirectory, batchInfo.Directory);
+                    if (Directory.Exists(dir))
+                        Directory.Delete(dir, true);
+                }
 
                 httpMessage.SyncContext = c;
                 httpMessageContent.ChangesApplied = s;

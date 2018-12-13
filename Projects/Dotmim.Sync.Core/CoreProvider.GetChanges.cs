@@ -30,6 +30,8 @@ namespace Dotmim.Sync
         public virtual async Task<(SyncContext, BatchInfo, ChangesSelected)> GetChangeBatchAsync(
             SyncContext context, MessageGetChangesBatch message)
         {
+            // batch info containing changes
+            BatchInfo batchInfo = null;
             try
             {
                 if (message.ScopeInfo == null)
@@ -50,14 +52,7 @@ namespace Dotmim.Sync
                     if (outdatedEventArgs.Action == OutdatedSyncAction.Rollback)
                         throw new OutOfDateException("The provider is out of date ! Try to make a Reinitialize sync");
                 }
-
-                // create local directory
-                if (message.DownloadBatchSizeInKB > 0 && !String.IsNullOrEmpty(message.BatchDirectory) && !Directory.Exists(message.BatchDirectory))
-                    Directory.CreateDirectory(message.BatchDirectory);
-
-                // batch info containing changes
-                BatchInfo batchInfo;
-
+                
                 // Statistics about changes that are selected
                 ChangesSelected changesSelected;
 
@@ -74,6 +69,9 @@ namespace Dotmim.Sync
             }
             catch (Exception ex)
             {
+                if (batchInfo?.Directory != null && Directory.Exists(Path.Combine(message.BatchDirectory, batchInfo.Directory)))
+                    Directory.Delete(Path.Combine(message.BatchDirectory, batchInfo.Directory));
+
                 throw new SyncException(ex, SyncStage.TableChangesSelecting, this.ProviderTypeName);
             }
         }
