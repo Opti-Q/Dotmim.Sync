@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.2.4</Version>
+    <Version>0.2.5</Version>
     <Authors>Sébastien Pertus</Authors>
     <Company>Microsoft</Company>
     <Title>Dotmim.Sync.Sqlite</Title>
@@ -11,6 +11,7 @@
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
     <PackageTags>Dotmim.Sync, SQLite Sync Core Provider, SQLite Sync, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
+    <Product>Dotmim.Sync.Sqlite OPTI-Q</Product>
   </PropertyGroup>
 
   <!--generate NUGET package including symbols ans source on each release build -->

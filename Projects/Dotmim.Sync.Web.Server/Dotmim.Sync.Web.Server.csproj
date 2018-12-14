@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
-    <Version>0.2.4</Version>
+    <Version>0.2.5</Version>
     <Authors>Sébastien Pertus, Gentledepp</Authors>
     <Company>Microsoft</Company>
     <Title>Dotmim.Sync.Web.Server</Title>
@@ -13,6 +13,7 @@ Can't work without a Server provider, you have to choose an existing one to be a
     <AssemblyName>Dotmim.Sync.Web.Server</AssemblyName>
     <RootNamespace>Dotmim.Sync.Web.Server</RootNamespace>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
+    <Product>Dotmim.Sync.Web.Server OPTI-Q</Product>
   </PropertyGroup>
 
   <!--generate NUGET package including symbols ans source on each release build -->

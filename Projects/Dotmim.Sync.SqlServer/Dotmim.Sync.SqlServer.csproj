@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.2.4</Version>
+    <Version>0.2.5</Version>
     <Authors>Sébastien Pertus</Authors>
     <Company>Microsoft</Company>
     <Title>Dotmim.Sync.SqlServer</Title>
@@ -10,6 +10,7 @@
     <PackageTags>Dotmim.Sync,Sync, Sql Server Provider, .Net Standard 2.0</PackageTags>
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
+    <Product>Dotmim.Sync.SqlServer OPTI-Q</Product>
   </PropertyGroup>
 
   <!--generate NUGET package including symbols ans source on each release build -->
