@@ -89,9 +89,19 @@ namespace Dotmim.Sync.Data.Surrogate
         /// </summary>
         public DmSet ConvertToDmSet()
         {
+            CultureInfo c = null;
+            try
+            {
+                c = CultureInfo.GetCultureInfo(this.CultureInfoName);
+            }
+            catch (Exception)
+            {
+                c = CultureInfo.InvariantCulture;
+            }
+
             DmSet dmSet = new DmSet()
             {
-                Culture = new CultureInfo(this.CultureInfoName),
+                Culture = c,
                 CaseSensitive = this.CaseSensitive,
                 DmSetName = this.DmSetName
             };
