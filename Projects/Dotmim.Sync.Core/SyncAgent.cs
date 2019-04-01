@@ -377,6 +377,18 @@ namespace Dotmim.Sync
                 if (cancellationToken.IsCancellationRequested)
                     cancellationToken.ThrowIfCancellationRequested();
 
+                // JUST Before the get changes, get the timestamp, to be sure to 
+                // get rows inserted / updated elsewhere since the sync is not over
+                (context, clientTimestamp) = await this.LocalProvider.GetLocalTimestampAsync(context,
+                    new MessageTimestamp
+                    {
+                        ScopeInfoTableName = this.Configuration.ScopeInfoTableName,
+                        SerializationFormat = this.Configuration.SerializationFormat
+                    });
+
+                if (cancellationToken.IsCancellationRequested)
+                    cancellationToken.ThrowIfCancellationRequested();
+
                 // Apply on the Server Side
                 // Since we are on the server, 
                 // we need to check the server client timestamp (not the client timestamp which is completely different)
@@ -405,18 +417,6 @@ namespace Dotmim.Sync
                             Filters = this.Configuration.Filters,
                             SerializationFormat = this.Configuration.SerializationFormat
                         });
-
-                if (cancellationToken.IsCancellationRequested)
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                // JUST After the get changes, get the timestamp, to be sure to 
-                // get rows inserted / updated elsewhere since the sync is not over
-                (context, clientTimestamp) = await this.LocalProvider.GetLocalTimestampAsync(context,
-                    new MessageTimestamp
-                    {
-                        ScopeInfoTableName = this.Configuration.ScopeInfoTableName,
-                        SerializationFormat = this.Configuration.SerializationFormat
-                    });
 
                 if (cancellationToken.IsCancellationRequested)
                     cancellationToken.ThrowIfCancellationRequested();
@@ -483,6 +483,19 @@ namespace Dotmim.Sync
                 }
 
 
+
+                // JUST BEFORE the get changes, get the timestamp, to be sure to 
+                // get rows inserted / updated elsewhere since the sync is not over
+                (context, serverTimestamp) = await this.RemoteProvider.GetLocalTimestampAsync(context,
+                    new MessageTimestamp
+                    {
+                        ScopeInfoTableName = this.Configuration.ScopeInfoTableName,
+                        SerializationFormat = this.Configuration.SerializationFormat
+                    });
+
+                if (cancellationToken.IsCancellationRequested)
+                    cancellationToken.ThrowIfCancellationRequested();
+
                 // fromId : Make sure we don't select lines on server that has been already updated by the client
                 fromId = localScopeInfo.Id;
                 // lastSyncTS : apply lines only if thye are not modified since last client sync
@@ -506,18 +519,6 @@ namespace Dotmim.Sync
                             Filters = this.Configuration.Filters,
                             SerializationFormat = this.Configuration.SerializationFormat
                         });
-
-                if (cancellationToken.IsCancellationRequested)
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                // JUST After the get changes, get the timestamp, to be sure to 
-                // get rows inserted / updated elsewhere since the sync is not over
-                (context, serverTimestamp) = await this.RemoteProvider.GetLocalTimestampAsync(context,
-                    new MessageTimestamp
-                    {
-                        ScopeInfoTableName = this.Configuration.ScopeInfoTableName,
-                        SerializationFormat = this.Configuration.SerializationFormat
-                    });
 
                 if (cancellationToken.IsCancellationRequested)
                     cancellationToken.ThrowIfCancellationRequested();
