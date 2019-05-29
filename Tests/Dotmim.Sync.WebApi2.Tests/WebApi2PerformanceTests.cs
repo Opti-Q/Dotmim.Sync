@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -16,11 +18,14 @@ using Dotmim.Sync.Test.SqlUtils;
 using Dotmim.Sync.Tests.Misc;
 using Dotmim.Sync.Web.Client;
 using Dotmim.Sync.Web.Server;
+using JetBrains.dotMemoryUnit;
 using Microsoft.Data.Sqlite;
 using Microsoft.Owin.Hosting;
 using Owin;
 using Xunit;
+using Xunit.Abstractions;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 namespace Dotmim.Sync.Tests
 {
     public class SqliteSyncHttpLoadFixture : IDisposable
@@ -160,8 +165,12 @@ namespace Dotmim.Sync.Tests
         private IDisposable webApp;
         private string batchDir;
 
-        public SqliteSyncHttpLoadTests(SqliteSyncHttpLoadFixture fixture)
+        public SqliteSyncHttpLoadTests(SqliteSyncHttpLoadFixture fixture, ITestOutputHelper outputHelper)
         {
+            // required - see: https://blog.jetbrains.com/dotnet/2018/10/04/unit-testing-memory-leaks-using-dotmemory-unit/
+            DotMemoryUnitTestOutput.SetOutputMethod(
+                message => outputHelper.WriteLine(message));
+
             this.fixture = fixture;
             this.batchDir = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString("N"));
 
@@ -204,14 +213,26 @@ namespace Dotmim.Sync.Tests
         [Fact, TestPriority(1)]
         public async Task LoadLotsOfRowsFromServer()
         {
-            // Act
-            var session = await agent.SynchronizeAsync();
+            using (dotMemoryUnit.Support())
+            {
+                var mem1 = dotMemory.Check();
 
-            var onp = new ObjectNameParser();
+                // Act
+                var session = await agent.SynchronizeAsync();
 
-            // Assert
-            Assert.Equal(50*fixture.Multiplier, session.TotalChangesDownloaded);
-            Assert.Equal(0, session.TotalChangesUploaded);
+                // Run explicit GC
+                GC.Collect();
+                dotMemory.Check(mem2 =>
+                {
+                    var traffic = mem2.GetTrafficFrom(mem1);
+
+                });
+
+
+                // Assert
+                Assert.Equal(50 * fixture.Multiplier, session.TotalChangesDownloaded);
+                Assert.Equal(0, session.TotalChangesUploaded);
+            }
         }
 
         public void Dispose()
@@ -234,6 +255,29 @@ namespace Dotmim.Sync.Tests
 
             if (Directory.Exists(this.batchDir))
                 Directory.Delete(this.batchDir, true);
+        }
+    }
+    /// <summary>
+    /// see: https://www.jetbrains.com/help/dotmemory-unit/3.0/Working_with_Unsupported_Unit_Testing_Frameworks.html
+    /// </summary>
+    internal class dotMemoryUnit : IDisposable
+    {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private dotMemoryUnit()
+        {
+            // frame1 is DotMemoryUnit.Support() method; frame2 is "test" method
+            DotMemoryUnitController.TestStart(new StackTrace().GetFrame(2).GetMethod());
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static IDisposable Support()
+        {
+            return new dotMemoryUnit();
+        }
+
+        public void Dispose()
+        {
+            DotMemoryUnitController.TestEnd();
         }
     }
 }
