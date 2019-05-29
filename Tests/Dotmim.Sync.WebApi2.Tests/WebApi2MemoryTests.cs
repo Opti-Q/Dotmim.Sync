@@ -1,33 +1,36 @@
 ﻿using System;
-using System.Data.SqlClient;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
-using Dotmim.Sync.Builders;
 using Dotmim.Sync.Enumerations;
 using Dotmim.Sync.Sqlite;
 using Dotmim.Sync.SqlServer;
 using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.Tests.Misc;
 using Dotmim.Sync.Web.Client;
 using Dotmim.Sync.Web.Server;
+using JetBrains.dotMemoryUnit;
 using Microsoft.Data.Sqlite;
 using Microsoft.Owin.Hosting;
+using NUnit.Framework;
 using Owin;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Dotmim.Sync.Tests
 {
-    public class SqliteSyncHttpLoadFixture : IDisposable
+    [TestFixture]
+    public class WebApi2MemoryTests
     {
+
+        SqlSyncProvider serverProvider;
+        SqliteSyncProvider clientProvider;
+        WebProxyServerProvider proxyServerProvider;
+        WebProxyClientProvider proxyClientProvider;
+        SyncAgent agent;
+        private Func<SyncConfiguration> configurationProvider;
+        private IDisposable webApp;
+        private string batchDir;
+
         public string createTableScript =
         $@"if (not exists (select * from sys.tables where name = 'ServiceTickets'))
             begin
@@ -96,7 +99,7 @@ namespace Dotmim.Sync.Tests
             INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) VALUES (newid(), 'Titre 6', 'Description 6', 1, 0, CAST('2016-07-29T16:36:41.733' AS DateTime), NULL, 1)
             INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) VALUES (newid(), 'Titre 7', 'Description 7', 1, 0, CAST('2016-07-29T16:36:41.733' AS DateTime), NULL, 10)
           ";
-        private readonly string baseAddress;
+        private readonly string baseAddress = "http://localhost:9902";
 
         public string[] Tables => new string[] { "ServiceTickets" };
 
@@ -111,10 +114,9 @@ namespace Dotmim.Sync.Tests
 
         public int Multiplier { get; } = 500;
 
-        public SqliteSyncHttpLoadFixture()
+        [SetUp]
+        public void Setup()
         {
-            baseAddress = "http://localhost:9902";
-
             var builder = new SqliteConnectionStringBuilder { DataSource = ClientSqliteFilePath };
             this.ClientSqliteConnectionString = builder.ConnectionString;
 
@@ -133,58 +135,26 @@ namespace Dotmim.Sync.Tests
                 helperDb.ExecuteScript(ServerDbName, datas);
             }
 
-        }
 
-        public void Dispose()
-        {
-            helperDb.DeleteDatabase(this.ServerDbName);
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            if (File.Exists(this.ClientSqliteFilePath))
-                File.Delete(this.ClientSqliteFilePath);
-
-        }
-    }
-
-
-    [Collection("Http")]
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.WebApi2.Tests")]
-    public class SqliteSyncHttpLoadTests : IClassFixture<SqliteSyncHttpLoadFixture>, IDisposable
-    {
-        SqlSyncProvider serverProvider;
-        SqliteSyncProvider clientProvider;
-        SqliteSyncHttpLoadFixture fixture;
-        WebProxyServerProvider proxyServerProvider;
-        WebProxyClientProvider proxyClientProvider;
-        SyncAgent agent;
-        private Func<SyncConfiguration> configurationProvider;
-        private IDisposable webApp;
-        private string batchDir;
-
-        public SqliteSyncHttpLoadTests(SqliteSyncHttpLoadFixture fixture)
-        {
-            this.fixture = fixture;
             this.batchDir = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString("N"));
 
-            configurationProvider = () => new SyncConfiguration(fixture.Tables)
+            configurationProvider = () => new SyncConfiguration(Tables)
             {
                 SerializationFormat = SerializationFormat.Json,
                 DownloadBatchSizeInKB = 400,
             };
 
-            serverProvider = new SqlSyncProvider(fixture.ServerConnectionString);
+            serverProvider = new SqlSyncProvider(ServerConnectionString);
             proxyServerProvider = new WebProxyServerProvider(serverProvider);
 
-            webApp = WebApp.Start(fixture.BaseAddress.OriginalString, (appBuilder) =>
+            webApp = WebApp.Start(BaseAddress.OriginalString, (appBuilder) =>
             {
                 // Configure Web API for self-host. 
                 HttpConfiguration config = new HttpConfiguration();
                 config.Routes.MapHttpRoute(
                     name: "DefaultApi",
                     routeTemplate: "api/{controller}/{actionid}/{id}",
-                    defaults: new {actionid = RouteParameter.Optional, id = RouteParameter.Optional}
+                    defaults: new { actionid = RouteParameter.Optional, id = RouteParameter.Optional }
                 );
                 config.Services.Replace(typeof(IHttpControllerActivator), new TestControllerActivator(
                     () =>
@@ -197,26 +167,15 @@ namespace Dotmim.Sync.Tests
                 appBuilder.UseWebApi(config);
             });
 
-            clientProvider = new SqliteSyncProvider(fixture.ClientSqliteFilePath);
-            proxyClientProvider = new WebProxyClientProvider(new Uri(fixture.BaseAddress, "api/values"));
+            clientProvider = new SqliteSyncProvider(ClientSqliteFilePath);
+            proxyClientProvider = new WebProxyClientProvider(new Uri(BaseAddress, "api/values"));
 
             agent = new SyncAgent(clientProvider, proxyClientProvider);
             agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
         }
 
-        [Fact, TestPriority(1)]
-        public async Task LoadLotsOfRowsFromServer()
-        {
-            // Act
-            var session = await agent.SynchronizeAsync();
-        
-
-            // Assert
-            Assert.Equal(50 * fixture.Multiplier, session.TotalChangesDownloaded);
-            Assert.Equal(0, session.TotalChangesUploaded);
-        }
-
-        public void Dispose()
+        [TearDown]
+        public void TearDown()
         {
             proxyClientProvider?.Dispose();
             agent?.Dispose();
@@ -226,17 +185,50 @@ namespace Dotmim.Sync.Tests
             // IF the server directory still is there, it should at least be empty
             var serverDir = Path.Combine(this.batchDir, "server");
             if (Directory.Exists(serverDir))
-                Assert.Equal(Directory.EnumerateFileSystemEntries(serverDir).Count(), 0); // "temporary data should be deleted"
+                Assert.AreEqual(Directory.EnumerateFileSystemEntries(serverDir).Count(), 0); // "temporary data should be deleted"
 
             // IF the client directory still is there, it should at least be empty
             var clientDir = Path.Combine(this.batchDir, "client");
             if (Directory.Exists(clientDir))
-                Assert.Equal(Directory.EnumerateFileSystemEntries(clientDir).Count(), 0); // "temporary data should be deleted"
+                Assert.AreEqual(Directory.EnumerateFileSystemEntries(clientDir).Count(), 0); // "temporary data should be deleted"
 
 
             if (Directory.Exists(this.batchDir))
                 Directory.Delete(this.batchDir, true);
+
+
+
+
+            helperDb.DeleteDatabase(this.ServerDbName);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            if (File.Exists(this.ClientSqliteFilePath))
+                File.Delete(this.ClientSqliteFilePath);
+        }
+
+        [Test]
+
+        public async Task LoadLotsOfRowsFromServer()
+        {
+            var mem1 = dotMemory.Check();
+
+            // Act
+            var session = await agent.SynchronizeAsync();
+
+            // Run explicit GC
+            GC.Collect();
+            dotMemory.Check(mem2 =>
+            {
+                var traffic = mem2.GetTrafficFrom(mem1);
+
+            });
+
+
+            // Assert
+            Assert.AreEqual(50 * Multiplier, session.TotalChangesDownloaded);
+            Assert.AreEqual(0, session.TotalChangesUploaded);
         }
     }
 }
-
