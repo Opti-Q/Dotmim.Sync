@@ -19,7 +19,7 @@ namespace Dotmim.Sync.Sqlite
         {
             this.connection = connection as SqliteConnection;
             this.transaction = transaction as SqliteTransaction;
-            this.scopeTableName = new ObjectNameParser(scopeTableName, "[", "]");
+            this.scopeTableName = ObjectNameParser.Create(scopeTableName, "[", "]");
         }
 
         public void CreateScopeInfoTable()

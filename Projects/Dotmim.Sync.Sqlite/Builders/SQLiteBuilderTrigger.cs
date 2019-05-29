@@ -60,7 +60,7 @@ namespace Dotmim.Sync.Sqlite
             //        if (this.tableDescription.PrimaryKey.Columns.Any(c => c.ColumnName == filterColumn.ColumnName))
             //            continue;
 
-            //        ObjectNameParser columnName = new ObjectNameParser(filterColumn.ColumnName);
+            //        ObjectNameParser columnName = ObjectNameParser.Create(filterColumn.ColumnName);
 
             //        stringBuilder.AppendLine($"\t,{columnName.QuotedString} = [d].{columnName.QuotedString}");
 
@@ -150,7 +150,7 @@ namespace Dotmim.Sync.Sqlite
             string argAnd = string.Empty;
             foreach (var mutableColumn in this.tableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser columnName = new ObjectNameParser(mutableColumn.ColumnName);
+                ObjectNameParser columnName = ObjectNameParser.Create(mutableColumn.ColumnName);
                 stringBuilderArguments.AppendLine($"\t\t{argComma}{columnName.FullQuotedString}");
                 stringBuilderArguments2.AppendLine($"\t\t{argComma}new.{columnName.FullQuotedString}");
                 stringPkAreNull.Append($"{argAnd}{trackingName.FullQuotedString}.{columnName.FullQuotedString} IS NULL");
@@ -181,7 +181,7 @@ namespace Dotmim.Sync.Sqlite
             //        if (this.tableDescription.PrimaryKey.Columns.Any(c => c.ColumnName == filterColumn.ColumnName))
             //            continue;
 
-            //        ObjectNameParser columnName = new ObjectNameParser(filterColumn.ColumnName);
+            //        ObjectNameParser columnName = ObjectNameParser.Create(filterColumn.ColumnName);
             //        filterColumnsString.AppendLine($"\t,[i].{columnName.QuotedString}");
             //    }
             //    stringBuilder.AppendLine(filterColumnsString.ToString());
@@ -289,7 +289,7 @@ namespace Dotmim.Sync.Sqlite
             //        if (this.tableDescription.PrimaryKey.Columns.Any(c => c.ColumnName == filterColumn.ColumnName))
             //            continue;
 
-            //        ObjectNameParser columnName = new ObjectNameParser(filterColumn.ColumnName);
+            //        ObjectNameParser columnName = ObjectNameParser.Create(filterColumn.ColumnName);
 
             //        stringBuilder.AppendLine($"\t,{columnName.QuotedString} = [i].{columnName.QuotedString}");
 

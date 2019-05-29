@@ -145,11 +145,11 @@ namespace Dotmim.Sync.Sqlite
             // Adding the primary key
             foreach (DmColumn pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                var quotedColumnName = new ObjectNameParser(pkColumn.ColumnName, "[", "]").FullQuotedString;
+                var quotedColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "[", "]").FullQuotedString;
 
                 var columnTypeString = this.sqliteDbMetadata.TryGetOwnerDbTypeString(pkColumn.OriginalDbType, pkColumn.DbType, false, false, this.tableDescription.OriginalProvider, SqliteSyncProvider.ProviderType);
                 var columnPrecisionString = this.sqliteDbMetadata.TryGetOwnerDbTypePrecision(pkColumn.OriginalDbType, pkColumn.DbType, false, false, pkColumn.MaxLength, pkColumn.Precision, pkColumn.Scale, this.tableDescription.OriginalProvider, SqliteSyncProvider.ProviderType);
-                var quotedColumnType = new ObjectNameParser(columnTypeString, "[", "]").FullQuotedString;
+                var quotedColumnType = ObjectNameParser.Create(columnTypeString, "[", "]").FullQuotedString;
                 quotedColumnType += columnPrecisionString;
 
                 stringBuilder.AppendLine($"{quotedColumnName} {quotedColumnType} NOT NULL COLLATE NOCASE, ");
@@ -175,8 +175,8 @@ namespace Dotmim.Sync.Sqlite
             //        if (isPk)
             //            continue;
 
-            //        var quotedColumnName = new ObjectNameParser(filterColumn.ColumnName, "[", "]").QuotedString;
-            //        var quotedColumnType = new ObjectNameParser(filterColumn.GetSqliteDbTypeString(), "[", "]").QuotedString;
+            //        var quotedColumnName = ObjectNameParser.Create(filterColumn.ColumnName, "[", "]").QuotedString;
+            //        var quotedColumnType = ObjectNameParser.Create(filterColumn.GetSqliteDbTypeString(), "[", "]").QuotedString;
             //        quotedColumnType += filterColumn.GetSqliteTypePrecisionString();
             //        var nullableColumn = filterColumn.AllowDBNull ? "NULL" : "NOT NULL";
 
@@ -187,7 +187,7 @@ namespace Dotmim.Sync.Sqlite
             for (int i = 0; i < this.tableDescription.PrimaryKey.Columns.Length; i++)
             {
                 DmColumn pkColumn = this.tableDescription.PrimaryKey.Columns[i];
-                var quotedColumnName = new ObjectNameParser(pkColumn.ColumnName).ObjectName;
+                var quotedColumnName = ObjectNameParser.Create(pkColumn.ColumnName).ObjectName;
 
                 stringBuilder.Append(quotedColumnName);
 
@@ -256,7 +256,7 @@ namespace Dotmim.Sync.Sqlite
             string sideTable = "[side]";
             foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                var quotedColumnName = new ObjectNameParser(pkColumn.ColumnName, "[", "]").FullQuotedString;
+                var quotedColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "[", "]").FullQuotedString;
 
                 stringBuilder1.Append(string.Concat(empty, quotedColumnName));
 
@@ -282,7 +282,7 @@ namespace Dotmim.Sync.Sqlite
             //        if (isPk)
             //            continue;
 
-            //        var quotedColumnName = new ObjectNameParser(filterColumn.ColumnName, "[", "]").QuotedString;
+            //        var quotedColumnName = ObjectNameParser.Create(filterColumn.ColumnName, "[", "]").QuotedString;
 
             //        stringBuilder6.Append(string.Concat(empty, quotedColumnName));
             //        stringBuilder5.Append(string.Concat(empty, baseTable, ".", quotedColumnName));
@@ -366,17 +366,17 @@ namespace Dotmim.Sync.Sqlite
 
         private string AddFilterColumnCommandText(DmColumn col)
         {
-            var quotedColumnName = new ObjectNameParser(col.ColumnName, "[", "]").FullQuotedString;
+            var quotedColumnName = ObjectNameParser.Create(col.ColumnName, "[", "]").FullQuotedString;
             var columnTypeString = this.sqliteDbMetadata.TryGetOwnerDbTypeString(col.OriginalDbType, col.DbType, false, false, this.tableDescription.OriginalProvider, SqliteSyncProvider.ProviderType);
             var columnPrecisionString = this.sqliteDbMetadata.TryGetOwnerDbTypePrecision(col.OriginalDbType, col.DbType, false, false, col.MaxLength, col.Precision, col.Scale, this.tableDescription.OriginalProvider, SqliteSyncProvider.ProviderType);
-            var quotedColumnType = new ObjectNameParser(columnTypeString, "[", "]").FullQuotedString;
+            var quotedColumnType = ObjectNameParser.Create(columnTypeString, "[", "]").FullQuotedString;
             quotedColumnType += columnPrecisionString;
 
             return string.Concat("ALTER TABLE ", quotedColumnName, " ADD ", quotedColumnType);
         }
         public string ScriptAddFilterColumn(DmColumn filterColumn)
         {
-            var quotedColumnName = new ObjectNameParser(filterColumn.ColumnName, "[", "]");
+            var quotedColumnName = ObjectNameParser.Create(filterColumn.ColumnName, "[", "]");
 
             string str = string.Concat("Add new filter column, ", quotedColumnName.FullUnquotedString, ", to Tracking Table ", trackingName.FullQuotedString);
             return SqliteBuilder.WrapScriptTextWithComments(this.AddFilterColumnCommandText(filterColumn), str);

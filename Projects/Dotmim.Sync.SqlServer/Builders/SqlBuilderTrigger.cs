@@ -58,7 +58,7 @@ namespace Dotmim.Sync.SqlServer.Builders
                     if (this.tableDescription.PrimaryKey.Columns.Any(c => c.ColumnName == columnFilter.ColumnName))
                         continue;
 
-                    ObjectNameParser columnName = new ObjectNameParser(columnFilter.ColumnName);
+                    ObjectNameParser columnName = ObjectNameParser.Create(columnFilter.ColumnName);
                     stringBuilder.AppendLine($"\t,{columnName.FullQuotedString} = [d].{columnName.FullQuotedString}");
 
                 }
@@ -241,7 +241,7 @@ namespace Dotmim.Sync.SqlServer.Builders
                     if (this.tableDescription.PrimaryKey.Columns.Any(c => c.ColumnName == columnFilter.ColumnName))
                         continue;
 
-                    ObjectNameParser columnName = new ObjectNameParser(columnFilter.ColumnName);
+                    ObjectNameParser columnName = ObjectNameParser.Create(columnFilter.ColumnName);
 
                     stringBuilder.AppendLine($"\t,{columnName.FullQuotedString} = [i].{columnName.FullQuotedString}");
 
@@ -263,7 +263,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             string argAnd = string.Empty;
             foreach (var mutableColumn in this.tableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser columnName = new ObjectNameParser(mutableColumn.ColumnName);
+                ObjectNameParser columnName = ObjectNameParser.Create(mutableColumn.ColumnName);
                 stringBuilderArguments.AppendLine($"\t{argComma}[i].{columnName.FullQuotedString}");
                 stringPkAreNull.Append($"{argAnd}[side].{columnName.FullQuotedString} IS NULL");
                 argComma = ",";
@@ -292,7 +292,7 @@ namespace Dotmim.Sync.SqlServer.Builders
                     if (this.tableDescription.PrimaryKey.Columns.Any(c => c.ColumnName == columnFilter.ColumnName))
                         continue;
 
-                    ObjectNameParser columnName = new ObjectNameParser(columnFilter.ColumnName);
+                    ObjectNameParser columnName = ObjectNameParser.Create(columnFilter.ColumnName);
                     filterColumnsString.AppendLine($"\t,[i].{columnName.FullQuotedString}");
                 }
 
@@ -481,7 +481,7 @@ namespace Dotmim.Sync.SqlServer.Builders
                     if (this.tableDescription.PrimaryKey.Columns.Any(c => c.ColumnName == columnFilter.ColumnName))
                         continue;
 
-                    ObjectNameParser columnName = new ObjectNameParser(columnFilter.ColumnName);
+                    ObjectNameParser columnName = ObjectNameParser.Create(columnFilter.ColumnName);
                     stringBuilder.AppendLine($"\t,{columnName.FullQuotedString} = [i].{columnName.FullQuotedString}");
                 }
                 stringBuilder.AppendLine();

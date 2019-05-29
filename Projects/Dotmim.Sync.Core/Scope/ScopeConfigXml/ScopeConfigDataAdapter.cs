@@ -160,7 +160,7 @@ namespace Dotmim.Sync.Scope
             }
             set
             {
-                this._trackingTableName.ParseString(value);
+                this._trackingTableName = ObjectNameParser.Create(value);
             }
         }
 

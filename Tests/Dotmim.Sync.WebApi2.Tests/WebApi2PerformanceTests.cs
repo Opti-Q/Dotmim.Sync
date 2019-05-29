@@ -106,6 +106,8 @@ namespace Dotmim.Sync.Tests
         public string ServerDbName { get; } = "Test_Sqlite_Http_Server_WebApi2_Load";
         private HelperDB helperDb = new HelperDB();
 
+        public int Multiplier { get; } = 500;
+
         public SqliteSyncHttpLoadFixture()
         {
             baseAddress = "http://localhost:9902";
@@ -122,7 +124,7 @@ namespace Dotmim.Sync.Tests
             // create table
             helperDb.ExecuteScript(ServerDbName, createTableScript);
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < Multiplier; i++)
             {
                 // insert table
                 helperDb.ExecuteScript(ServerDbName, datas);
@@ -200,7 +202,7 @@ namespace Dotmim.Sync.Tests
         }
 
         [Fact, TestPriority(1)]
-        public async Task Initialize()
+        public async Task LoadLotsOfRowsFromServer()
         {
             // Act
             var session = await agent.SynchronizeAsync();
@@ -208,7 +210,7 @@ namespace Dotmim.Sync.Tests
             var onp = new ObjectNameParser();
 
             // Assert
-            Assert.Equal(50, session.TotalChangesDownloaded);
+            Assert.Equal(50*fixture.Multiplier, session.TotalChangesDownloaded);
             Assert.Equal(0, session.TotalChangesUploaded);
         }
 

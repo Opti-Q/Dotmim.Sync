@@ -63,7 +63,7 @@ namespace Dotmim.Sync.MySql
             else
                 text = this.mySqlObjectNames.GetCommandName(commandType);
 
-            var textName = new ObjectNameParser(text, "`", "`");
+            var textName = ObjectNameParser.Create(text, "`", "`");
             // on MySql, everything is text based :)
             command.CommandType = CommandType.StoredProcedure;
             command.CommandText = textName.ObjectName;
@@ -122,7 +122,7 @@ namespace Dotmim.Sync.MySql
 
             foreach (DmColumn column in this.TableDescription.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"{MySqlBuilderProcedure.MYSQL_PREFIX_PARAMETER}{quotedColumn.ObjectNameNormalized}";
                 p.DbType = column.DbType;
@@ -148,7 +148,7 @@ namespace Dotmim.Sync.MySql
 
             foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"{MySqlBuilderProcedure.MYSQL_PREFIX_PARAMETER}{quotedColumn.ObjectNameNormalized}";
                 p.DbType = column.DbType;
@@ -183,7 +183,7 @@ namespace Dotmim.Sync.MySql
 
             foreach (DmColumn column in this.TableDescription.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"{MySqlBuilderProcedure.MYSQL_PREFIX_PARAMETER}{quotedColumn.ObjectNameNormalized}";
                 p.DbType = column.DbType;
@@ -198,7 +198,7 @@ namespace Dotmim.Sync.MySql
 
             foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"{MySqlBuilderProcedure.MYSQL_PREFIX_PARAMETER}{quotedColumn.ObjectNameNormalized}";
                 p.DbType = column.DbType;
@@ -233,7 +233,7 @@ namespace Dotmim.Sync.MySql
 
             foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"{MySqlBuilderProcedure.MYSQL_PREFIX_PARAMETER}{quotedColumn.ObjectNameNormalized}";
                 p.DbType = column.DbType;
@@ -258,7 +258,7 @@ namespace Dotmim.Sync.MySql
 
             foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"{MySqlBuilderProcedure.MYSQL_PREFIX_PARAMETER}{quotedColumn.ObjectNameNormalized}";
                 p.DbType = column.DbType;
@@ -279,7 +279,7 @@ namespace Dotmim.Sync.MySql
 
             foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"{MySqlBuilderProcedure.MYSQL_PREFIX_PARAMETER}{quotedColumn.ObjectNameNormalized}";
                 p.DbType = column.DbType;

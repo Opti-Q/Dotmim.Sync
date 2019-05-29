@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -127,23 +128,50 @@ namespace Dotmim.Sync.Builders
         {
         }
 
-        public ObjectNameParser(string input)
+        private ObjectNameParser(string input)
+            : this()
         {
             this.ParseString(input);
         }
 
-        public ObjectNameParser(string quotePrefix, string quoteSuffix)
-        {
-            this.QuotePrefix = quotePrefix;
-            this.QuoteSuffix = quoteSuffix;
-        }
+        //public ObjectNameParser(string quotePrefix, string quoteSuffix)
+        //    : this()
+        //{
+        //    this.QuotePrefix = quotePrefix;
+        //    this.QuoteSuffix = quoteSuffix;
+        //}
 
-        public ObjectNameParser(string input, string quotePrefix, string quoteSuffix)
+        private ObjectNameParser(string input, string quotePrefix, string quoteSuffix)
+            : this()
         {
             this.QuotePrefix = quotePrefix;
             this.QuoteSuffix = quoteSuffix;
             this.ParseString(input);
         }
+
+        public static ObjectNameParser Create(string input)
+        {
+            if (ParserCache.TryGetValue(input, out var onp))
+                return onp;
+
+            var newOnp = new ObjectNameParser(input);
+            ParserCache.TryAdd(input, newOnp);
+
+            return newOnp;
+        }
+
+        public static ObjectNameParser Create(string input, string quotePrefix, string quoteSuffix)
+        {
+            if (ParserCache.TryGetValue(input, out var onp))
+                return onp;
+
+            var newOnp = new ObjectNameParser(input, quotePrefix, quoteSuffix);
+            ParserCache.TryAdd(input, newOnp);
+
+            return newOnp;
+        }
+
+        public static readonly ConcurrentDictionary<string, ObjectNameParser> ParserCache = new ConcurrentDictionary<string, ObjectNameParser>();
 
         /// <summary>
         /// Parse the input string and Get a non bracket object name :
@@ -152,8 +180,10 @@ namespace Dotmim.Sync.Builders
         ///   "dbo.client === > dbo client "
         ///   "Fabrikam.[dbo].[client] === > Fabrikam dbo client "
         /// </summary>
-        public void ParseString(string input)
+        private void ParseString(string input)
         {
+
+
             this.DatabaseName = string.Empty;
             this.QuotedDatabaseName = string.Empty;
             this.SchemaName = string.Empty;

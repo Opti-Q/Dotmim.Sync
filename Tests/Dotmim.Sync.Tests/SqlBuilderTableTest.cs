@@ -127,7 +127,7 @@ namespace Dotmim.Sync.Test
                                 $"Where tbl.name = @tableName " +
                                 $"Order by col.column_id";
 
-                ObjectNameParser tableNameParser = new ObjectNameParser(table.TableName);
+                ObjectNameParser tableNameParser = ObjectNameParser.Create(table.TableName);
                 DmTable dmTable = new DmTable(tableNameParser.ObjectNameNormalized);
                 using (SqlCommand sqlCommand = new SqlCommand(commandColumn, connection))
                 {
@@ -241,7 +241,7 @@ namespace Dotmim.Sync.Test
                                 $"Where tbl.name = @tableName " +
                                 $"Order by col.column_id";
 
-                ObjectNameParser tableNameParser = new ObjectNameParser(table.TableName + "_tracking");
+                ObjectNameParser tableNameParser = ObjectNameParser.Create(table.TableName + "_tracking");
                 DmTable dmTable = new DmTable(tableNameParser.ObjectNameNormalized);
                 using (SqlCommand sqlCommand = new SqlCommand(commandColumn, connection))
                 {

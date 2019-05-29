@@ -56,7 +56,7 @@ namespace Dotmim.Sync.SqlServer.Builders
                 string sep = "";
                 foreach (var c in filters)
                 {
-                    var unquotedColumnName = new ObjectNameParser(c).FullUnquotedString;
+                    var unquotedColumnName = ObjectNameParser.Create(c).FullUnquotedString;
                     name += $"{unquotedColumnName}{sep}";
                     sep = "_";
                 }

@@ -13,7 +13,7 @@ namespace Dotmim.Sync.Sqlite
 
         public static void DropTableIfExists(SqliteConnection connection, SqliteTransaction transaction, string quotedTableName)
         {
-            ObjectNameParser objectNameParser = new ObjectNameParser(quotedTableName);
+            ObjectNameParser objectNameParser = ObjectNameParser.Create(quotedTableName);
 
             using (DbCommand dbCommand = connection.CreateCommand())
             {
@@ -27,21 +27,21 @@ namespace Dotmim.Sync.Sqlite
 
         public static string DropTableIfExistsScriptText(string quotedTableName)
         {
-            ObjectNameParser objectNameParser = new ObjectNameParser(quotedTableName);
+            ObjectNameParser objectNameParser = ObjectNameParser.Create(quotedTableName);
 
             return $"drop table if exist {objectNameParser.ObjectName}";
         }
 
         public static string DropTableScriptText(string quotedTableName)
         {
-            ObjectNameParser objectNameParser = new ObjectNameParser(quotedTableName);
+            ObjectNameParser objectNameParser = ObjectNameParser.Create(quotedTableName);
 
             return $"drop table {objectNameParser.ObjectName}";
         }
 
         public static void DropTriggerIfExists(SqliteConnection connection, SqliteTransaction transaction, string quotedTriggerName)
         {
-            ObjectNameParser objectNameParser = new ObjectNameParser(quotedTriggerName);
+            ObjectNameParser objectNameParser = ObjectNameParser.Create(quotedTriggerName);
 
             using (DbCommand dbCommand = connection.CreateCommand())
             {
@@ -55,7 +55,7 @@ namespace Dotmim.Sync.Sqlite
 
         public static string DropTriggerScriptText(string quotedTriggerName)
         {
-            ObjectNameParser objectNameParser = new ObjectNameParser(quotedTriggerName);
+            ObjectNameParser objectNameParser = ObjectNameParser.Create(quotedTriggerName);
             return $"drop trigger {objectNameParser.ObjectName}";
         }
 
@@ -63,7 +63,7 @@ namespace Dotmim.Sync.Sqlite
         public static bool TableExists(SqliteConnection connection, SqliteTransaction transaction, string quotedTableName)
         {
             bool tableExist;
-            ObjectNameParser objectNameParser = new ObjectNameParser(quotedTableName);
+            ObjectNameParser objectNameParser = ObjectNameParser.Create(quotedTableName);
             using (DbCommand dbCommand = connection.CreateCommand())
             {
                 dbCommand.CommandText = "select count(*) from sqlite_master where name = @tableName AND type='table'";
@@ -86,7 +86,7 @@ namespace Dotmim.Sync.Sqlite
         public static bool TriggerExists(SqliteConnection connection, SqliteTransaction transaction, string quotedTriggerName)
         {
             bool triggerExist;
-            ObjectNameParser objectNameParser = new ObjectNameParser(quotedTriggerName);
+            ObjectNameParser objectNameParser = ObjectNameParser.Create(quotedTriggerName);
 
 
             using (SqliteCommand dbCommand = connection.CreateCommand())
@@ -112,7 +112,7 @@ namespace Dotmim.Sync.Sqlite
             string str = "";
             foreach (DmColumn column in columns)
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
 
                 stringBuilder.Append(str);
                 stringBuilder.Append(strLeftName);
@@ -133,7 +133,7 @@ namespace Dotmim.Sync.Sqlite
             string str1 = "";
             foreach (DmColumn column in columns)
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
 
                 stringBuilder.Append(str1);
                 stringBuilder.Append(strFromPrefix);
@@ -152,7 +152,7 @@ namespace Dotmim.Sync.Sqlite
             string strSeparator = "";
             foreach (DmColumn mutableColumn in table.MutableColumns)
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(mutableColumn.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(mutableColumn.ColumnName);
                 stringBuilder.AppendLine($"{strSeparator} {strFromPrefix}{quotedColumn.FullQuotedString} = @{quotedColumn.FullUnquotedString}");
                 strSeparator = ", ";
             }

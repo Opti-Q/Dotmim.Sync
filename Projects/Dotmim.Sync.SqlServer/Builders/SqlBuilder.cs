@@ -39,13 +39,13 @@ namespace Dotmim.Sync.SqlServer.Builders
             if (string.IsNullOrEmpty(pref) && string.IsNullOrEmpty(suf))
                 suf = "_tracking";
 
-            var originalTableName = new ObjectNameParser(tableAndPrefixName, "[", "]");
-            //var trackingTableName = new ObjectNameParser($"{pref}{tableAndPrefixName}{suf}", "[", "]");
+            var originalTableName = ObjectNameParser.Create(tableAndPrefixName, "[", "]");
+            //var trackingTableName = ObjectNameParser.Create($"{pref}{tableAndPrefixName}{suf}", "[", "]");
             var trakingTableNameString = $"{pref}{originalTableName.ObjectName}{suf}";
             if (!String.IsNullOrEmpty(originalTableName.SchemaName))
                 trakingTableNameString = $"{originalTableName.SchemaName}.{trakingTableNameString}";
 
-            var trackingTableName = new ObjectNameParser(trakingTableNameString);
+            var trackingTableName = ObjectNameParser.Create(trakingTableNameString);
             
 
             return (originalTableName, trackingTableName);

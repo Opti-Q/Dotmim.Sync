@@ -416,7 +416,7 @@ namespace Dotmim.Sync.SqlServer.Builders
                 if (this.transaction != null)
                     command.Transaction = this.transaction;
 
-                var textParser = new ObjectNameParser(command.CommandText);
+                var textParser = ObjectNameParser.Create(command.CommandText);
 
                 if (derivingParameters.ContainsKey(textParser.FullUnquotedString))
                 {

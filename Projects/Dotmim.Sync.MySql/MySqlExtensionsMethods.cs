@@ -23,7 +23,7 @@ namespace Dotmim.Sync.MySql
 
             //if (cmd == null) throw new ArgumentNullException("SqlCommand");
 
-            //var textParser = new ObjectNameParser(cmd.CommandText);
+            //var textParser = ObjectNameParser.Create(cmd.CommandText);
 
             //// Hack to check for schema name in the spName
             //string schemaName = "dbo";

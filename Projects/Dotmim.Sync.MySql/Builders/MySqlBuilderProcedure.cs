@@ -307,7 +307,7 @@ namespace Dotmim.Sync.MySql
             string empty = string.Empty;
             foreach (var mutableColumn in this.tableDescription.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser columnName = new ObjectNameParser(mutableColumn.ColumnName, "`", "`");
+                ObjectNameParser columnName = ObjectNameParser.Create(mutableColumn.ColumnName, "`", "`");
                 stringBuilderArguments.Append(string.Concat(empty, columnName.FullQuotedString));
                 stringBuilderParameters.Append(string.Concat(empty, $"{MYSQL_PREFIX_PARAMETER}{columnName.FullUnquotedString}"));
                 empty = ", ";
@@ -371,7 +371,7 @@ namespace Dotmim.Sync.MySql
             string empty = string.Empty;
             foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                ObjectNameParser columnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                ObjectNameParser columnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilderArguments.Append(string.Concat(empty, columnName.FullQuotedString.ToLowerInvariant()));
                 stringBuilderParameters.Append(string.Concat(empty, $"{MYSQL_PREFIX_PARAMETER}{columnName.FullUnquotedString.ToLowerInvariant()}"));
                 empty = ", ";
@@ -428,14 +428,14 @@ namespace Dotmim.Sync.MySql
             string empty = string.Empty;
             foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                ObjectNameParser pkColumnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                ObjectNameParser pkColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilder.AppendLine($"\t`side`.{pkColumnName.FullQuotedString}, ");
                 stringBuilder1.Append($"{empty}`side`.{pkColumnName.FullQuotedString} = {MYSQL_PREFIX_PARAMETER}{pkColumnName.FullUnquotedString}");
                 empty = " AND ";
             }
             foreach (DmColumn mutableColumn in this.tableDescription.MutableColumns)
             {
-                ObjectNameParser nonPkColumnName = new ObjectNameParser(mutableColumn.ColumnName, "`", "`");
+                ObjectNameParser nonPkColumnName = ObjectNameParser.Create(mutableColumn.ColumnName, "`", "`");
                 stringBuilder.AppendLine($"\t`base`.{nonPkColumnName.FullQuotedString}, ");
             }
             stringBuilder.AppendLine("\t`side`.`sync_row_is_tombstone`,");
@@ -450,7 +450,7 @@ namespace Dotmim.Sync.MySql
             string str = string.Empty;
             foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                ObjectNameParser pkColumnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                ObjectNameParser pkColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilder.Append($"{str}`base`.{pkColumnName.FullQuotedString} = `side`.{pkColumnName.FullQuotedString}");
                 str = " AND ";
             }
@@ -641,7 +641,7 @@ namespace Dotmim.Sync.MySql
             //        if (columnFilter == null)
             //            throw new InvalidExpressionException($"Column {c.ColumnName} does not exist in Table {this.tableDescription.TableName}");
 
-            //        var columnFilterName = new ObjectNameParser(columnFilter.ColumnName, "`", "`");
+            //        var columnFilterName = ObjectNameParser.Create(columnFilter.ColumnName, "`", "`");
 
             //        MySqlParameter sqlParamFilter = new MySqlParameter($"{columnFilterName.UnquotedString}", columnFilter.GetMySqlDbType());
             //        sqlCommand.Parameters.Add(sqlParamFilter);
@@ -651,12 +651,12 @@ namespace Dotmim.Sync.MySql
             StringBuilder stringBuilder = new StringBuilder("SELECT ");
             foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                var pkColumnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                var pkColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilder.AppendLine($"\t`side`.{pkColumnName.FullQuotedString}, ");
             }
             foreach (var mutableColumn in this.tableDescription.MutableColumns)
             {
-                var columnName = new ObjectNameParser(mutableColumn.ColumnName, "`", "`");
+                var columnName = ObjectNameParser.Create(mutableColumn.ColumnName, "`", "`");
                 stringBuilder.AppendLine($"\t`base`.{columnName.FullQuotedString}, ");
             }
             stringBuilder.AppendLine($"\t`side`.`sync_row_is_tombstone`, ");
@@ -671,7 +671,7 @@ namespace Dotmim.Sync.MySql
             string empty = "";
             foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                var pkColumnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                var pkColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilder.Append($"{empty}`base`.{pkColumnName.FullQuotedString} = `side`.{pkColumnName.FullQuotedString}");
                 empty = " AND ";
             }
@@ -691,7 +691,7 @@ namespace Dotmim.Sync.MySql
                     if (columnFilter == null)
                         throw new InvalidExpressionException($"Column {c.ColumnName} does not exist in Table {this.tableDescription.TableName}");
 
-                    var columnFilterName = new ObjectNameParser(columnFilter.ColumnName, "`", "`");
+                    var columnFilterName = ObjectNameParser.Create(columnFilter.ColumnName, "`", "`");
 
                     builderFilter.Append($"`side`.{columnFilterName.QuotedObjectName} = {columnFilterName.FullUnquotedString}{filterSeparationString}");
                     filterSeparationString = " AND ";
@@ -705,7 +705,7 @@ namespace Dotmim.Sync.MySql
                 foreach (var c in this.Filters)
                 {
                     var columnFilter = this.tableDescription.Columns[c.ColumnName];
-                    var columnFilterName = new ObjectNameParser(columnFilter.ColumnName, "`", "`");
+                    var columnFilterName = ObjectNameParser.Create(columnFilter.ColumnName, "`", "`");
 
                     builderFilter.Append($"`side`.{columnFilterName.QuotedObjectName} IS NULL{filterSeparationString}");
                     filterSeparationString = " OR ";
@@ -739,7 +739,7 @@ namespace Dotmim.Sync.MySql
             empty = " AND ";
             foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                var pkColumnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                var pkColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilder.Append($"{empty}`base`.{pkColumnName.FullQuotedString} is not null");
             }
             stringBuilder.AppendLine("\t)");
@@ -804,7 +804,7 @@ namespace Dotmim.Sync.MySql
                     if (columnFilter == null)
                         throw new InvalidExpressionException($"Column {c.ColumnName} does not exist in Table {this.tableDescription.TableName}");
 
-                    var unquotedColumnName = new ObjectNameParser(columnFilter.ColumnName, "`", "`").FullUnquotedString;
+                    var unquotedColumnName = ObjectNameParser.Create(columnFilter.ColumnName, "`", "`").FullUnquotedString;
                     name += $"{unquotedColumnName}{sep}";
                     sep = "_";
                 }

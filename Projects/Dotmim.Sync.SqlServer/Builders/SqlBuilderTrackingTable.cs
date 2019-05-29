@@ -85,14 +85,14 @@ namespace Dotmim.Sync.SqlServer.Builders
                     if (this.tableDescription.Columns.Any(c => c.ColumnName == filterColumn.ColumnName))
                         continue;
 
-                    ObjectNameParser columnName = new ObjectNameParser(filterColumn.ColumnName);
+                    ObjectNameParser columnName = ObjectNameParser.Create(filterColumn.ColumnName);
                     stringBuilder.AppendLine($"\t,{columnName.FullQuotedString} ASC");
                 }
             }
 
             foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                ObjectNameParser columnName = new ObjectNameParser(pkColumn.ColumnName);
+                ObjectNameParser columnName = ObjectNameParser.Create(pkColumn.ColumnName);
                 stringBuilder.AppendLine($"\t,{columnName.FullQuotedString} ASC");
             }
             stringBuilder.Append(")");
@@ -154,7 +154,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             for (int i = 0; i < this.tableDescription.PrimaryKey.Columns.Length; i++)
             {
                 DmColumn pkColumn = this.tableDescription.PrimaryKey.Columns[i];
-                var quotedColumnName = new ObjectNameParser(pkColumn.ColumnName, "[", "]").FullQuotedString;
+                var quotedColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "[", "]").FullQuotedString;
 
                 stringBuilder.Append(quotedColumnName);
 
@@ -262,10 +262,10 @@ namespace Dotmim.Sync.SqlServer.Builders
             // Adding the primary key
             foreach (DmColumn pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                var quotedColumnName = new ObjectNameParser(pkColumn.ColumnName, "[", "]").FullQuotedString;
+                var quotedColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "[", "]").FullQuotedString;
 
                 var columnTypeString = this.sqlDbMetadata.TryGetOwnerDbTypeString(pkColumn.OriginalDbType, pkColumn.DbType, false, false, this.tableDescription.OriginalProvider, SqlSyncProvider.ProviderType);
-                var quotedColumnType = new ObjectNameParser(columnTypeString, "[", "]").FullQuotedString;
+                var quotedColumnType = ObjectNameParser.Create(columnTypeString, "[", "]").FullQuotedString;
                 var columnPrecisionString = this.sqlDbMetadata.TryGetOwnerDbTypePrecision(pkColumn.OriginalDbType, pkColumn.DbType, false, false, pkColumn.MaxLength, pkColumn.Precision, pkColumn.Scale, this.tableDescription.OriginalProvider, SqlSyncProvider.ProviderType);
                 var columnType = $"{quotedColumnType} {columnPrecisionString}";
 
@@ -296,10 +296,10 @@ namespace Dotmim.Sync.SqlServer.Builders
                         continue;
 
 
-                    var quotedColumnName = new ObjectNameParser(columnFilter.ColumnName, "[", "]").FullQuotedString;
+                    var quotedColumnName = ObjectNameParser.Create(columnFilter.ColumnName, "[", "]").FullQuotedString;
 
                     var columnTypeString = this.sqlDbMetadata.TryGetOwnerDbTypeString(columnFilter.OriginalDbType, columnFilter.DbType, false, false, this.tableDescription.OriginalProvider, SqlSyncProvider.ProviderType);
-                    var quotedColumnType = new ObjectNameParser(columnTypeString, "[", "]").FullQuotedString;
+                    var quotedColumnType = ObjectNameParser.Create(columnTypeString, "[", "]").FullQuotedString;
                     var columnPrecisionString = this.sqlDbMetadata.TryGetOwnerDbTypePrecision(columnFilter.OriginalDbType, columnFilter.DbType, false, false, columnFilter.MaxLength, columnFilter.Precision, columnFilter.Scale, this.tableDescription.OriginalProvider, SqlSyncProvider.ProviderType);
                     var columnType = $"{quotedColumnType} {columnPrecisionString}";
 
@@ -365,7 +365,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             string sideTable = "[side]";
             foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns)
             {
-                var quotedColumnName = new ObjectNameParser(pkColumn.ColumnName, "[", "]").FullQuotedString;
+                var quotedColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "[", "]").FullQuotedString;
 
                 stringBuilder1.Append(string.Concat(empty, quotedColumnName));
 
@@ -393,7 +393,7 @@ namespace Dotmim.Sync.SqlServer.Builders
                     if (isPk)
                         continue;
 
-                    var quotedColumnName = new ObjectNameParser(columnFilter.ColumnName, "[", "]").FullQuotedString;
+                    var quotedColumnName = ObjectNameParser.Create(columnFilter.ColumnName, "[", "]").FullQuotedString;
 
                     stringBuilder6.Append(string.Concat(empty, quotedColumnName));
                     stringBuilder5.Append(string.Concat(empty, baseTable, ".", quotedColumnName));
@@ -477,8 +477,8 @@ namespace Dotmim.Sync.SqlServer.Builders
 
         private string AddFilterColumnCommandText(DmColumn col)
         {
-            var quotedColumnName = new ObjectNameParser(col.ColumnName, "[", "]").FullQuotedString;
-            var quotedColumnType = new ObjectNameParser(col.OriginalDbType, "[", "]").FullQuotedString;
+            var quotedColumnName = ObjectNameParser.Create(col.ColumnName, "[", "]").FullQuotedString;
+            var quotedColumnType = ObjectNameParser.Create(col.OriginalDbType, "[", "]").FullQuotedString;
 
             var columnTypeString = this.sqlDbMetadata.TryGetOwnerDbTypeString(col.OriginalDbType, col.DbType, false, false, this.tableDescription.OriginalProvider, SqlSyncProvider.ProviderType);
             var columnPrecisionString = this.sqlDbMetadata.TryGetOwnerDbTypePrecision(col.OriginalDbType, col.DbType, false, false, col.MaxLength, col.Precision, col.Scale, this.tableDescription.OriginalProvider, SqlSyncProvider.ProviderType);
@@ -488,7 +488,7 @@ namespace Dotmim.Sync.SqlServer.Builders
         }
         public string ScriptAddFilterColumn(DmColumn filterColumn)
         {
-            var quotedColumnName = new ObjectNameParser(filterColumn.ColumnName, "[", "]");
+            var quotedColumnName = ObjectNameParser.Create(filterColumn.ColumnName, "[", "]");
 
             string str = string.Concat("Add new filter column, ", quotedColumnName.FullUnquotedString, ", to Tracking Table ", trackingName.FullQuotedString);
             return SqlBuilder.WrapScriptTextWithComments(this.AddFilterColumnCommandText(filterColumn), str);

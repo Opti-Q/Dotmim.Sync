@@ -20,7 +20,7 @@ namespace Dotmim.Sync.SqlServer.Scope
         {
             this.connection = connection as SqlConnection;
             this.transaction = transaction as SqlTransaction;
-            this.scopeTableName = new ObjectNameParser(scopeTableName, "[", "]");
+            this.scopeTableName = ObjectNameParser.Create(scopeTableName, "[", "]");
             
         }
 

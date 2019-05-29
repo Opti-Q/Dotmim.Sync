@@ -127,7 +127,7 @@ namespace Dotmim.Sync.Sqlite
 
             foreach (DmColumn column in this.TableDescription.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"@{quotedColumn.ObjectNameNormalized}";
                 p.DbType = GetValidDbType(column.DbType);
@@ -153,7 +153,7 @@ namespace Dotmim.Sync.Sqlite
 
             foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"@{quotedColumn.ObjectNameNormalized}";
                 p.DbType = GetValidDbType(column.DbType);
@@ -183,7 +183,7 @@ namespace Dotmim.Sync.Sqlite
 
             foreach (DmColumn column in this.TableDescription.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"@{quotedColumn.ObjectNameNormalized}";
                 p.DbType = GetValidDbType(column.DbType);
@@ -198,7 +198,7 @@ namespace Dotmim.Sync.Sqlite
 
             foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"@{quotedColumn.ObjectNameNormalized}";
                 p.DbType = column.DbType;
@@ -238,7 +238,7 @@ namespace Dotmim.Sync.Sqlite
 
             foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"@{quotedColumn.ObjectNameNormalized}";
                 p.DbType = GetValidDbType(column.DbType);
@@ -263,7 +263,7 @@ namespace Dotmim.Sync.Sqlite
 
             foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser quotedColumn = new ObjectNameParser(column.ColumnName);
+                ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"@{quotedColumn.ObjectNameNormalized}";
                 p.DbType = GetValidDbType(column.DbType);

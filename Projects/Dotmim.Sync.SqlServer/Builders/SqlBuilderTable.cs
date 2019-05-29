@@ -72,12 +72,12 @@ namespace Dotmim.Sync.SqlServer.Builders
             string childSchema = foreignKey.ChildTable.Schema;
             string childFullName = String.IsNullOrEmpty(childSchema) ? childTable : $"{childSchema}.{childTable}";
 
-            var childTableName = new ObjectNameParser(childFullName);
+            var childTableName = ObjectNameParser.Create(childFullName);
 
             string parentTable = foreignKey.ParentTable.TableName;
             string parentSchema = foreignKey.ParentTable.Schema;
             string parentFullName = String.IsNullOrEmpty(parentSchema) ? parentTable : $"{parentSchema}.{parentTable}";
-            var parentTableName = new ObjectNameParser(parentFullName);
+            var parentTableName = ObjectNameParser.Create(parentFullName);
 
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append("ALTER TABLE ");
@@ -88,7 +88,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             string empty = string.Empty;
             foreach (var parentdColumn in foreignKey.ParentColumns)
             {
-                var parentColumnName = new ObjectNameParser(parentdColumn.ColumnName);
+                var parentColumnName = ObjectNameParser.Create(parentdColumn.ColumnName);
 
                 stringBuilder.Append($"{empty} {parentColumnName.FullQuotedString}");
                 empty = ", ";
@@ -99,7 +99,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             empty = string.Empty;
             foreach (var childColumn in foreignKey.ChildColumns)
             {
-                var childColumnName = new ObjectNameParser(childColumn.ColumnName);
+                var childColumnName = ObjectNameParser.Create(childColumn.ColumnName);
                 stringBuilder.Append($"{empty} {childColumnName.FullQuotedString}");
             }
             stringBuilder.Append(" ) ");
@@ -165,7 +165,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             for (int i = 0; i < this.tableDescription.PrimaryKey.Columns.Length; i++)
             {
                 DmColumn pkColumn = this.tableDescription.PrimaryKey.Columns[i];
-                var quotedColumnName = new ObjectNameParser(pkColumn.ColumnName, "[", "]").FullQuotedString;
+                var quotedColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "[", "]").FullQuotedString;
 
                 stringBuilder.Append(quotedColumnName);
 
@@ -224,7 +224,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             stringBuilder.AppendLine();
             foreach (var column in this.tableDescription.Columns)
             {
-                var columnName = new ObjectNameParser(column.ColumnName);
+                var columnName = ObjectNameParser.Create(column.ColumnName);
 
                 var columnTypeString = this.sqlDbMetadata.TryGetOwnerDbTypeString(column.OriginalDbType, column.DbType, false, false, this.tableDescription.OriginalProvider, SqlSyncProvider.ProviderType);
                 var columnPrecisionString = this.sqlDbMetadata.TryGetOwnerDbTypePrecision(column.OriginalDbType, column.DbType, false, false, column.MaxLength, column.Precision, column.Scale, this.tableDescription.OriginalProvider, SqlSyncProvider.ProviderType);

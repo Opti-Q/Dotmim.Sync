@@ -472,7 +472,7 @@ namespace Dotmim.Sync.Scope
         /// <summary>Initializes a new instance of the <see cref="T:Microsoft.Synchronization.Data.DbSyncColumnDescription" /> class for a column that has the specified name and data type.</summary>
         public ScopeConfigDataColumn(string columnName, string type)
         {
-            ObjectNameParser objectNameParser = new ObjectNameParser(columnName);
+            ObjectNameParser objectNameParser = ObjectNameParser.Create(columnName);
             this._unquotedName = objectNameParser.ObjectName;
             this._quotedName = objectNameParser.QuotedObjectName;
             this.Type = type;

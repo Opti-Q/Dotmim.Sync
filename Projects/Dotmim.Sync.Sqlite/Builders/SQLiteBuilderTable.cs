@@ -33,9 +33,9 @@ namespace Dotmim.Sync.Sqlite
             SqliteCommand sqlCommand = new SqliteCommand();
 
             var childTable = foreignKey.ChildTable;
-            var childTableName = new ObjectNameParser(childTable.TableName);
+            var childTableName = ObjectNameParser.Create(childTable.TableName);
             var parentTable = foreignKey.ParentTable;
-            var parentTableName = new ObjectNameParser(parentTable.TableName);
+            var parentTableName = ObjectNameParser.Create(parentTable.TableName);
 
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append("ALTER TABLE ");
@@ -46,7 +46,7 @@ namespace Dotmim.Sync.Sqlite
             string empty = string.Empty;
             foreach (var parentdColumn in foreignKey.ParentColumns)
             {
-                var parentColumnName = new ObjectNameParser(parentdColumn.ColumnName);
+                var parentColumnName = ObjectNameParser.Create(parentdColumn.ColumnName);
 
                 stringBuilder.Append($"{empty} {parentColumnName.FullQuotedString}");
                 empty = ", ";
@@ -57,7 +57,7 @@ namespace Dotmim.Sync.Sqlite
             empty = string.Empty;
             foreach (var childColumn in foreignKey.ChildColumns)
             {
-                var childColumnName = new ObjectNameParser(childColumn.ColumnName);
+                var childColumnName = ObjectNameParser.Create(childColumn.ColumnName);
                 stringBuilder.Append($"{empty} {childColumnName.FullQuotedString}");
             }
             stringBuilder.Append(" ) ");
@@ -85,7 +85,7 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine();
             foreach (var column in this.tableDescription.Columns)
             {
-                var columnName = new ObjectNameParser(column.ColumnName);
+                var columnName = ObjectNameParser.Create(column.ColumnName);
 
                 var columnTypeString = this.sqliteDbMetadata.TryGetOwnerDbTypeString(column.OriginalDbType, column.DbType, false, false, this.tableDescription.OriginalProvider, SqliteSyncProvider.ProviderType);
                 var columnPrecisionString = this.sqliteDbMetadata.TryGetOwnerDbTypePrecision(column.OriginalDbType, column.DbType, false, false, column.MaxLength, column.Precision, column.Scale, this.tableDescription.OriginalProvider, SqliteSyncProvider.ProviderType);
@@ -133,7 +133,7 @@ namespace Dotmim.Sync.Sqlite
             for (int i = 0; i < this.tableDescription.PrimaryKey.Columns.Length; i++)
             {
                 DmColumn pkColumn = this.tableDescription.PrimaryKey.Columns[i];
-                var quotedColumnName = new ObjectNameParser(pkColumn.ColumnName).ObjectName;
+                var quotedColumnName = ObjectNameParser.Create(pkColumn.ColumnName).ObjectName;
 
                 stringBuilder.Append(quotedColumnName);
 
@@ -146,13 +146,13 @@ namespace Dotmim.Sync.Sqlite
             foreach (DmRelation constraint in this.tableDescription.ChildRelations)
             {
                 var childTable = constraint.ChildTable;
-                var childTableName = new ObjectNameParser(childTable.TableName);
+                var childTableName = ObjectNameParser.Create(childTable.TableName);
                 stringBuilder.AppendLine();
                 stringBuilder.Append($"\tFOREIGN KEY (");
                 empty = string.Empty;
                 foreach (var column in constraint.ParentColumns)
                 {
-                    var columnName = new ObjectNameParser(column.ColumnName);
+                    var columnName = ObjectNameParser.Create(column.ColumnName);
 
                     stringBuilder.Append($"{empty} {columnName.FullQuotedString}");
                     empty = ", ";
@@ -162,7 +162,7 @@ namespace Dotmim.Sync.Sqlite
                 empty = string.Empty;
                 foreach (var column in constraint.ChildColumns)
                 {
-                    var columnName = new ObjectNameParser(column.ColumnName);
+                    var columnName = ObjectNameParser.Create(column.ColumnName);
 
                     stringBuilder.Append($"{empty} {columnName.FullQuotedString}");
                     empty = ", ";

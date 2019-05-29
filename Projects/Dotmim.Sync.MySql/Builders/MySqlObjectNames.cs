@@ -147,7 +147,7 @@ namespace Dotmim.Sync.MySql
             string empty = string.Empty;
             foreach (var pkColumn in this.TableDescription.PrimaryKey.Columns)
             {
-                ObjectNameParser columnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                ObjectNameParser columnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilderArguments.Append(string.Concat(empty, columnName.FullQuotedString.ToLowerInvariant()));
                 stringBuilderParameters.Append(string.Concat(empty, $"@{columnName.FullUnquotedString.ToLowerInvariant()}"));
                 empty = ", ";
@@ -180,7 +180,7 @@ namespace Dotmim.Sync.MySql
             string empty = string.Empty;
             foreach (var mutableColumn in this.TableDescription.Columns.Where(c => !c.IsReadOnly))
             {
-                ObjectNameParser columnName = new ObjectNameParser(mutableColumn.ColumnName, "`", "`");
+                ObjectNameParser columnName = ObjectNameParser.Create(mutableColumn.ColumnName, "`", "`");
                 stringBuilderArguments.Append(string.Concat(empty, columnName.FullQuotedString.ToLowerInvariant()));
                 stringBuilderParameters.Append(string.Concat(empty, $"@{columnName.FullUnquotedString.ToLowerInvariant()}"));
                 empty = ", ";
@@ -224,14 +224,14 @@ namespace Dotmim.Sync.MySql
             string empty = string.Empty;
             foreach (var pkColumn in this.TableDescription.PrimaryKey.Columns)
             {
-                ObjectNameParser pkColumnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                ObjectNameParser pkColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilder.AppendLine($"\t`side`.{pkColumnName.FullQuotedString.ToLowerInvariant()}, ");
                 stringBuilder1.Append($"{empty}`side`.{pkColumnName.FullQuotedString.ToLowerInvariant()} = @{pkColumnName.FullUnquotedString.ToLowerInvariant()}");
                 empty = " AND ";
             }
             foreach (DmColumn mutableColumn in this.TableDescription.MutableColumns)
             {
-                ObjectNameParser nonPkColumnName = new ObjectNameParser(mutableColumn.ColumnName, "`", "`");
+                ObjectNameParser nonPkColumnName = ObjectNameParser.Create(mutableColumn.ColumnName, "`", "`");
                 stringBuilder.AppendLine($"\t`base`.{nonPkColumnName.FullQuotedString}, ");
             }
             stringBuilder.AppendLine("\t`side`.`sync_row_is_tombstone`,");
@@ -246,7 +246,7 @@ namespace Dotmim.Sync.MySql
             string str = string.Empty;
             foreach (var pkColumn in this.TableDescription.PrimaryKey.Columns)
             {
-                ObjectNameParser pkColumnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                ObjectNameParser pkColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilder.Append($"{str}`base`.{pkColumnName.FullQuotedString.ToLowerInvariant()} = `side`.{pkColumnName.FullQuotedString.ToLowerInvariant()}");
                 str = " AND ";
             }
@@ -261,12 +261,12 @@ namespace Dotmim.Sync.MySql
             StringBuilder stringBuilder = new StringBuilder("SELECT ");
             foreach (var pkColumn in this.TableDescription.PrimaryKey.Columns)
             {
-                var pkColumnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                var pkColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilder.AppendLine($"\t`side`.{pkColumnName.FullQuotedString.ToLowerInvariant()}, ");
             }
             foreach (var mutableColumn in this.TableDescription.MutableColumns)
             {
-                var columnName = new ObjectNameParser(mutableColumn.ColumnName, "`", "`");
+                var columnName = ObjectNameParser.Create(mutableColumn.ColumnName, "`", "`");
                 stringBuilder.AppendLine($"\t`base`.{columnName.FullQuotedString.ToLowerInvariant()}, ");
             }
             stringBuilder.AppendLine($"\t`side`.`sync_row_is_tombstone`, ");
@@ -281,7 +281,7 @@ namespace Dotmim.Sync.MySql
             string empty = "";
             foreach (var pkColumn in this.TableDescription.PrimaryKey.Columns)
             {
-                var pkColumnName = new ObjectNameParser(pkColumn.ColumnName, "`", "`");
+                var pkColumnName = ObjectNameParser.Create(pkColumn.ColumnName, "`", "`");
                 stringBuilder.Append($"{empty}`base`.{pkColumnName.FullQuotedString.ToLowerInvariant()} = `side`.{pkColumnName.FullQuotedString.ToLowerInvariant()}");
                 empty = " AND ";
             }

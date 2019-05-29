@@ -24,8 +24,8 @@ namespace Dotmim.Sync.Sqlite
         internal static (ObjectNameParser tableName, ObjectNameParser trackingName) GetParsers(DmTable tableDescription)
         {
             string tableAndPrefixName = tableDescription.TableName;
-            var originalTableName = new ObjectNameParser(tableAndPrefixName, "[", "]");
-            var trackingTableName = new ObjectNameParser($"{tableAndPrefixName}_tracking", "[", "]");
+            var originalTableName = ObjectNameParser.Create(tableAndPrefixName, "[", "]");
+            var trackingTableName = ObjectNameParser.Create($"{tableAndPrefixName}_tracking", "[", "]");
 
             return (originalTableName, trackingTableName);
         }

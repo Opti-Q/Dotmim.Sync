@@ -497,7 +497,7 @@ namespace Dotmim.Sync
 
             // Potentially user can pass something like [SalesLT].[Product]
             // or SalesLT.Product or Product. ObjectNameParser will handle it
-            ObjectNameParser parser = new ObjectNameParser(table);
+            ObjectNameParser parser = ObjectNameParser.Create(table);
 
             var tableName = parser.ObjectName;
             var schema = parser.SchemaName;
