@@ -374,7 +374,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             return false;
         }
 
-        public override DbCommand GetCommand(DbCommandType nameType, IEnumerable<string> additionals = null)
+        protected override DbCommand GetCommandOverride(DbCommandType nameType, IEnumerable<string> additionals = null)
         {
             var command = this.Connection.CreateCommand();
 
@@ -398,7 +398,7 @@ namespace Dotmim.Sync.SqlServer.Builders
         /// <summary>
         /// Set a stored procedure parameters
         /// </summary>
-        public override void SetCommandParameters(DbCommandType commandType, DbCommand command)
+        protected override void SetCommandParameters(DbCommandType commandType, DbCommand command)
         {
             if (command == null)
                 return;

@@ -19,13 +19,18 @@ namespace Dotmim.Sync
     /// The SyncAdapter is the datasource manager for ONE table
     /// Should be implemented by every database provider and provide every SQL action
     /// </summary>
-    public abstract class DbSyncAdapter
+    public abstract class DbSyncAdapter : IDisposable
     {
         private const int BATCH_SIZE = 1000;
 
         public delegate (ApplyAction, DmRow) ConflictActionDelegate(SyncConflict conflict, ConflictResolutionPolicy policy, DbConnection connection, DbTransaction transaction = null);
 
         public ConflictActionDelegate ConflictActionInvoker = null;
+        private readonly Dictionary<CommandCacheKey, DbCommand> commandCache = new Dictionary<CommandCacheKey, DbCommand>();
+        private Dictionary<string, DmColumn> columnCache;
+        private DmTable columnTable;
+        protected DmColumn[] WritableColumns { get; }
+        protected DmColumn[] WritablePrimaryKeyColumns { get; }
 
         internal ApplyAction ConflictApplyAction { get; set; } = ApplyAction.Continue;
 
@@ -52,12 +57,39 @@ namespace Dotmim.Sync
         /// <summary>
         /// Gets a command from the current adapter
         /// </summary>
-        public abstract DbCommand GetCommand(DbCommandType commandType, IEnumerable<string> additionals = null);
+        public DbCommand GetCommand(DbCommandType commandType, IEnumerable<string> additionals = null)
+        {
+            var key = new CommandCacheKey(commandType, additionals);
+            if (!commandCache.TryGetValue(key, out var command))
+            {
+                command = GetCommandOverride(commandType, additionals);
+
+                // always prepare parameters for same commandtype execpt for SelectChangesWithFilters
+                var toPrepare = commandType == DbCommandType.SelectChangesWitFilters
+                    ? DbCommandType.SelectChanges
+                    : commandType;
+
+                // when created, also setup the parameters and prepare the statement to speed up execution
+                SetCommandParameters(toPrepare, command);
+                command.Prepare();
+
+                // add command so it can be reused
+                commandCache.Add(key, command);
+            }
+
+            command.Connection = Connection;
+            if (Transaction != null)
+                command.Transaction = Transaction;
+
+            return command;
+        }
+
+        protected abstract DbCommand GetCommandOverride(DbCommandType commandType, IEnumerable<string> additionals = null);
 
         /// <summary>
         /// Set parameters on a command
         /// </summary>
-        public abstract void SetCommandParameters(DbCommandType commandType, DbCommand command);
+        protected abstract void SetCommandParameters(DbCommandType commandType, DbCommand command);
 
         /// <summary>
         /// Execute a batch command
@@ -80,26 +112,39 @@ namespace Dotmim.Sync
         public DbSyncAdapter(DmTable tableDescription)
         {
             this.TableDescription = tableDescription;
-            ColumnCache = tableDescription.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
+
+            this.WritableColumns = tableDescription.Columns.Where(c => !c.IsReadOnly).ToArray();
+            this.WritablePrimaryKeyColumns = tableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly).ToArray();
         }
 
-        private Dictionary<string, DmColumn> ColumnCache { get; }
+        private Dictionary<string, DmColumn> GetColumnCache(DmRow row)
+        {
+            if (columnCache == null || columnTable != row.Table)
+            {
+                columnCache = row.Table.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
+                columnTable = row.Table;
+            }
+
+            return columnCache;
+        }
 
         /// <summary>
         /// Set command parameters value mapped to Row
         /// </summary>
         internal void SetColumnParametersValues(DbCommand command, DmRow row)
         {
+            var cache = GetColumnCache(row);
+
             foreach (DbParameter parameter in command.Parameters)
             {
                 // foreach parameter, check if we have a column 
-                if (!string.IsNullOrEmpty(parameter.SourceColumn) && ColumnCache.ContainsKey(parameter.SourceColumn))
+                if (!string.IsNullOrEmpty(parameter.SourceColumn) && cache.TryGetValue(parameter.SourceColumn, out var column))
                 {
                     object value = null;
                     if (row.RowState == DmRowState.Deleted)
-                        value = row[parameter.SourceColumn, DmRowVersion.Original];
+                        value = row[column, DmRowVersion.Original];
                     else
-                        value = row[parameter.SourceColumn];
+                        value = row[column];
 
                     DbManager.SetParameterValue(command, parameter, value);
                 }
@@ -125,12 +170,16 @@ namespace Dotmim.Sync
             // Set the id parameter
             this.SetColumnParametersValues(command, row);
 
+
+            var cache = GetColumnCache(row);
+            
+
             DmRowVersion version = row.RowState == DmRowState.Deleted ? DmRowVersion.Original : DmRowVersion.Current;
 
-            long createTimestamp = row["create_timestamp", version] != null ? Convert.ToInt64(row["create_timestamp", version]) : 0;
-            long updateTimestamp = row["update_timestamp", version] != null ? Convert.ToInt64(row["update_timestamp", version]) : 0;
-            Guid? create_scope_id = row["create_scope_id", version] != null ? (Guid?)(row["create_scope_id", version]) : null;
-            Guid? update_scope_id = row["update_scope_id", version] != null ? (Guid?)(row["update_scope_id", version]) : null;
+            long createTimestamp = row[cache["create_timestamp"], version] != null ? Convert.ToInt64(row[cache["create_timestamp"], version]) : 0;
+            long updateTimestamp = row[cache["update_timestamp"], version] != null ? Convert.ToInt64(row[cache["update_timestamp"], version]) : 0;
+            Guid? create_scope_id = row[cache["create_scope_id"], version] != null ? (Guid?)(row[cache["create_scope_id"], version]) : null;
+            Guid? update_scope_id = row[cache["update_scope_id"], version] != null ? (Guid?)(row[cache["update_scope_id"], version]) : null;
 
             // Override create and update scope id to reflect who change the value
             // if it's an update, the createscope is staying the same (because not present in dbCommand)
@@ -149,7 +198,7 @@ namespace Dotmim.Sync
             if (row.RowState == DmRowState.Deleted)
                 isTombstone = true;
 
-            if (row.Table != null && row.Table.Columns.Contains("sync_row_is_tombstone"))
+            if (row.Table != null && cache.ContainsKey("sync_row_is_tombstone"))
                 isTombstone = row["sync_row_is_tombstone", version] != null && row["sync_row_is_tombstone", version] != DBNull.Value ? (bool)row["sync_row_is_tombstone", version] : false;
 
             DbManager.SetParameterValue(command, "sync_row_is_tombstone", isTombstone ? 1 : 0);
@@ -184,10 +233,10 @@ namespace Dotmim.Sync
         private DmTable GetRow(DmRow sourceRow)
         {
             // Get the row in the local repository
-            using (DbCommand selectCommand = GetCommand(DbCommandType.SelectRow))
+            DbCommand selectCommand = GetCommand(DbCommandType.SelectRow);
             {
                 // Deriving Parameters
-                this.SetCommandParameters(DbCommandType.SelectRow, selectCommand);
+                //this.SetCommandParameters(DbCommandType.SelectRow, selectCommand);
 
                 this.SetColumnParametersValues(selectCommand, sourceRow);
 
@@ -238,17 +287,17 @@ namespace Dotmim.Sync
             if (this.applyType == DmRowState.Added)
             {
                 bulkCommand = this.GetCommand(DbCommandType.BulkInsertRows);
-                this.SetCommandParameters(DbCommandType.BulkInsertRows, bulkCommand);
+                //this.SetCommandParameters(DbCommandType.BulkInsertRows, bulkCommand);
             }
             else if (this.applyType == DmRowState.Modified)
             {
                 bulkCommand = this.GetCommand(DbCommandType.BulkUpdateRows);
-                this.SetCommandParameters(DbCommandType.BulkUpdateRows, bulkCommand);
+                //this.SetCommandParameters(DbCommandType.BulkUpdateRows, bulkCommand);
             }
             else if (this.applyType == DmRowState.Deleted)
             {
                 bulkCommand = this.GetCommand(DbCommandType.BulkDeleteRows);
-                this.SetCommandParameters(DbCommandType.BulkDeleteRows, bulkCommand);
+                //this.SetCommandParameters(DbCommandType.BulkDeleteRows, bulkCommand);
             }
             else
             {
@@ -365,9 +414,9 @@ namespace Dotmim.Sync
 
         private void UpdateMetadatas(DbCommandType dbCommandType, DmRow dmRow, ScopeInfo scope)
         {
-            using (var dbCommand = this.GetCommand(dbCommandType))
+            var dbCommand = this.GetCommand(dbCommandType);
             {
-                this.SetCommandParameters(dbCommandType, dbCommand);
+                //this.SetCommandParameters(dbCommandType, dbCommand);
                 this.InsertOrUpdateMetadatas(dbCommand, dmRow, scope.Id);
             }
         }
@@ -449,11 +498,11 @@ namespace Dotmim.Sync
         /// </summary>
         internal bool ApplyInsert(DmRow row, ScopeInfo scope, bool forceWrite)
         {
-            using (var command = this.GetCommand(DbCommandType.InsertRow))
+            var command = this.GetCommand(DbCommandType.InsertRow);
             {
 
                 // Deriving Parameters
-                this.SetCommandParameters(DbCommandType.InsertRow, command);
+                //this.SetCommandParameters(DbCommandType.InsertRow, command);
 
                 // Set the parameters value from row
                 this.SetColumnParametersValues(command, row);
@@ -493,10 +542,10 @@ namespace Dotmim.Sync
         /// </summary>
         internal bool ApplyDelete(DmRow sourceRow, ScopeInfo scope, bool forceWrite)
         {
-            using (var command = this.GetCommand(DbCommandType.DeleteRow))
+            var command = this.GetCommand(DbCommandType.DeleteRow);
             {
                 // Deriving Parameters
-                this.SetCommandParameters(DbCommandType.DeleteRow, command);
+                //this.SetCommandParameters(DbCommandType.DeleteRow, command);
 
                 // Set the parameters value from row
                 this.SetColumnParametersValues(command, sourceRow);
@@ -534,10 +583,10 @@ namespace Dotmim.Sync
         /// </summary>
         internal bool ApplyUpdate(DmRow sourceRow, ScopeInfo scope, bool forceWrite)
         {
-            using (var command = this.GetCommand(DbCommandType.UpdateRow))
+            var command = this.GetCommand(DbCommandType.UpdateRow);
             {
                 // Deriving Parameters
-                this.SetCommandParameters(DbCommandType.UpdateRow, command);
+                //this.SetCommandParameters(DbCommandType.UpdateRow, command);
 
                 // Set the parameters value from row
                 this.SetColumnParametersValues(command, sourceRow);
@@ -572,10 +621,10 @@ namespace Dotmim.Sync
         /// </summary>
         internal bool ResetTable(DmTable tableDescription)
         {
-            using (var command = this.GetCommand(DbCommandType.Reset))
+            var command = this.GetCommand(DbCommandType.Reset);
             {
                 // Deriving Parameters
-                this.SetCommandParameters(DbCommandType.Reset, command);
+                //this.SetCommandParameters(DbCommandType.Reset, command);
 
                 var alreadyOpened = Connection.State == ConnectionState.Open;
 
@@ -765,14 +814,14 @@ namespace Dotmim.Sync
                         // Whe should update the metadatas correctly
                         if (isUpdated && isInserted)
                         {
-                            using (var metadataCommand = GetCommand(commandType))
+                            var metadataCommand = GetCommand(commandType);
                             {
                                 // getting the row updated from server
                                 var dmTableRow = GetRow(row);
                                 row = dmTableRow.Rows[0];
 
                                 // Deriving Parameters
-                                this.SetCommandParameters(commandType, metadataCommand);
+                                //this.SetCommandParameters(commandType, metadataCommand);
 
                                 // Set the id parameter
                                 this.SetColumnParametersValues(metadataCommand, row);
@@ -876,10 +925,10 @@ namespace Dotmim.Sync
                 }
 
 
-                using (var metadataCommand = GetCommand(commandType))
+                var metadataCommand = GetCommand(commandType);
                 {
                     // Deriving Parameters
-                    this.SetCommandParameters(commandType, metadataCommand);
+                    //this.SetCommandParameters(commandType, metadataCommand);
 
                     // force applying client row, so apply scope.id (client scope here)
                     var rowsApplied = this.InsertOrUpdateMetadatas(metadataCommand, conflict.RemoteRow, scope.Id);
@@ -943,6 +992,61 @@ namespace Dotmim.Sync
                     {
                         return;
                     }
+            }
+        }
+
+        public virtual void Dispose()
+        {
+            foreach (var cmd in commandCache.Values)
+                cmd.Dispose();
+
+            commandCache.Clear();
+        }
+
+
+        private class CommandCacheKey
+        {
+            private DbCommandType CommandType { get; }
+            private string[] Additionals { get; }
+
+            public CommandCacheKey(DbCommandType commandType, IEnumerable<string> additionals)
+            {
+                CommandType = commandType;
+                Additionals = additionals?.ToArray() ?? new string[0];
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null)
+                    return false;
+
+                if (!(obj is CommandCacheKey k))
+                    return false;
+
+                if (!object.Equals(CommandType, k.CommandType))
+                    return false;
+
+                if (!object.Equals(Additionals.Length, k.Additionals.Length))
+                    return false;
+
+                for (int i = 0; i < Additionals.Length; i++)
+                {
+                    if (!object.Equals(Additionals[i], k.Additionals[i]))
+                        return false;
+                }
+
+                return true;
+            }
+
+            public override int GetHashCode()
+            {
+                var c = CommandType.GetHashCode();
+                for (int i = 0; i < Additionals.Length; i++)
+                {
+                    c += Additionals[i].GetHashCode();
+                }
+
+                return c * 3;
             }
         }
     }
