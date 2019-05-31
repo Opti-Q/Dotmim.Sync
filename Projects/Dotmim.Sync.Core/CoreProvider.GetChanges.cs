@@ -17,6 +17,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DbColumn = Dotmim.Sync.Manager.DbColumn;
 
 namespace Dotmim.Sync
 {
@@ -292,9 +293,11 @@ namespace Dotmim.Sync
                                 // Get the reader
                                 using (var dataReader = selectIncrementalChangesCommand.ExecuteReader())
                                 {
+                                    var columnCache = dmTableChanges.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
+
                                     while (dataReader.Read())
                                     {
-                                        DmRow dataRow = CreateRowFromReader(dataReader, dmTableChanges);
+                                        DmRow dataRow = CreateRowFromReader(dataReader, dmTableChanges, columnCache);
 
                                         //DmRow dataRow = dmTableChanges.NewRow();
 
@@ -302,7 +305,7 @@ namespace Dotmim.Sync
                                         DmRowState state = DmRowState.Unchanged;
 
                                         // get if the current row is inserted, modified, deleted
-                                        state = GetStateFromDmRow(dataRow, scopeInfo);
+                                        state = GetStateFromDmRow(dataRow, scopeInfo, columnCache);
 
                                         if (state != DmRowState.Deleted && state != DmRowState.Modified &&
                                             state != DmRowState.Added)
@@ -569,13 +572,15 @@ namespace Dotmim.Sync
                                     // Get the reader
                                     using (var dataReader = selectIncrementalChangesCommand.ExecuteReader())
                                     {
+                                        var columnCache = dmTable.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
+
                                         while (dataReader.Read())
                                         {
-                                            DmRow dmRow = CreateRowFromReader(dataReader, dmTable);
+                                            DmRow dmRow = CreateRowFromReader(dataReader, dmTable, columnCache);
 
                                             DmRowState state = DmRowState.Unchanged;
 
-                                            state = GetStateFromDmRow(dmRow, scopeInfo);
+                                            state = GetStateFromDmRow(dmRow, scopeInfo, columnCache);
 
                                             // If the row is not deleted inserted or modified, go next
                                             if (state != DmRowState.Deleted && state != DmRowState.Modified &&
@@ -714,21 +719,23 @@ namespace Dotmim.Sync
         /// <summary>
         /// Create a DmRow from a IDataReader
         /// </summary>
-        private DmRow CreateRowFromReader(IDataReader dataReader, DmTable dmTable)
+        private DmRow CreateRowFromReader(IDataReader dataReader, DmTable dmTable, Dictionary<string,DmColumn> columnCache)
         {
+            
             // we have an insert / update or delete
             DmRow dataRow = dmTable.NewRow();
-
+            
             for (int i = 0; i < dataReader.FieldCount; i++)
             {
                 var columnName = dataReader.GetName(i);
+                var column = columnCache[columnName];
                 var dmRowObject = dataReader.GetValue(i);
 
                 if (dmRowObject != DBNull.Value)
                 {
                     if (dmRowObject != null)
                     {
-                        var columnType = dmTable.Columns[columnName].DataType;
+                        var columnType = column.DataType;
                         var dmRowObjectType = dmRowObject.GetType();
 
                         if (dmRowObjectType != columnType && columnType != typeof(object))
@@ -776,7 +783,7 @@ namespace Dotmim.Sync
                             }
                         }
                     }
-                    dataRow[columnName] = dmRowObject;
+                    dataRow[column] = dmRowObject;
                 }
             }
 
@@ -812,20 +819,20 @@ namespace Dotmim.Sync
         /// <summary>
         /// Get a DmRow state to know is we have an inserted, updated, or deleted row to apply
         /// </summary>
-        private DmRowState GetStateFromDmRow(DmRow dataRow, ScopeInfo scopeInfo)
+        private DmRowState GetStateFromDmRow(DmRow dataRow, ScopeInfo scopeInfo, Dictionary<string, DmColumn> columnCache)
         {
             DmRowState dmRowState = DmRowState.Unchanged;
 
-            var isTombstone = Convert.ToInt64(dataRow["sync_row_is_tombstone"]) > 0;
+            var isTombstone = Convert.ToInt64(dataRow[columnCache["sync_row_is_tombstone"]]) > 0;
 
             if (isTombstone)
                 dmRowState = DmRowState.Deleted;
             else
             {
-                var createdTimeStamp = DbManager.ParseTimestamp(dataRow["create_timestamp"]);
-                var updatedTimeStamp = DbManager.ParseTimestamp(dataRow["update_timestamp"]);
-                var updateScopeIdRow = dataRow["update_scope_id"];
-                var createScopeIdRow = dataRow["create_scope_id"];
+                var createdTimeStamp = DbManager.ParseTimestamp(dataRow[columnCache["create_timestamp"]]);
+                var updatedTimeStamp = DbManager.ParseTimestamp(dataRow[columnCache["update_timestamp"]]);
+                var updateScopeIdRow = dataRow[columnCache["update_scope_id"]];
+                var createScopeIdRow = dataRow[columnCache["create_scope_id"]];
 
                 Guid? updateScopeId = (updateScopeIdRow != DBNull.Value && updateScopeIdRow != null) ? (Guid)updateScopeIdRow : (Guid?)null;
                 Guid? createScopeId = (createScopeIdRow != DBNull.Value && createScopeIdRow != null) ? (Guid)createScopeIdRow : (Guid?)null;
