@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -20,6 +21,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Owin.Hosting;
 using Owin;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Dotmim.Sync.Tests
 {
@@ -153,6 +155,7 @@ namespace Dotmim.Sync.Tests
         SqlSyncProvider serverProvider;
         SqliteSyncProvider clientProvider;
         SqliteSyncHttpLoadFixture fixture;
+        private readonly ITestOutputHelper output;
         WebProxyServerProvider proxyServerProvider;
         WebProxyClientProvider proxyClientProvider;
         SyncAgent agent;
@@ -160,13 +163,15 @@ namespace Dotmim.Sync.Tests
         private IDisposable webApp;
         private string batchDir;
 
-        public SqliteSyncHttpLoadTests(SqliteSyncHttpLoadFixture fixture)
+        public SqliteSyncHttpLoadTests(SqliteSyncHttpLoadFixture fixture, ITestOutputHelper output)
         {
             this.fixture = fixture;
+            this.output = output;
             this.batchDir = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString("N"));
 
             configurationProvider = () => new SyncConfiguration(fixture.Tables)
             {
+                //SerializationFormat = SerializationFormat.Binary,
                 SerializationFormat = SerializationFormat.Json,
                 DownloadBatchSizeInKB = 400,
             };
@@ -204,13 +209,23 @@ namespace Dotmim.Sync.Tests
         [Fact, TestPriority(1)]
         public async Task LoadLotsOfRowsFromServer()
         {
+            var expectedCount = 50 * fixture.Multiplier;
+
+            var sw = new Stopwatch();
+            sw.Start();
+
             // Act
             var session = await agent.SynchronizeAsync();
 
+            sw.Stop();
+
+            this.output.WriteLine($"Synchronized {session.TotalChangesDownloaded} rows in {sw.Elapsed}");
+
             var onp = new ObjectNameParser();
+            SqliteSyncAdapter a;
 
             // Assert
-            Assert.Equal(50*fixture.Multiplier, session.TotalChangesDownloaded);
+            Assert.Equal(expectedCount, session.TotalChangesDownloaded);
             Assert.Equal(0, session.TotalChangesUploaded);
         }
 
