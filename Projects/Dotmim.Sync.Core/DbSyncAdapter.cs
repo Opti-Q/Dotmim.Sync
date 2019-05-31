@@ -80,8 +80,10 @@ namespace Dotmim.Sync
         public DbSyncAdapter(DmTable tableDescription)
         {
             this.TableDescription = tableDescription;
+            ColumnCache = tableDescription.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
         }
 
+        private Dictionary<string, DmColumn> ColumnCache { get; }
 
         /// <summary>
         /// Set command parameters value mapped to Row
@@ -91,20 +93,16 @@ namespace Dotmim.Sync
             foreach (DbParameter parameter in command.Parameters)
             {
                 // foreach parameter, check if we have a column 
-                if (!string.IsNullOrEmpty(parameter.SourceColumn))
+                if (!string.IsNullOrEmpty(parameter.SourceColumn) && ColumnCache.ContainsKey(parameter.SourceColumn))
                 {
-                    if (row.Table.Columns.Contains(parameter.SourceColumn))
-                    {
-                        object value = null;
-                        if (row.RowState == DmRowState.Deleted)
-                            value = row[parameter.SourceColumn, DmRowVersion.Original];
-                        else
-                            value = row[parameter.SourceColumn];
+                    object value = null;
+                    if (row.RowState == DmRowState.Deleted)
+                        value = row[parameter.SourceColumn, DmRowVersion.Original];
+                    else
+                        value = row[parameter.SourceColumn];
 
-                        DbManager.SetParameterValue(command, parameter.ParameterName, value);
-                    }
+                    DbManager.SetParameterValue(command, parameter, value);
                 }
-
             }
 
             // return value
