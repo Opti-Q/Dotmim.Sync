@@ -16,6 +16,10 @@ namespace Dotmim.Sync.Sqlite
         private SqliteObjectNames sqliteObjectNames;
         private SqliteDbMetadata sqliteDbMetadata;
 
+        private readonly Dictionary<CommandCacheKey, DbCommand> commandCache = new Dictionary<CommandCacheKey, DbCommand>();
+        private readonly DmColumn[] writableColumns;
+        private readonly DmColumn[] writablePrimaryKeyColumns;
+
         public override DbConnection Connection
         {
             get
@@ -41,6 +45,9 @@ namespace Dotmim.Sync.Sqlite
 
             this.sqliteObjectNames = new SqliteObjectNames(TableDescription);
             this.sqliteDbMetadata = new SqliteDbMetadata();
+
+            this.writableColumns = tableDescription.Columns.Where(c => !c.IsReadOnly).ToArray();
+            this.writablePrimaryKeyColumns = tableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly).ToArray();
         }
 
         public override bool IsPrimaryKeyViolation(Exception Error)
@@ -48,29 +55,86 @@ namespace Dotmim.Sync.Sqlite
             return false;
         }
 
+        private class CommandCacheKey
+        {
+            public DbCommandType CommandType { get; }
+            public string[] Additionals { get; }
+
+            public CommandCacheKey(DbCommandType commandType, IEnumerable<string> additionals)
+            {
+                CommandType = commandType;
+                Additionals = additionals?.ToArray() ?? new string[0];
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null)
+                    return false;
+
+                if (!(obj is CommandCacheKey k))
+                    return false;
+
+                if (!object.Equals(CommandType, k.CommandType))
+                    return false;
+                
+                if (!object.Equals(Additionals.Length, k.Additionals.Length))
+                    return false;
+
+                for (int i = 0; i < Additionals.Length; i++)
+                {
+                    if (!object.Equals(Additionals[i], k.Additionals[i]))
+                        return false;
+                }
+
+                return true;
+            }
+
+            public override int GetHashCode()
+            {
+                var c = CommandType.GetHashCode();
+                for (int i = 0; i < Additionals.Length; i++)
+                {
+                    c += Additionals[i].GetHashCode();
+                }
+
+                return c * 3;
+            }
+        }
+
         public override DbCommand GetCommand(DbCommandType commandType, IEnumerable<string> additionals = null)
         {
-            var command = this.Connection.CreateCommand();
-            string text;
+            var key = new CommandCacheKey(commandType, additionals);
+            if (!commandCache.TryGetValue(key, out var command))
+            {
+                command = this.Connection.CreateCommand();
+                string text;
 
-            if (additionals != null)
-                text = this.sqliteObjectNames.GetCommandName(commandType, additionals);
-            else
-                text = this.sqliteObjectNames.GetCommandName(commandType);
+                if (additionals != null)
+                    text = this.sqliteObjectNames.GetCommandName(commandType, additionals);
+                else
+                    text = this.sqliteObjectNames.GetCommandName(commandType);
 
-            // on Sqlite, everything is text :)
-            command.CommandType = CommandType.Text;
-            command.CommandText = text;
-            command.Connection = Connection;
+                // on Sqlite, everything is text :)
+                command.CommandType = CommandType.Text;
+                command.CommandText = text;
+                command.Connection = Connection;
 
-            if (Transaction != null)
-                command.Transaction = Transaction;
+                if (Transaction != null)
+                    command.Transaction = Transaction;
+
+                // add command so it can be reused
+                commandCache.Add(key, command);
+            }
 
             return command;
         }
 
         public override void SetCommandParameters(DbCommandType commandType, DbCommand command)
         {
+            // if parameters are already set, then 
+            if (command.Parameters.Count != 0)
+                return;
+
             switch (commandType)
             {
                 case DbCommandType.SelectChanges:
@@ -103,6 +167,8 @@ namespace Dotmim.Sync.Sqlite
                 default:
                     break;
             }
+            // in case we set parameters, we prepare the command so it can be reused more efficiently
+            command.Prepare();
         }
 
         private void SetResetParameters(DbCommand command)
@@ -125,7 +191,7 @@ namespace Dotmim.Sync.Sqlite
         {
             DbParameter p;
 
-            foreach (DmColumn column in this.TableDescription.Columns.Where(c => !c.IsReadOnly))
+            foreach (DmColumn column in this.writableColumns)
             {
                 ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
@@ -151,7 +217,7 @@ namespace Dotmim.Sync.Sqlite
         {
             DbParameter p;
 
-            foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
+            foreach (DmColumn column in this.writablePrimaryKeyColumns)
             {
                 ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
@@ -181,7 +247,7 @@ namespace Dotmim.Sync.Sqlite
         {
             DbParameter p;
 
-            foreach (DmColumn column in this.TableDescription.Columns.Where(c => !c.IsReadOnly))
+            foreach (DmColumn column in this.writableColumns)
             {
                 ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
@@ -196,7 +262,7 @@ namespace Dotmim.Sync.Sqlite
         {
             DbParameter p;
 
-            foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
+            foreach (DmColumn column in this.writablePrimaryKeyColumns)
             {
                 ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
@@ -236,7 +302,7 @@ namespace Dotmim.Sync.Sqlite
         {
             DbParameter p;
 
-            foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
+            foreach (DmColumn column in this.writablePrimaryKeyColumns)
             {
                 ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
@@ -261,7 +327,7 @@ namespace Dotmim.Sync.Sqlite
         {
             DbParameter p;
 
-            foreach (DmColumn column in this.TableDescription.PrimaryKey.Columns.Where(c => !c.IsReadOnly))
+            foreach (DmColumn column in this.writablePrimaryKeyColumns)
             {
                 ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
