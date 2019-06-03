@@ -211,7 +211,10 @@ namespace Dotmim.Sync
                 Parameters = this.Parameters,
 
                 // set sync type (Normal, Reinitialize, ReinitializeWithUpload)
-                SyncType = syncType
+                SyncType = syncType,
+
+                // set the scopename
+                ScopeName = this.Configuration.ScopeName
             };
 
             this.SessionState = SyncSessionState.Synchronizing;
