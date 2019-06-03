@@ -432,8 +432,6 @@ namespace Dotmim.Sync
         internal async Task<(BatchInfo, ChangesSelected)> EnumerateChangesInBatchesInternal
             (SyncContext context, ScopeInfo scopeInfo, int downloadBatchSizeInKB, DmSet configTables, string batchDirectory, ConflictResolutionPolicy policy, ICollection<FilterClause> filters)
         {
-
-            DmTable dmTable = null;
             // memory size total
             double memorySizeFromDmRows = 0L;
 
@@ -525,7 +523,7 @@ namespace Dotmim.Sync
                                     throw new Exception(exc);
                                 }
 
-                                dmTable = BuildChangesTable(tableDescription.TableName, configTables);
+                                var dmTable = BuildChangesTable(tableDescription.TableName, configTables);
 
                                 try
                                 {
@@ -573,7 +571,7 @@ namespace Dotmim.Sync
                                     using (var dataReader = selectIncrementalChangesCommand.ExecuteReader())
                                     {
                                         var columnCache = dmTable.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
-
+                                        
                                         while (dataReader.Read())
                                         {
                                             DmRow dmRow = CreateRowFromReader(dataReader, dmTable, columnCache);
@@ -645,6 +643,9 @@ namespace Dotmim.Sync
                                                 dmTable = dmTable.Clone();
                                                 this.AddTrackingColumns<int>(dmTable, "sync_row_is_tombstone");
 
+                                                // re-initialize column cache, as column instances are always directly linked to their parent column
+                                                columnCache = dmTable.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
+                                                
                                                 // Init the row memory size
                                                 memorySizeFromDmRows = 0L;
 
