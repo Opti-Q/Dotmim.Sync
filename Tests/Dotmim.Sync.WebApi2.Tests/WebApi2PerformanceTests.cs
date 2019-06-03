@@ -173,7 +173,7 @@ namespace Dotmim.Sync.Tests
             {
                 //SerializationFormat = SerializationFormat.Binary,
                 SerializationFormat = SerializationFormat.Json,
-                //DownloadBatchSizeInKB = 400,
+                DownloadBatchSizeInKB = 400,
             };
 
             serverProvider = new SqlSyncProvider(fixture.ServerConnectionString);
@@ -215,6 +215,7 @@ namespace Dotmim.Sync.Tests
             sw.Start();
 
             // Act
+            agent.Configuration.DownloadBatchSizeInKB = 400; // no batching
             var session = await agent.SynchronizeAsync();
 
             sw.Stop();
