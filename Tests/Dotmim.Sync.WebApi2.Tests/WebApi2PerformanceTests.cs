@@ -45,8 +45,8 @@ namespace Dotmim.Sync.Tests
 
         public string datas =
         $@"
-            INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) VALUES (newid(), 'Titre 3', 'Description 3', 1, 0, CAST('2016-07-29T16:36:41.733' AS DateTime), NULL, 1)
-            INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) VALUES (newid(), 'Titre 4', 'Description 4', 1, 0, CAST('2016-07-29T16:36:41.733' AS DateTime), NULL, 1)
+            INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) VALUES (newid(), 'Titre 3', ' ', 1, 0, CAST('2016-07-29T16:36:41.733' AS DateTime), NULL, 1)
+            INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) VALUES (newid(), 'Titre 4 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.', 'Description Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.', 1, 0, CAST('2016-07-29T16:36:41.733' AS DateTime), NULL, 1)
             INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) VALUES (newid(), 'Titre Client 1', 'Description Client 1', 1, 0, CAST('2016-07-29T17:26:20.720' AS DateTime), NULL, 1)
             INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) VALUES (newid(), 'Titre 6', 'Description 6', 1, 0, CAST('2016-07-29T16:36:41.733' AS DateTime), NULL, 1)
             INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) VALUES (newid(), 'Titre 7', 'Description 7', 1, 0, CAST('2016-07-29T16:36:41.733' AS DateTime), NULL, 10)
@@ -156,6 +156,7 @@ namespace Dotmim.Sync.Tests
         SqlSyncProvider serverProvider;
         SqliteSyncProvider clientProvider;
         SqliteSyncHttpLoadFixture fixture;
+        private readonly ITestOutputHelper output;
         WebProxyServerProvider proxyServerProvider;
         WebProxyClientProvider proxyClientProvider;
         SyncAgent agent;
@@ -163,13 +164,15 @@ namespace Dotmim.Sync.Tests
         private IDisposable webApp;
         private string batchDir;
 
-        public SqliteSyncHttpLoadTests(SqliteSyncHttpLoadFixture fixture)
+        public SqliteSyncHttpLoadTests(SqliteSyncHttpLoadFixture fixture, ITestOutputHelper output)
         {
             this.fixture = fixture;
+            this.output = output;
             this.batchDir = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString("N"));
 
             configurationProvider = () => new SyncConfiguration(fixture.Tables)
             {
+                //SerializationFormat = SerializationFormat.Binary,
                 SerializationFormat = SerializationFormat.Json,
                 DownloadBatchSizeInKB = 400,
             };
@@ -207,12 +210,24 @@ namespace Dotmim.Sync.Tests
         [Fact, TestPriority(1)]
         public async Task LoadLotsOfRowsFromServer()
         {
+            var expectedCount = 50 * fixture.Multiplier;
+
+            var sw = new Stopwatch();
+            sw.Start();
+
             // Act
+            agent.Configuration.DownloadBatchSizeInKB = 400; // no batching
             var session = await agent.SynchronizeAsync();
-        
+
+            sw.Stop();
+
+            this.output.WriteLine($"Synchronized {session.TotalChangesDownloaded} rows in {sw.Elapsed}");
+
+            var onp = new ObjectNameParser();
+            SqliteSyncAdapter a;
 
             // Assert
-            Assert.Equal(50 * fixture.Multiplier, session.TotalChangesDownloaded);
+            Assert.Equal(expectedCount, session.TotalChangesDownloaded);
             Assert.Equal(0, session.TotalChangesUploaded);
         }
 

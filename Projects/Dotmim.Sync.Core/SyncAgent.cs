@@ -211,7 +211,10 @@ namespace Dotmim.Sync
                 Parameters = this.Parameters,
 
                 // set sync type (Normal, Reinitialize, ReinitializeWithUpload)
-                SyncType = syncType
+                SyncType = syncType,
+
+                // set the scopename
+                ScopeName = this.Configuration.ScopeName
             };
 
             this.SessionState = SyncSessionState.Synchronizing;
@@ -226,6 +229,7 @@ namespace Dotmim.Sync
             long lastSyncTS = 0L;
             bool isNew = true;
             string batchDirectory = null;
+            int batchSizeInKb = this.Configuration.DownloadBatchSizeInKB;
 
             try
             {
@@ -411,7 +415,7 @@ namespace Dotmim.Sync
                         {
                             ScopeInfo = scope,
                             Schema = this.Configuration.Schema,
-                            DownloadBatchSizeInKB = this.Configuration.DownloadBatchSizeInKB,
+                            DownloadBatchSizeInKB = batchSizeInKb,
                             BatchDirectory = batchDirectory,//this.Configuration.BatchDirectory,
                             Policy = clientPolicy,
                             Filters = this.Configuration.Filters,
@@ -513,7 +517,7 @@ namespace Dotmim.Sync
                         {
                             ScopeInfo = scope,
                             Schema = this.Configuration.Schema,
-                            DownloadBatchSizeInKB = this.Configuration.DownloadBatchSizeInKB,
+                            DownloadBatchSizeInKB = batchSizeInKb,
                             BatchDirectory = batchDirectory,// this.Configuration.BatchDirectory,
                             Policy = serverPolicy,
                             Filters = this.Configuration.Filters,

@@ -52,12 +52,11 @@ namespace Dotmim.Sync
                         if (!needToCreateScopeInfoTable)
                         {
                             // get all scopes shared by all (identified by scopeName)
-                            var lstScopes = scopeInfoBuilder.GetAllScopes(message.ScopeName);
+                            var lstScopes = scopeInfoBuilder.GetAllScopes(message.ScopeName, message.ClientReferenceId);
 
                             // try to get the scopes from database
                             // could be two scopes if from server or a single scope if from client
                             scopes = lstScopes.Where(s => (s.IsLocal == true || (message.ClientReferenceId.HasValue && s.Id == message.ClientReferenceId.Value))).ToList();
-
                         }
 
                         // If no scope found, create it on the local provider

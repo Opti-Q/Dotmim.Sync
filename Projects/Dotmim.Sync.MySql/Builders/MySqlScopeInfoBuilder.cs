@@ -98,7 +98,7 @@ namespace Dotmim.Sync.MySql
         }
 
 
-        public List<ScopeInfo> GetAllScopes(string scopeName)
+        public List<ScopeInfo> GetAllScopes(string scopeName, Guid? clientScopeId)
         {
             var command = connection.CreateCommand();
             if (transaction != null)
@@ -121,13 +121,21 @@ namespace Dotmim.Sync.MySql
                            , scope_last_sync_timestamp
                            , scope_last_sync_duration
                     FROM  {scopeTableName.ObjectNameNormalized}
-                    WHERE sync_scope_name = @sync_scope_name";
+                    WHERE sync_scope_name = @sync_scope_name
+                        and (scope_is_local = 1 or sync_scope_id = @sync_scope_id)";
 
                 var p = command.CreateParameter();
                 p.ParameterName = "@sync_scope_name";
                 p.Value = scopeName;
                 p.DbType = DbType.String;
                 command.Parameters.Add(p);
+
+                var p2 = command.CreateParameter();
+                p2.ParameterName = "@sync_scope_id";
+                p2.Value = (object)clientScopeId ?? DBNull.Value;
+                p2.DbType = DbType.Guid;
+                command.Parameters.Add(p2);
+
 
                 using (DbDataReader reader = command.ExecuteReader())
                 {

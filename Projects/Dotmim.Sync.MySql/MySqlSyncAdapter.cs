@@ -53,7 +53,7 @@ namespace Dotmim.Sync.MySql
         }
 
 
-        public override DbCommand GetCommand(DbCommandType commandType, IEnumerable<string> additionals = null)
+        protected override DbCommand GetCommandOverride(DbCommandType commandType, IEnumerable<string> additionals = null)
         {
             var command = this.Connection.CreateCommand();
             string text;
@@ -83,7 +83,7 @@ namespace Dotmim.Sync.MySql
         }
 
 
-        public override void SetCommandParameters(DbCommandType commandType, DbCommand command)
+        protected override void SetCommandParameters(DbCommandType commandType, DbCommand command)
         {
             switch (commandType)
             {

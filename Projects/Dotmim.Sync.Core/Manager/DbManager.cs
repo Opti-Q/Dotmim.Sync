@@ -1,9 +1,6 @@
-﻿using Dotmim.Sync.Data;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data.Common;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 
 namespace Dotmim.Sync.Manager
@@ -31,19 +28,28 @@ namespace Dotmim.Sync.Manager
             if (command == null)
                 return null;
 
-            if (command.Parameters.Contains($"@{parameterName}"))
-                return command.Parameters[$"@{parameterName}"];
+            string p1 = $"@{parameterName}";
+            string p2 = $":{parameterName}";
+            string p3 = $"in{parameterName}";
 
-            if (command.Parameters.Contains($":{parameterName}"))
-                return command.Parameters[$":{parameterName}"];
+            for (int i = 0; i < command.Parameters.Count; i++)
+            {
+                var curr = command.Parameters[i];
 
-            if (command.Parameters.Contains($"in{parameterName}"))
-                return command.Parameters[$"in{parameterName}"];
+                if (curr.ParameterName == p1)
+                    return curr;
 
-            if (!command.Parameters.Contains(parameterName))
-                return null;
+                if (curr.ParameterName == p2)
+                    return curr;
 
-            return command.Parameters[parameterName];
+                if (curr.ParameterName == p3)
+                    return curr;
+
+                if (curr.ParameterName == parameterName)
+                    return curr;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -55,6 +61,14 @@ namespace Dotmim.Sync.Manager
             if (parameter == null)
                 return;
 
+            SetParameterValue(command, parameter, value);
+        }
+
+        /// <summary>
+        /// Set a parameter value
+        /// </summary>
+        public static void SetParameterValue(DbCommand command, DbParameter parameter, object value)
+        {
             parameter.Value = value == null ? DBNull.Value : value;
         }
 

@@ -10,7 +10,7 @@ namespace Dotmim.Sync.Builders
     {
         bool NeedToCreateScopeInfoTable();
         void CreateScopeInfoTable();
-        List<ScopeInfo> GetAllScopes(string scopeName);
+        List<ScopeInfo> GetAllScopes(string scopeName, Guid? clientScopeId);
         ScopeInfo InsertOrUpdateScopeInfo(ScopeInfo scopeInfo);
         long GetLocalTimestamp();
         void DropScopeInfoTable();
