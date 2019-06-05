@@ -178,7 +178,6 @@ namespace Dotmim.Sync.Web.Server
         /// </summary>
         public async Task<HttpResponseMessage> HandleRequestAsync(HttpRequestMessage httpRequest, HttpContext context, CancellationToken cancellationToken)
         {
-            var streamArray = await httpRequest.Content.ReadAsStreamAsync();
 
             SerializationFormat serializationFormat = SerializationFormat.Json;
             // Get the serialization format
@@ -195,8 +194,10 @@ namespace Dotmim.Sync.Web.Server
             try
             {
                 var serializer = BaseConverter<HttpMessage>.GetConverter(serializationFormat);
+                HttpMessage httpMessage;
 
-                var httpMessage = serializer.Deserialize(streamArray);
+                using(var streamArray = await httpRequest.Content.ReadAsStreamAsync())
+                    httpMessage = serializer.Deserialize(streamArray);
 
                 HttpMessage httpMessageResponse = null;
                 switch (httpMessage.Step)
