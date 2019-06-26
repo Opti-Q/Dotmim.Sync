@@ -701,7 +701,7 @@ namespace Dotmim.Sync.Tests
             }
 
             // Since we move to server side, it's server to handle errors
-            serverProvider.ApplyChangedFailed += (s, args) =>
+            proxyServerProvider.ApplyChangedFailed += (s, args) =>
             {
                 args.Action = ConflictAction.ClientWins;
             };
@@ -709,11 +709,12 @@ namespace Dotmim.Sync.Tests
 
             SyncContext session2 = null;
             await Assert.RaisesAsync<ApplyChangeFailedEventArgs>(
-                h => serverProvider.ApplyChangedFailed += h,
-                h => serverProvider.ApplyChangedFailed -= h, async () =>
+                h => proxyServerProvider.ApplyChangedFailed += h,
+                h => proxyServerProvider.ApplyChangedFailed -= h, async () =>
                 {
                     session2 = await agent.SynchronizeAsync();
                 });
+            
 
             // check statistics
             Assert.Equal(0, session2.TotalChangesDownloaded);

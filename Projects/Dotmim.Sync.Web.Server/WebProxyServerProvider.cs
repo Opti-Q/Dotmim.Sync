@@ -44,22 +44,86 @@ namespace Dotmim.Sync.Web.Server
         /// </summary>
         public Boolean IsRegisterAsSingleton { get; set; }
 
-        public event EventHandler<ProgressEventArgs> SyncProgress;
-        public event EventHandler<ApplyChangeFailedEventArgs> ApplyChangedFailed;
-        public event EventHandler<BeginSessionEventArgs> BeginSession;
-        public event EventHandler<EndSessionEventArgs> EndSession;
-        public event EventHandler<ScopeEventArgs> ScopeLoading;
-        public event EventHandler<ScopeEventArgs> ScopeSaved;
-        public event EventHandler<DatabaseApplyingEventArgs> DatabaseApplying;
-        public event EventHandler<DatabaseAppliedEventArgs> DatabaseApplied;
-        public event EventHandler<DatabaseTableApplyingEventArgs> DatabaseTableApplying;
-        public event EventHandler<DatabaseTableAppliedEventArgs> DatabaseTableApplied;
-        public event EventHandler<SchemaApplyingEventArgs> SchemaApplying;
-        public event EventHandler<SchemaAppliedEventArgs> SchemaApplied;
-        public event EventHandler<TableChangesSelectingEventArgs> TableChangesSelecting;
-        public event EventHandler<TableChangesSelectedEventArgs> TableChangesSelected;
-        public event EventHandler<TableChangesApplyingEventArgs> TableChangesApplying;
-        public event EventHandler<TableChangesAppliedEventArgs> TableChangesApplied;
+        public event EventHandler<ProgressEventArgs> SyncProgress
+        {
+            add => this.LocalProvider.SyncProgress += value;
+            remove => this.LocalProvider.SyncProgress -= value;
+        }
+        public event EventHandler<ApplyChangeFailedEventArgs> ApplyChangedFailed
+        {
+            add => this.LocalProvider.ApplyChangedFailed += value;
+            remove => this.LocalProvider.ApplyChangedFailed -= value;
+        }
+        public event EventHandler<BeginSessionEventArgs> BeginSession
+        {
+            add => this.LocalProvider.BeginSession += value;
+            remove => this.LocalProvider.BeginSession -= value;
+        }
+        public event EventHandler<EndSessionEventArgs> EndSession
+        {
+            add => this.LocalProvider.EndSession += value;
+            remove => this.LocalProvider.EndSession -= value;
+        }
+        public event EventHandler<ScopeEventArgs> ScopeLoading
+        {
+            add => this.LocalProvider.ScopeLoading += value;
+            remove => this.LocalProvider.ScopeLoading -= value;
+        }
+        public event EventHandler<ScopeEventArgs> ScopeSaved
+        {
+            add => this.LocalProvider.ScopeSaved += value;
+            remove => this.LocalProvider.ScopeSaved -= value;
+        }
+        public event EventHandler<DatabaseApplyingEventArgs> DatabaseApplying
+        {
+            add => this.LocalProvider.DatabaseApplying += value;
+            remove => this.LocalProvider.DatabaseApplying -= value;
+        }
+        public event EventHandler<DatabaseAppliedEventArgs> DatabaseApplied
+        {
+            add => this.LocalProvider.DatabaseApplied += value;
+            remove => this.LocalProvider.DatabaseApplied -= value;
+        }
+        public event EventHandler<DatabaseTableApplyingEventArgs> DatabaseTableApplying
+        {
+            add => this.LocalProvider.DatabaseTableApplying += value;
+            remove => this.LocalProvider.DatabaseTableApplying -= value;
+        }
+        public event EventHandler<DatabaseTableAppliedEventArgs> DatabaseTableApplied
+        {
+            add => this.LocalProvider.DatabaseTableApplied += value;
+            remove => this.LocalProvider.DatabaseTableApplied -= value;
+        }
+        public event EventHandler<SchemaApplyingEventArgs> SchemaApplying
+        {
+            add => this.LocalProvider.SchemaApplying += value;
+            remove => this.LocalProvider.SchemaApplying -= value;
+        }
+        public event EventHandler<SchemaAppliedEventArgs> SchemaApplied
+        {
+            add => this.LocalProvider.SchemaApplied += value;
+            remove => this.LocalProvider.SchemaApplied -= value;
+        }
+        public event EventHandler<TableChangesSelectingEventArgs> TableChangesSelecting
+        {
+            add => this.LocalProvider.TableChangesSelecting += value;
+            remove => this.LocalProvider.TableChangesSelecting -= value;
+        }
+        public event EventHandler<TableChangesSelectedEventArgs> TableChangesSelected
+        {
+            add => this.LocalProvider.TableChangesSelected += value;
+            remove => this.LocalProvider.TableChangesSelected -= value;
+        }
+        public event EventHandler<TableChangesApplyingEventArgs> TableChangesApplying
+        {
+            add => this.LocalProvider.TableChangesApplying += value;
+            remove => this.LocalProvider.TableChangesApplying -= value;
+        }
+        public event EventHandler<TableChangesAppliedEventArgs> TableChangesApplied
+        {
+            add => this.LocalProvider.TableChangesApplied += value;
+            remove => this.LocalProvider.TableChangesApplied -= value;
+        }
 
         /// <summary>
         /// Use this constructor when you are on the Remote Side, only
