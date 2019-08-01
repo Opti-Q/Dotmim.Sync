@@ -112,7 +112,7 @@ namespace Dotmim.Sync.Tests
 
         public SqliteSyncHttpLoadFixture()
         {
-            baseAddress = "http://localhost:9902";
+            baseAddress = "http://localhost:9903";
 
             var builder = new SqliteConnectionStringBuilder { DataSource = ClientSqliteFilePath };
             this.ClientSqliteConnectionString = builder.ConnectionString;

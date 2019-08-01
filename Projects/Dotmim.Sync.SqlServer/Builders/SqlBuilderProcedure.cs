@@ -448,6 +448,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             string str6 = SqlManagementUtils.JoinTwoTablesOnClause(this.tableDescription.PrimaryKey.Columns, "[changes]", "[side]");
 
             StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("-- #1 DEFINE TEMP TABLE");
             stringBuilder.AppendLine("-- use a temp table to store the list of PKs that successfully got updated/inserted");
             stringBuilder.Append("declare @changed TABLE (");
             foreach (var c in this.tableDescription.PrimaryKey.Columns)
@@ -461,6 +462,8 @@ namespace Dotmim.Sync.SqlServer.Builders
 
                 stringBuilder.Append($"{cc.FullQuotedString} {quotedColumnType}, ");
             }
+            // stores the action (INSERT, UPDATE, DELETE) that happened during this MERGE statement
+            stringBuilder.Append("[Action] nvarchar(10), ");
             stringBuilder.Append(" PRIMARY KEY (");
             for (int i = 0; i < this.tableDescription.PrimaryKey.Columns.Length; i++)
             {
@@ -480,6 +483,7 @@ namespace Dotmim.Sync.SqlServer.Builders
                 stringBuilder.AppendLine();
             }
 
+            stringBuilder.AppendLine("-- #2 INSERT AND UPDATE THE ROWS");
             stringBuilder.AppendLine("-- update/insert into the base table");
             stringBuilder.AppendLine($"MERGE {tableName.FullQuotedString} AS base USING");
             stringBuilder.AppendLine("\t-- join done here against the side table to get the local timestamp for concurrency check\n");
@@ -506,8 +510,6 @@ namespace Dotmim.Sync.SqlServer.Builders
             stringBuilder.AppendLine($"\t{str4}");
             stringBuilder.AppendLine($"\t) AS changes ON {str5}");
             stringBuilder.AppendLine();
-            stringBuilder.AppendLine("-- Si la ligne n'existe pas en local et qu'elle a été créé avant le timestamp de référence");
-            stringBuilder.Append("WHEN NOT MATCHED BY TARGET AND (changes.[timestamp] <= @sync_min_timestamp OR changes.[timestamp] IS NULL) THEN");
 
             StringBuilder stringBuilderArguments = new StringBuilder();
             StringBuilder stringBuilderParameters = new StringBuilder();
@@ -520,11 +522,47 @@ namespace Dotmim.Sync.SqlServer.Builders
                 stringBuilderParameters.Append(string.Concat(empty, $"changes.{columnName.FullQuotedString}"));
                 empty = ", ";
             }
+
+            // THE UPDATE PART 
+            // BUT ONLY IF THE TABLE HAS MUTABLE COLUMNS!!
+            if (this.tableDescription.MutableColumnsAndNotAutoInc.Any())
+            {
+                stringBuilder.AppendLine("-- UPDATE: ");
+                stringBuilder.AppendLine("-- The UPDATES that can happen, in case the client already sent the INSERT to the server");
+                stringBuilder.AppendLine("-- but crashed before storing the \"scope_last_sync_timestamp\"");
+                stringBuilder.AppendLine("-- => in that case, if there was a local UPDATE, the client would - although an update happened locally - send the row as INSERT to the server. ");
+                stringBuilder.AppendLine("-- ... the server would then reject this as SYNC CONFLICT because the original row already exists on the server");
+                stringBuilder.AppendLine("-- End result: The latest changed performed by the local update NEVER reach the server!!");
+                stringBuilder.AppendLine("WHEN MATCHED AND ([changes].[update_scope_id] = @sync_scope_id OR [changes].[timestamp] <= @sync_min_timestamp) THEN");
+
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine($"\tUPDATE SET");
+
+                string strSeparator = "";
+                foreach (DmColumn mutableColumn in this.tableDescription.MutableColumnsAndNotAutoInc)
+                {
+                    ObjectNameParser quotedColumn = ObjectNameParser.Create(mutableColumn.ColumnName);
+                    stringBuilder.AppendLine($"\t{strSeparator}{quotedColumn.FullQuotedString} = [changes].{quotedColumn.FullQuotedString}");
+                    strSeparator = ", ";
+                }
+                stringBuilder.AppendLine();
+            }
+
+            // THE INSERT PART
+            stringBuilder.AppendLine("-- INSERT: ");
+            stringBuilder.AppendLine("-- If the row does not exist locally and was created before the reference timestamp");
+            stringBuilder.Append("WHEN NOT MATCHED BY TARGET AND (changes.[timestamp] <= @sync_min_timestamp OR changes.[timestamp] IS NULL) THEN");
+            
             stringBuilder.AppendLine();
             stringBuilder.AppendLine($"\tINSERT");
             stringBuilder.AppendLine($"\t({stringBuilderArguments.ToString()})");
             stringBuilder.AppendLine($"\tVALUES ({stringBuilderParameters.ToString()})");
-            stringBuilder.Append($"\tOUTPUT ");
+
+
+
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("-- STORE IDs and the action (INSERT/UPDATE) of all inserted/updated rows for conflict detection and updating of the tracking tables");
+            stringBuilder.Append($"OUTPUT ");
             for (int i = 0; i < this.tableDescription.PrimaryKey.Columns.Length; i++)
             {
                 var cc = ObjectNameParser.Create(this.tableDescription.PrimaryKey.Columns[i].ColumnName);
@@ -532,9 +570,13 @@ namespace Dotmim.Sync.SqlServer.Builders
                 if (i < this.tableDescription.PrimaryKey.Columns.Length - 1)
                     stringBuilder.Append(", ");
                 else
+                {
+                    stringBuilder.Append(", $action");
                     stringBuilder.AppendLine();
+                }
             }
             stringBuilder.AppendLine($"\tINTO @changed; -- populates the temp table with successful PKs");
+            stringBuilder.AppendLine();
             stringBuilder.AppendLine();
 
             if (this.tableDescription.HasAutoIncrementColumns)
@@ -544,6 +586,32 @@ namespace Dotmim.Sync.SqlServer.Builders
                 stringBuilder.AppendLine();
             }
 
+            // UPDATE THE TRACKING TABLE FOR UPDATES
+            stringBuilder.AppendLine("-- #3 UPDATE tracking table for UPDATES");
+            stringBuilder.AppendLine("-- Since the update trigger is passed, we update the tracking table to reflect the real scope updater");
+            stringBuilder.AppendLine("UPDATE side SET");
+            stringBuilder.AppendLine("\tupdate_scope_id = @sync_scope_id,");
+            stringBuilder.AppendLine("\tupdate_timestamp = changes.update_timestamp");
+            stringBuilder.AppendLine($"FROM {trackingName.FullQuotedString} side");
+            stringBuilder.AppendLine("JOIN (");
+            stringBuilder.Append("\tSELECT ");
+            for (int i = 0; i < this.tableDescription.PrimaryKey.Columns.Length; i++)
+            {
+                var cc = ObjectNameParser.Create(this.tableDescription.PrimaryKey.Columns[i].ColumnName);
+                stringBuilder.Append($"p.{cc.FullQuotedString}, ");
+            }
+            stringBuilder.AppendLine(" p.update_timestamp, p.create_timestamp ");
+            stringBuilder.AppendLine("\tFROM @changed t");
+            stringBuilder.AppendLine("\tJOIN @changeTable p ON ");
+            stringBuilder.AppendLine($"\t{str4}");
+            stringBuilder.AppendLine("\t where [t].[Action] = 'UPDATE'");
+            stringBuilder.AppendLine(") AS [changes] ON ");
+            stringBuilder.AppendLine($"\t{str6}");
+            stringBuilder.AppendLine();
+
+
+            // UPDATE THE TRACKING TABLE FOR INSERTS
+            stringBuilder.AppendLine("-- #4 UPDATE tracking table for INSERTS");
             stringBuilder.AppendLine("-- Since the insert trigger is passed, we update the tracking table to reflect the real scope inserter");
             stringBuilder.AppendLine("UPDATE side SET");
             stringBuilder.AppendLine("\tupdate_scope_id = @sync_scope_id,");
@@ -558,13 +626,17 @@ namespace Dotmim.Sync.SqlServer.Builders
                 var cc = ObjectNameParser.Create(this.tableDescription.PrimaryKey.Columns[i].ColumnName);
                 stringBuilder.Append($"p.{cc.FullQuotedString}, ");
             }
-
             stringBuilder.AppendLine(" p.update_timestamp, p.create_timestamp ");
             stringBuilder.AppendLine("\tFROM @changed t");
             stringBuilder.AppendLine("\tJOIN @changeTable p ON ");
-            stringBuilder.Append(str4);
+            stringBuilder.AppendLine($"\t{str4}");
+            stringBuilder.AppendLine("\t where [t].[Action] = 'INSERT'");
             stringBuilder.AppendLine(") AS [changes] ON ");
             stringBuilder.AppendLine(str6);
+            stringBuilder.AppendLine();
+
+            // SELECT ALL CONFLICTS
+            stringBuilder.AppendLine("-- #5 RETURN IDs OF ALL ROWS THAT WERE NOT INSERTED/UPDATED!");
             stringBuilder.Append(BulkSelectUnsuccessfulRows());
 
 
