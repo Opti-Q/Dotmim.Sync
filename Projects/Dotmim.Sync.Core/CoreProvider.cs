@@ -136,7 +136,7 @@ namespace Dotmim.Sync
                     break;
                 case SyncStage.ScopeSaved:
                     props.Add("ScopeId", (args as ScopeEventArgs).ScopeInfo.Id.ToString());
-                    this.TryRaiseProgressEvent(SyncStage.ScopeLoading, $"Scope saved", props);
+                    this.TryRaiseProgressEvent(SyncStage.ScopeSaved, $"Scope saved", props);
                     break;
                 case SyncStage.SchemaApplying:
                     this.TryRaiseProgressEvent(SyncStage.SchemaApplying, $"Applying configuration");
