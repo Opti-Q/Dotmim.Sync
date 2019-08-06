@@ -807,7 +807,7 @@ namespace Dotmim.Sync.Tests
         }
         
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(13)]
-        public async Task InsertAndUpdateOnClient_ValuesOnServer(SyncConfiguration conf)
+        public async Task InsertAndUpdateOnClient_DataIsSentToServer(SyncConfiguration conf)
         {
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
@@ -881,7 +881,7 @@ namespace Dotmim.Sync.Tests
         }
 
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(14)]
-        public async Task InsertFromClient_WhenConnectionInterrupted_ThenUpdatedOnClientAndRetried_UpdateNotSentToServer(SyncConfiguration conf)
+        public async Task InsertFromClient_WhenConnectionInterrupted_ThenUpdatedOnClientAndRetried_UpdateIsSentToServer(SyncConfiguration conf)
         {
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
@@ -977,7 +977,183 @@ namespace Dotmim.Sync.Tests
             Assert.Equal(0, session1.TotalSyncErrors);
         }
 
+        [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(15)]
+        public async Task InsertFromServer_ThenUpdatedOnServer_UpdateIsSentToClient(SyncConfiguration conf)
+        {
+            conf.Add(fixture.Tables);
+            configurationProvider = () => conf;
+            // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
+            await agent.SynchronizeAsync();
 
+            Guid newId = Guid.NewGuid();
+
+            var insertRowScript =
+                $@"INSERT INTO [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) 
+                VALUES (@id, 'Insert One Row in Sqlite client', 'Description Insert One Row', 1, 0, getutcdate(), NULL, 1)";
+
+            int nbRowsInserted = 0;
+            using (var sqlConnection = new SqlConnection(fixture.ServerConnectionString))
+            {
+                using (var sqlCmd = new SqlCommand(insertRowScript, sqlConnection))
+                {
+                    sqlCmd.Parameters.AddWithValue("@id", newId);
+
+                    sqlConnection.Open();
+                    nbRowsInserted = sqlCmd.ExecuteNonQuery();
+                    sqlConnection.Close();
+                }
+            }
+            if (nbRowsInserted < 0)
+                throw new Exception("Row not inserted");
+
+            // throw exception, when server scope is saved
+            var scopeSaved = new EventHandler<ScopeEventArgs>((sen, arg) =>
+            {
+                throw new InvalidOperationException("Could not obtain lock");
+            });
+
+            SyncException exception = null;
+            try
+            {
+                serverProvider.ScopeSaved += scopeSaved;
+                await agent.SynchronizeAsync();
+            }
+            catch (SyncException x)
+            {
+                exception = x;
+                serverProvider.ScopeSaved -= scopeSaved;
+            }
+
+            // now the local change was actually INSERTED on the client, 
+            // but as the sync process was never completed, we do not know on the server, that we actually already received the data
+            Assert.NotNull(exception); // exception is expected!
+
+            // next.. we do an update
+            var localDescription = "A local update not on the client yet!";
+            var updateRowScript =
+                $@"UPDATE [ServiceTickets] set [Description] = '{localDescription}' where ServiceTicketID = @id";
+
+            using (var sqlConnection = new SqlConnection(fixture.ServerConnectionString))
+            {
+                using (var sqlCmd = new SqlCommand(updateRowScript, sqlConnection))
+                {
+                    sqlCmd.Parameters.AddWithValue("@id", newId);
+
+                    sqlConnection.Open();
+                    nbRowsInserted = sqlCmd.ExecuteNonQuery();
+                    sqlConnection.Close();
+                }
+            }
+            if (nbRowsInserted < 0)
+                throw new Exception("Row not updated");
+
+
+            // Act
+            var session1 = await agent.SynchronizeAsync();
+
+            // Assert
+            // Now we check, if the update of the local row was actually applied on the server!
+            var selectOnServerScript = "Select Description from ServiceTickets where ServiceTicketID = @id";
+            using (var sqlConnection = new SqliteConnection(fixture.ClientSqliteConnectionString))
+            {
+                using (var sqlCmd = new SqliteCommand(selectOnServerScript, sqlConnection))
+                {
+                    sqlCmd.Parameters.AddWithValue("@id", newId);
+                    sqlConnection.Open();
+                    var result = sqlCmd.ExecuteScalar();
+                    var description = (string)result;
+
+                    Assert.Equal(localDescription, description);// "server update was NOT sent to the client!!"
+
+                    sqlConnection.Close();
+                }
+            }
+
+
+            Assert.Equal(1, session1.TotalChangesDownloaded);
+            Assert.Equal(0, session1.TotalChangesUploaded);
+            Assert.Equal(1, session1.TotalSyncConflicts);
+            Assert.Equal(0, session1.TotalSyncErrors);
+        }
+
+        [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(16)]
+        public async Task InsertAndUpdateOnServer_DataIsSyncedToClient(SyncConfiguration conf)
+        {
+            conf.Add(fixture.Tables);
+            configurationProvider = () => conf;
+            // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
+            await agent.SynchronizeAsync();
+
+            Guid newId = Guid.NewGuid();
+
+            var insertRowScript =
+                $@"INSERT INTO [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) 
+                VALUES (@id, 'Insert One Row in Sqlite client', 'Description Insert One Row', 1, 0, getutcdate(), NULL, 1)";
+
+            int nbRowsInserted = 0;
+            using (var sqlConnection = new SqlConnection(fixture.ServerConnectionString))
+            {
+                using (var sqlCmd = new SqlCommand(insertRowScript, sqlConnection))
+                {
+                    sqlCmd.Parameters.AddWithValue("@id", newId);
+
+                    sqlConnection.Open();
+                    nbRowsInserted = sqlCmd.ExecuteNonQuery();
+                    sqlConnection.Close();
+                }
+            }
+            if (nbRowsInserted < 0)
+                throw new Exception("Row not inserted");
+
+            
+            // next.. we do an update
+            var localDescription = "Another server update not on the client yet!";
+            var updateRowScript =
+                $@"UPDATE [ServiceTickets] set [Description] = '{localDescription}' where ServiceTicketID = @id";
+
+            using (var sqlConnection = new SqlConnection(fixture.ServerConnectionString))
+            {
+                using (var sqlCmd = new SqlCommand(updateRowScript, sqlConnection))
+                {
+                    sqlCmd.Parameters.AddWithValue("@id", newId);
+
+                    sqlConnection.Open();
+                    nbRowsInserted = sqlCmd.ExecuteNonQuery();
+                    sqlConnection.Close();
+                }
+            }
+            if (nbRowsInserted < 0)
+                throw new Exception("Row not updated");
+
+
+            // Act
+            var session1 = await agent.SynchronizeAsync();
+
+            // Assert
+            // Now we check, if the update of the local row was actually applied on the server!
+            var selectOnServerScript = "Select Description from ServiceTickets where ServiceTicketID = @id";
+            using (var sqlConnection = new SqliteConnection(fixture.ClientSqliteConnectionString))
+            {
+                using (var sqlCmd = new SqliteCommand(selectOnServerScript, sqlConnection))
+                {
+                    sqlCmd.Parameters.AddWithValue("@id", newId);
+                    sqlConnection.Open();
+                    var result = sqlCmd.ExecuteScalar();
+                    var description = (string)result;
+
+                    Assert.Equal(localDescription, description);// "server update was NOT sent to the client!!"
+
+                    sqlConnection.Close();
+                }
+            }
+
+
+            Assert.Equal(1, session1.TotalChangesDownloaded);
+            Assert.Equal(0, session1.TotalChangesUploaded);
+            Assert.Equal(0, session1.TotalSyncConflicts);
+            Assert.Equal(0, session1.TotalSyncErrors);
+        }
+        
         public void Dispose()
         {
             proxyClientProvider?.Dispose();
