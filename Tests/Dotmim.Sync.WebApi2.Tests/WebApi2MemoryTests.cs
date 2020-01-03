@@ -226,7 +226,7 @@ namespace Dotmim.Sync.Tests
             var r1 = agent.SynchronizeAsync().Result;
 
             // insert rows on server
-            this.fixture.CreateData(100);
+            this.fixture.CreateData();
 
             // create new agent and providers
             var cp2 = new SqliteSyncProvider(fixture.ClientSqliteFilePath);
