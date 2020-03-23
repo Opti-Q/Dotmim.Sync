@@ -221,6 +221,7 @@ namespace Dotmim.Sync.Web.Server
         /// </summary>
         public async Task WriteExceptionAsync(HttpResponse httpResponse, Exception ex)
         {
+            LogException(ex);
             var webx = WebSyncException.GetWebSyncException(ex);
             var webXMessage = JsonConvert.SerializeObject(webx);
 
@@ -315,6 +316,7 @@ namespace Dotmim.Sync.Web.Server
         /// </summary>
         public Task<HttpResponseMessage> WriteExceptionAsync(Exception ex)
         {
+            LogException(ex);
             var webx = WebSyncException.GetWebSyncException(ex);
             var webXMessage = JsonConvert.SerializeObject(webx);
 
@@ -328,6 +330,9 @@ namespace Dotmim.Sync.Web.Server
 
 #endif
 
+        protected virtual void LogException(Exception exception)
+        {
+        }
 
         private async Task<HttpMessage> BeginSessionAsync(HttpMessage httpMessage)
         {
