@@ -85,10 +85,11 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine($"UPDATE {tableName.FullQuotedString}");
             stringBuilder.Append($"SET {SqliteManagementUtils.CommaSeparatedUpdateFromParameters(this.TableDescription)}");
             stringBuilder.Append($"WHERE {SqliteManagementUtils.WhereColumnAndParameters(this.TableDescription.PrimaryKey.Columns, "")}");
-            stringBuilder.AppendLine($" AND ((SELECT [timestamp] FROM {trackingName.QuotedObjectName} ");
-            stringBuilder.AppendLine($"  WHERE {SqliteManagementUtils.JoinTwoTablesOnClause(this.TableDescription.PrimaryKey.Columns, tableName.QuotedObjectName, trackingName.QuotedObjectName)}");
-            stringBuilder.AppendLine(" ) <= @sync_min_timestamp OR @sync_force_write = 1");
-            stringBuilder.AppendLine(");");
+            // sync conflict resolution does not make sense at all
+            //stringBuilder.AppendLine($" AND ((SELECT [timestamp] FROM {trackingName.QuotedObjectName} ");
+            //stringBuilder.AppendLine($"  WHERE {SqliteManagementUtils.JoinTwoTablesOnClause(this.TableDescription.PrimaryKey.Columns, tableName.QuotedObjectName, trackingName.QuotedObjectName)}");
+            //stringBuilder.AppendLine(" ) <= @sync_min_timestamp OR @sync_force_write = 1");
+            //stringBuilder.AppendLine(");");
             this.AddName(DbCommandType.UpdateRow, stringBuilder.ToString());
 
         }
@@ -171,10 +172,11 @@ namespace Dotmim.Sync.Sqlite
 
             stringBuilder.AppendLine($"DELETE FROM {tableName.FullQuotedString} ");
             stringBuilder.Append($"WHERE {SqliteManagementUtils.WhereColumnAndParameters(this.TableDescription.PrimaryKey.Columns, "")}");
-            stringBuilder.AppendLine($" AND ((SELECT [timestamp] FROM {trackingName.QuotedObjectName} ");
-            stringBuilder.AppendLine($"  WHERE {SqliteManagementUtils.JoinTwoTablesOnClause(this.TableDescription.PrimaryKey.Columns, tableName.QuotedObjectName, trackingName.QuotedObjectName)}");
-            stringBuilder.AppendLine(" ) <= @sync_min_timestamp OR @sync_force_write = 1");
-            stringBuilder.AppendLine(");");
+            // sync conflict resolution does not make sense at all
+            //stringBuilder.AppendLine($" AND ((SELECT [timestamp] FROM {trackingName.QuotedObjectName} ");
+            //stringBuilder.AppendLine($"  WHERE {SqliteManagementUtils.JoinTwoTablesOnClause(this.TableDescription.PrimaryKey.Columns, tableName.QuotedObjectName, trackingName.QuotedObjectName)}");
+            //stringBuilder.AppendLine(" ) <= @sync_min_timestamp OR @sync_force_write = 1");
+            //stringBuilder.AppendLine(");");
 
             this.AddName(DbCommandType.DeleteRow, stringBuilder.ToString());
         }
