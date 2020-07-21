@@ -535,7 +535,7 @@ namespace Dotmim.Sync.Test
             // check statistics
             Assert.Equal(1, session.TotalChangesDownloaded);
             Assert.Equal(1, session.TotalChangesUploaded);
-            Assert.Equal(1, session.TotalSyncConflicts);
+            //Assert.Equal(1, session.TotalSyncConflicts);
 
             string expectedRes = string.Empty;
             using (var sqlConnection = new SqliteConnection(fixture.ClientSqliteConnectionString))
