@@ -281,13 +281,14 @@ namespace Dotmim.Sync
                         SerializationFormat = this.Configuration.SerializationFormat
                     });
 
-                if (localScopes.Count != 1)
-                    throw new Exception("On Local provider, we should have only one scope info");
+                if (localScopes.Count > 2)
+                    throw new Exception("On Local provider, we should have at most two scope infos");
 
                 if (cancellationToken.IsCancellationRequested)
                     cancellationToken.ThrowIfCancellationRequested();
 
-                localScopeInfo = localScopes[0];
+                localScopeInfo = localScopes.Single(s => s.IsLocal);
+                var localServerScopeInfo = localScopes.SingleOrDefault(s => !s.IsLocal);
 
                 (context, serverScopes) = await this.RemoteProvider.EnsureScopesAsync(context,
                     new MessageEnsureScopes
@@ -304,9 +305,13 @@ namespace Dotmim.Sync
                 if (cancellationToken.IsCancellationRequested)
                     cancellationToken.ThrowIfCancellationRequested();
 
+                // on first sync, we do not (yet) have a server scope stored locally
                 serverScopeInfo = serverScopes.First(s => s.Id != localScopeInfo.Id);
                 localScopeReferenceInfo = serverScopes.First(s => s.Id == localScopeInfo.Id);
 
+                if (localServerScopeInfo != null)
+                    localScopeReferenceInfo.LastSyncTimestamp = localServerScopeInfo.LastSyncTimestamp;
+                
 
                 // ----------------------------------------
                 // 2) Build Configuration Object
@@ -574,18 +579,6 @@ namespace Dotmim.Sync
                 localScopeReferenceInfo.LastSyncDuration = duration.Ticks;
                 localScopeInfo.LastSyncDuration = duration.Ticks;
 
-                serverScopeInfo.IsLocal = true;
-                localScopeReferenceInfo.IsLocal = false;
-
-                context = await this.RemoteProvider.WriteScopesAsync(context,
-                        new MessageWriteScopes
-                        {
-                            ScopeInfoTableName = this.Configuration.ScopeInfoTableName,
-                            Scopes = new List<ScopeInfo> { serverScopeInfo, localScopeReferenceInfo },
-                            SerializationFormat = this.Configuration.SerializationFormat
-                        });
-
-
                 serverScopeInfo.IsLocal = false;
                 localScopeInfo.IsLocal = true;
 
@@ -599,6 +592,18 @@ namespace Dotmim.Sync
                             Scopes = new List<ScopeInfo> { localScopeInfo, serverScopeInfo },
                             SerializationFormat = this.Configuration.SerializationFormat
                         });
+
+                serverScopeInfo.IsLocal = true;
+                localScopeReferenceInfo.IsLocal = false;
+
+                context = await this.RemoteProvider.WriteScopesAsync(context,
+                        new MessageWriteScopes
+                        {
+                            ScopeInfoTableName = this.Configuration.ScopeInfoTableName,
+                            Scopes = new List<ScopeInfo> { serverScopeInfo, localScopeReferenceInfo },
+                            SerializationFormat = this.Configuration.SerializationFormat
+                        });
+
 
                 if (cancellationToken.IsCancellationRequested)
                     cancellationToken.ThrowIfCancellationRequested();

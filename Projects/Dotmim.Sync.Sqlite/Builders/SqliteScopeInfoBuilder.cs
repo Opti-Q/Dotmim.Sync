@@ -118,8 +118,7 @@ namespace Dotmim.Sync.Sqlite
                            , scope_last_sync_timestamp
                            , scope_last_sync_duration
                     FROM  {scopeTableName.ObjectNameNormalized}
-                    WHERE sync_scope_name = @sync_scope_name
-                        and (scope_is_local = 1 or sync_scope_id = @sync_scope_id)";
+                    WHERE sync_scope_name = @sync_scope_name";
 
                 var p = command.CreateParameter();
                 p.ParameterName = "@sync_scope_name";

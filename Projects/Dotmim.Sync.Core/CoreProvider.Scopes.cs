@@ -56,11 +56,12 @@ namespace Dotmim.Sync
 
                             // try to get the scopes from database
                             // could be two scopes if from server or a single scope if from client
-                            scopes = lstScopes.Where(s => (s.IsLocal == true || (message.ClientReferenceId.HasValue && s.Id == message.ClientReferenceId.Value))).ToList();
+                            //scopes = lstScopes.Where(s => (s.IsLocal == true || (message.ClientReferenceId.HasValue && s.Id == message.ClientReferenceId.Value))).ToList();
+                            scopes = lstScopes.ToList();
                         }
 
                         // If no scope found, create it on the local provider
-                        if (scopes == null || scopes.Count <= 0)
+                        if (scopes.Count <= 0)
                         {
                             scopes = new List<ScopeInfo>();
 
@@ -83,7 +84,7 @@ namespace Dotmim.Sync
                         }
 
                         // if we are not on the server, we have to check that we only have one scope
-                        if (!message.ClientReferenceId.HasValue && scopes.Count > 1)
+                        if (!message.ClientReferenceId.HasValue && scopes.Count > 2)
                             throw new InvalidOperationException("On Local provider, we should have only one scope info");
 
 

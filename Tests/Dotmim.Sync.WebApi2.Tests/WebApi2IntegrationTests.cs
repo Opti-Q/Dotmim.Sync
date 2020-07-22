@@ -1072,7 +1072,7 @@ namespace Dotmim.Sync.Tests
 
             Assert.Equal(1, session1.TotalChangesDownloaded);
             Assert.Equal(0, session1.TotalChangesUploaded);
-            Assert.Equal(1, session1.TotalSyncConflicts);
+            Assert.Equal(0, session1.TotalSyncConflicts); //no more unnecessary conflicts on client side
             Assert.Equal(0, session1.TotalSyncErrors);
         }
 
