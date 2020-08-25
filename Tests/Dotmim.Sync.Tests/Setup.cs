@@ -1,8 +1,9 @@
 ﻿using Dotmim.Sync.Tests.Core;
-using Dotmim.Sync.Tests.MySql;
-using Dotmim.Sync.Tests.SqlServer;
+using MySql.Data.MySqlClient;
 using System;
+using Microsoft.Data.SqlClient;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Configuration;
 
 namespace Dotmim.Sync.Tests
 {
@@ -11,45 +12,62 @@ namespace Dotmim.Sync.Tests
     /// </summary>
     public class Setup
     {
+        private static IConfigurationRoot configuration;
+
         static Setup()
         {
+            configuration = new ConfigurationBuilder()
+              .AddJsonFile("appsettings.json", false, true) 
+              .AddJsonFile("appsettings.local.json", true, true)
+              .Build();
+
         }
 
         /// <summary>
-        /// Returns the database server to be used in the untittests - note that this is the connection to appveyor SQL Server 2016 instance!
-        /// see: https://www.appveyor.com/docs/services-databases/#mysql
+        /// Returns the database connection string for Sql
         /// </summary>
         internal static string GetSqlDatabaseConnectionString(string dbName)
         {
-            // check if we are running localy on windows or linux
-            bool isWindowsRuntime = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            var cstring = string.Format(configuration.GetSection("ConnectionStrings")["SqlConnection"], dbName);
 
-            if (IsOnAppVeyor)
-                return $@"Server=(local)\SQL2016;Database={dbName};UID=sa;PWD=Password12!";
-            else if (IsOnAzureDev)
-                return $@"Data Source=localhost;Initial Catalog={dbName};User Id=SA;Password=Password12!";
-            else if (isWindowsRuntime)
-                return $@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog={dbName};Integrated Security=true;";
-            else
-                return $@"Data Source=localhost; Database={dbName}; User=sa; Password=Password12!";
+            var builder = new SqlConnectionStringBuilder(cstring);
+
+            if (IsOnAzureDev)
+            {
+                builder.IntegratedSecurity = false;
+                builder.DataSource = @"localhost";
+                builder.UserID = "sa";
+                builder.Password = "Password12!";
+            }
+
+            return builder.ToString();
+
         }
 
         /// <summary>
-        /// Returns the database server to be used in the untittests - note that this is the connection to appveyor MySQL 5.7 x64 instance!
-        /// see: https://www.appveyor.com/docs/services-databases/#mysql
+        /// Returns the database connection string for Azure Sql
+        /// </summary>
+        internal static string GetSqlAzureDatabaseConnectionString(string dbName) =>
+            string.Format(configuration.GetSection("ConnectionStrings")["AzureSqlConnection"], dbName);
+
+        /// <summary>
+        /// Returns the database connection string for MySql
         /// </summary>
         internal static string GetMySqlDatabaseConnectionString(string dbName)
         {
-            var cs = "";
-            if (IsOnAppVeyor)
-                cs = $@"Server=127.0.0.1; Port=3306; Database={dbName}; Uid=root; Pwd=Password12!";
-            else if (IsOnAzureDev)
-                cs = $@"Server=127.0.0.1; Port=3307; Database={dbName}; Uid=root; Pwd=Password12!";
-            else
-                cs = $@"Server=127.0.0.1; Port=3307; Database={dbName}; Uid=root; Pwd=Password12!";
+            var cstring = string.Format(configuration.GetSection("ConnectionStrings")["MySqlConnection"], dbName);
 
-            Console.WriteLine(cs);
-            return cs;
+            var builder = new MySqlConnectionStringBuilder(cstring);
+
+            if (IsOnAzureDev)
+            {
+                builder.Port = 3307;
+                builder.UserID = "root";
+                builder.Password = "Password12!";
+            }
+
+            var cn = builder.ToString();
+            return cn;
         }
 
         /// <summary>

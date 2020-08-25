@@ -1,5 +1,5 @@
 using Dotmim.Sync.Builders;
-using Dotmim.Sync.Data;
+
 using Dotmim.Sync.MySql.Builders;
 using MySql.Data.MySqlClient;
 using System;
@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Dotmim.Sync.MySql
 {
@@ -17,17 +18,14 @@ namespace Dotmim.Sync.MySql
     {
         private readonly ParserName tableName;
         private readonly ParserName trackingName;
-        private readonly DmTable tableDescription;
-        private readonly MySqlConnection connection;
-        private readonly MySqlTransaction transaction;
+        private readonly SyncTable tableDescription;
+        private readonly SyncSetup setup;
         private readonly MySqlDbMetadata mySqlDbMetadata;
 
         private static Dictionary<string, string> createdRelationNames = new Dictionary<string, string>();
 
         private static string GetRandomString()
-        {
-            return Path.GetRandomFileName().Replace(".", "").ToLowerInvariant();
-        }
+            => Path.GetRandomFileName().Replace(".", "").ToLowerInvariant();
 
         /// <summary>
         /// Ensure the relation name is correct to be created in MySql
@@ -46,40 +44,40 @@ namespace Dotmim.Sync.MySql
 
             return name;
         }
-        public MySqlBuilderTable(DmTable tableDescription, DbConnection connection, DbTransaction transaction = null)
+        public MySqlBuilderTable(SyncTable tableDescription, ParserName tableName, ParserName trackingName, SyncSetup setup)
         {
-
-            this.connection = connection as MySqlConnection;
-            this.transaction = transaction as MySqlTransaction;
             this.tableDescription = tableDescription;
-            (this.tableName, this.trackingName) = MySqlBuilder.GetParsers(this.tableDescription);
+            this.setup = setup;
+            this.tableName = tableName;
+            this.trackingName = trackingName;
             this.mySqlDbMetadata = new MySqlDbMetadata();
         }
 
 
-        private MySqlCommand BuildForeignKeyConstraintsCommand(DmRelation foreignKey)
+        private MySqlCommand BuildForeignKeyConstraintsCommand(SyncRelation constraint, DbConnection connection, DbTransaction transaction)
         {
-            var sqlCommand = new MySqlCommand();
+            var command = new MySqlCommand((MySqlConnection)connection, (MySqlTransaction)transaction);
 
-            var childTableName = ParserName.Parse(foreignKey.ChildTable, "`").Quoted().ToString();
-            var parentTableName = ParserName.Parse(foreignKey.ParentTable, "`").Quoted().ToString();
+            var tableName = ParserName.Parse(constraint.GetTable(), "`").Quoted().ToString();
+            var parentTableName = ParserName.Parse(constraint.GetParentTable(), "`").Quoted().ToString();
 
-            var relationName = NormalizeRelationName(foreignKey.RelationName);
+            var relationName = NormalizeRelationName(constraint.RelationName);
 
-            DmColumn[] foreignKeyColumns = foreignKey.ChildColumns;
-            DmColumn[] referencesColumns = foreignKey.ParentColumns;
+            var keyColumns = constraint.Keys;
+            var referencesColumns = constraint.ParentKeys;
 
             var stringBuilder = new StringBuilder();
+            stringBuilder.Append("SET FOREIGN_KEY_CHECKS=0;");
             stringBuilder.Append("ALTER TABLE ");
-            stringBuilder.AppendLine(childTableName);
+            stringBuilder.AppendLine(tableName);
             stringBuilder.Append("ADD CONSTRAINT ");
 
             stringBuilder.AppendLine($"`{relationName}`");
             stringBuilder.Append("FOREIGN KEY (");
             string empty = string.Empty;
-            foreach (var foreignKeyColumn in foreignKeyColumns)
+            foreach (var keyColumn in keyColumns)
             {
-                var foreignKeyColumnName = ParserName.Parse(foreignKeyColumn, "`").Quoted().ToString();
+                var foreignKeyColumnName = ParserName.Parse(keyColumn.ColumnName, "`").Quoted().ToString();
                 stringBuilder.Append($"{empty} {foreignKeyColumnName}");
                 empty = ", ";
             }
@@ -89,125 +87,56 @@ namespace Dotmim.Sync.MySql
             empty = string.Empty;
             foreach (var referencesColumn in referencesColumns)
             {
-                var referencesColumnName = ParserName.Parse(referencesColumn, "`").Quoted().ToString();
+                var referencesColumnName = ParserName.Parse(referencesColumn.ColumnName, "`").Quoted().ToString();
                 stringBuilder.Append($"{empty} {referencesColumnName}");
                 empty = ", ";
             }
-            stringBuilder.Append(" ) ");
-            sqlCommand.CommandText = stringBuilder.ToString();
+            stringBuilder.AppendLine(" );");
+            stringBuilder.AppendLine("SET FOREIGN_KEY_CHECKS=1;");
 
-            return sqlCommand;
+            command.CommandText = stringBuilder.ToString();
+
+            return command;
         }
 
-        public bool NeedToCreateForeignKeyConstraints(DmRelation foreignKey)
+        public async Task<bool> NeedToCreateForeignKeyConstraintsAsync(SyncRelation relation, DbConnection connection, DbTransaction transaction)
         {
-            string parentTable = foreignKey.ParentTable.TableName;
-            string parentSchema = foreignKey.ParentTable.Schema;
-            string parentFullName = string.IsNullOrEmpty(parentSchema) ? parentTable : $"{parentSchema}.{parentTable}";
+            string tableName = relation.GetTable().TableName;
 
-            var relationName = NormalizeRelationName(foreignKey.RelationName);
+            var relationName = NormalizeRelationName(relation.RelationName);
 
-            bool alreadyOpened = this.connection.State == ConnectionState.Open;
+            var relations = await MySqlManagementUtils.GetRelationsForTableAsync((MySqlConnection)connection, (MySqlTransaction)transaction, tableName).ConfigureAwait(false);
 
-            // Don't want foreign key on same table since it could be a problem on first 
-            // sync. We are not sure that parent row will be inserted in first position
-            if (string.Equals(parentTable, foreignKey.ChildTable.TableName, StringComparison.CurrentCultureIgnoreCase))
-                return false;
+            var foreignKeyExist = relations.Rows.Any(r =>
+               string.Equals(r["ForeignKey"].ToString(), relationName, SyncGlobalization.DataSourceStringComparison));
 
-            try
-            {
-                if (!alreadyOpened)
-                    this.connection.Open();
-
-                var dmTable = MySqlManagementUtils.RelationsForTable(this.connection, this.transaction, parentFullName);
-
-                var foreignKeyExist = dmTable.Rows.Any(r =>
-                   dmTable.IsEqual(r["ForeignKey"].ToString(), relationName));
-
-                return !foreignKeyExist;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error during checking foreign keys: {ex}");
-                throw;
-            }
-            finally
-            {
-                if (!alreadyOpened && this.connection.State != ConnectionState.Closed)
-                    this.connection.Close();
-            }
+            return !foreignKeyExist;
         }
 
-        public void CreateForeignKeyConstraints(DmRelation constraint)
+        public async Task CreateForeignKeyConstraintsAsync(SyncRelation constraint, DbConnection connection, DbTransaction transaction)
         {
-            bool alreadyOpened = this.connection.State == ConnectionState.Open;
-
-            try
+            using (var command = this.BuildForeignKeyConstraintsCommand(constraint, connection, transaction))
             {
-                if (!alreadyOpened)
-                    this.connection.Open();
-
-                using (var command = this.BuildForeignKeyConstraintsCommand(constraint))
-                {
-                    command.Connection = this.connection;
-
-                    if (this.transaction != null)
-                        command.Transaction = this.transaction;
-
-                    command.ExecuteNonQuery();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error during CreateForeignKeyConstraints : {ex}");
-                throw;
-
-            }
-            finally
-            {
-                if (!alreadyOpened && this.connection.State != ConnectionState.Closed)
-                    this.connection.Close();
-
+                await command.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
 
         }
 
-        public string CreateForeignKeyConstraintsScriptText(DmRelation constraint)
+
+
+        public Task CreatePrimaryKeyAsync(DbConnection connection, DbTransaction transaction) => Task.CompletedTask;
+
+
+        private MySqlCommand BuildTableCommand(DbConnection connection, DbTransaction transaction)
         {
-            var stringBuilder = new StringBuilder();
-            var relationName = NormalizeRelationName(constraint.RelationName);
-
-            var constraintName = $"Create Constraint {constraint.RelationName} between parent {constraint.ParentTable.TableName} and child {constraint.ChildTable.TableName}";
-            var constraintScript = this.BuildForeignKeyConstraintsCommand(constraint).CommandText;
-            stringBuilder.Append(MySqlBuilder.WrapScriptTextWithComments(constraintScript, constraintName));
-            stringBuilder.AppendLine();
-
-            return stringBuilder.ToString();
-        }
-
-        public void CreatePrimaryKey()
-        {
-            return;
-        }
-        public string CreatePrimaryKeyScriptText()
-        {
-            return string.Empty;
-        }
-
-
-        private MySqlCommand BuildTableCommand()
-        {
-            var command = new MySqlCommand();
-
             var stringBuilder = new StringBuilder($"CREATE TABLE IF NOT EXISTS {this.tableName.Quoted().ToString()} (");
             string empty = string.Empty;
             stringBuilder.AppendLine();
             foreach (var column in this.tableDescription.Columns)
             {
                 var columnName = ParserName.Parse(column, "`").Quoted().ToString();
-                var stringType = this.mySqlDbMetadata.TryGetOwnerDbTypeString(column.OriginalDbType, column.DbType, false, false, column.MaxLength, this.tableDescription.OriginalProvider, MySqlSyncProvider.ProviderType);
-                var stringPrecision = this.mySqlDbMetadata.TryGetOwnerDbTypePrecision(column.OriginalDbType, column.DbType, false, false, column.MaxLength, column.Precision, column.Scale, this.tableDescription.OriginalProvider, MySqlSyncProvider.ProviderType);
+                var stringType = this.mySqlDbMetadata.TryGetOwnerDbTypeString(column.OriginalDbType, column.GetDbType(), false, false, column.MaxLength, this.tableDescription.OriginalProvider, MySqlSyncProvider.ProviderType);
+                var stringPrecision = this.mySqlDbMetadata.TryGetOwnerDbTypePrecision(column.OriginalDbType, column.GetDbType(), false, false, column.MaxLength, column.Precision, column.Scale, this.tableDescription.OriginalProvider, MySqlSyncProvider.ProviderType);
                 var columnType = $"{stringType} {stringPrecision}";
 
                 var identity = string.Empty;
@@ -230,201 +159,69 @@ namespace Dotmim.Sync.MySql
                 empty = ",";
             }
 
-            if (this.tableDescription.MutableColumns.Any(mc => mc.IsAutoIncrement))
+            if (this.tableDescription.GetMutableColumns().Any(mc => mc.IsAutoIncrement))
                 stringBuilder.Append("\t, KEY (");
 
             empty = string.Empty;
-            foreach (var column in this.tableDescription.MutableColumns.Where(c => c.IsAutoIncrement))
+            foreach (var column in this.tableDescription.GetMutableColumns().Where(c => c.IsAutoIncrement))
             {
                 var columnName = ParserName.Parse(column, "`").Quoted().ToString();
                 stringBuilder.Append($"{empty} {columnName}");
                 empty = ",";
             }
 
-            if (this.tableDescription.MutableColumns.Any(mc => mc.IsAutoIncrement))
+            if (this.tableDescription.GetMutableColumns().Any(mc => mc.IsAutoIncrement))
                 stringBuilder.AppendLine(")");
 
             stringBuilder.Append("\t,PRIMARY KEY (");
 
             int i = 0;
             // It seems we need to specify the increment column in first place
-            foreach (var pkColumn in this.tableDescription.PrimaryKey.Columns.OrderByDescending(pk => pk.IsAutoIncrement))
+            foreach (var pkColumn in this.tableDescription.GetPrimaryKeysColumns().OrderByDescending(pk => pk.IsAutoIncrement))
             {
                 var columnName = ParserName.Parse(pkColumn, "`").Quoted().ToString();
 
                 stringBuilder.Append(columnName);
 
-                if (i < this.tableDescription.PrimaryKey.Columns.Length - 1)
+                if (i < this.tableDescription.PrimaryKeys.Count - 1)
                     stringBuilder.Append(", ");
                 i++;
             }
 
-            //for (int i = 0; i < this.tableDescription.PrimaryKey.Columns.Length; i++)
-            //{
-            //    DmColumn pkColumn = this.tableDescription.PrimaryKey.Columns[i];
-            //    var quotedColumnName = new ObjectNameParser(pkColumn.ColumnName., "`", "`").QuotedObjectName;
-
-            //    stringBuilder.Append(quotedColumnName);
-
-            //    if (i < this.tableDescription.PrimaryKey.Columns.Length - 1)
-            //        stringBuilder.Append(", ");
-            //}
             stringBuilder.Append(")");
             stringBuilder.Append(")");
-            return new MySqlCommand(stringBuilder.ToString());
+            return new MySqlCommand(stringBuilder.ToString(), (MySqlConnection)connection, (MySqlTransaction)transaction);
         }
 
-        public void CreateTable()
+        public async Task CreateTableAsync(DbConnection connection, DbTransaction transaction)
         {
-            bool alreadyOpened = this.connection.State == ConnectionState.Open;
-
-            try
+            using (var command = this.BuildTableCommand(connection, transaction))
             {
-                using (var command = this.BuildTableCommand())
-                {
-                    if (!alreadyOpened)
-                        this.connection.Open();
-
-                    if (this.transaction != null)
-                        command.Transaction = this.transaction;
-
-                    command.Connection = this.connection;
-                    command.ExecuteNonQuery();
-
-                }
+                await command.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error during CreateTable : {ex}");
-                throw;
-
-            }
-            finally
-            {
-                if (!alreadyOpened && this.connection.State != ConnectionState.Closed)
-                    this.connection.Close();
-
-            }
-
-        }
-        public string CreateTableScriptText()
-        {
-            var stringBuilder = new StringBuilder();
-            var tableNameScript = $"Create Table {this.tableName.Quoted().ToString()}";
-            var tableScript = this.BuildTableCommand().CommandText;
-            stringBuilder.Append(MySqlBuilder.WrapScriptTextWithComments(tableScript, tableNameScript));
-            stringBuilder.AppendLine();
-            return stringBuilder.ToString();
         }
 
-        /// <summary>
-        /// For a foreign key, check if the Parent table exists
-        /// </summary>
-        private bool EnsureForeignKeysTableExist(DmRelation foreignKey)
-        {
-            var childTable = foreignKey.ChildTable;
-            var parentTable = foreignKey.ParentTable;
-
-            // The foreignkey comes from the child table
-            var ds = foreignKey.ChildTable.DmSet;
-
-            if (ds == null)
-                return false;
-
-            // Check if the parent table is part of the sync configuration
-            var exist = ds.Tables.Any(t => ds.IsEqual(t.TableName.ToLowerInvariant(), parentTable.TableName.ToLowerInvariant()));
-
-            if (!exist)
-                return false;
-
-            bool alreadyOpened = this.connection.State == ConnectionState.Open;
-
-            try
-            {
-                if (!alreadyOpened)
-                    this.connection.Open();
-
-                return MySqlManagementUtils.TableExists(this.connection, this.transaction, ParserName.Parse(parentTable));
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error during EnsureForeignKeysTableExist : {ex}");
-                throw;
-
-            }
-            finally
-            {
-                if (!alreadyOpened && this.connection.State != ConnectionState.Closed)
-                    this.connection.Close();
-
-            }
-
-
-        }
 
         /// <summary>
         /// Check if we need to create the table in the current database
         /// </summary>
-        public bool NeedToCreateTable()
-        {
-            return !MySqlManagementUtils.TableExists(this.connection, this.transaction, this.tableName);
-        }
+        public async Task<bool> NeedToCreateTableAsync(DbConnection connection, DbTransaction transaction)
+            => !await MySqlManagementUtils.TableExistsAsync((MySqlConnection)connection, (MySqlTransaction)transaction, this.tableName).ConfigureAwait(false);
 
-        public bool NeedToCreateSchema()
-        {
-            return false;
-        }
+        public Task<bool> NeedToCreateSchemaAsync(DbConnection connection, DbTransaction transaction) => Task.FromResult(false);
 
-        public void CreateSchema()
-        {
-            return;
-        }
+        public Task CreateSchemaAsync(DbConnection connection, DbTransaction transaction) => Task.CompletedTask;
 
-        public string CreateSchemaScriptText()
-        {
-            return string.Empty;
-        }
-
-        public void DropTable()
+        public async Task DropTableAsync(DbConnection connection, DbTransaction transaction)
         {
             var commandText = $"drop table if exists {this.tableName.Quoted().ToString()}";
 
-            bool alreadyOpened = this.connection.State == ConnectionState.Open;
-
-            try
+            using (var command = new MySqlCommand(commandText, (MySqlConnection)connection, (MySqlTransaction)transaction))
             {
-                if (!alreadyOpened)
-                    this.connection.Open();
-
-                using (var command = new MySqlCommand(commandText, this.connection))
-                {
-                    if (this.transaction != null)
-                        command.Transaction = this.transaction;
-
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error during DropTableCommand : {ex}");
-                throw;
-            }
-            finally
-            {
-                if (!alreadyOpened && this.connection.State != ConnectionState.Closed)
-                    this.connection.Close();
-
+                await command.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
 
         }
 
-        public string DropTableScriptText()
-        {
-            var commandText = $"drop table if exists {this.tableName.Quoted().ToString()}";
-
-            var str1 = $"Drop table {this.tableName.Quoted().ToString()}";
-            return MySqlBuilder.WrapScriptTextWithComments(commandText, str1);
-        }
     }
 }

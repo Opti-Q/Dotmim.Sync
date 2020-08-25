@@ -1,4 +1,4 @@
-﻿using Dotmim.Sync.Data;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,23 +8,23 @@ namespace Dotmim.Sync.Builders
     public enum DbCommandType
     {
         SelectChanges,
-        SelectChangesWitFilters,
+        SelectInitializedChanges,
+        SelectInitializedChangesWithFilters,
+        SelectChangesWithFilters,
         SelectRow,
-        InsertRow,
         UpdateRow,
         DeleteRow,
         DisableConstraints,
         EnableConstraints,
-        InsertMetadata,
-        UpdateMetadata,
         DeleteMetadata,
+        UpdateMetadata,
         InsertTrigger,
         UpdateTrigger,
         DeleteTrigger,
         BulkTableType,
-        BulkInsertRows,
         BulkUpdateRows,
         BulkDeleteRows,
+        UpdateUntrackedRows,
         Reset
     }
 }

@@ -1,25 +1,94 @@
-using Dotmim.Sync.Data;
+
 using Dotmim.Sync.Enumerations;
 using Dotmim.Sync.Manager;
-using Dotmim.Sync.Messages;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dotmim.Sync
 {
     public abstract partial class CoreProvider
     {
+
+        /// <summary>
+        /// update configuration object with tables desc from server database
+        /// </summary>
+        public async Task<(SyncContext, SyncSet)> GetSchemaAsync(SyncContext context, SyncSetup setup, DbConnection connection, DbTransaction transaction,
+                             CancellationToken cancellationToken, IProgress<ProgressArgs> progress)
+        {
+            if (setup == null || setup.Tables.Count <= 0)
+                throw new MissingTablesException();
+
+            // Create the schema
+            var schema = new SyncSet();
+
+            // copy filters from setup
+            foreach (var filter in setup.Filters)
+                schema.Filters.Add(filter);
+
+            var relations = new List<DbRelationDefinition>(20);
+
+            foreach (var setupTable in setup.Tables)
+            {
+
+                this.Orchestrator.logger.LogDebug(SyncEventsId.GetSchema, setupTable);
+
+                var builderTable = this.GetTableManagerFactory(setupTable.TableName, setupTable.SchemaName);
+                var tblManager = builderTable.CreateManagerTable(connection, transaction);
+
+                // Check if table exists
+                var syncTable = await tblManager.GetTableAsync().ConfigureAwait(false);
+
+                if (syncTable == null)
+                    throw new MissingTableException(string.IsNullOrEmpty(setupTable.SchemaName) ? setupTable.TableName : setupTable.SchemaName + "." + setupTable.TableName);
+
+                // get columns list
+                var lstColumns = await tblManager.GetColumnsAsync().ConfigureAwait(false);
+
+                if (this.Orchestrator.logger.IsEnabled(LogLevel.Debug))
+                    foreach(var col in lstColumns)
+                        this.Orchestrator.logger.LogDebug(SyncEventsId.GetSchema, col);
+
+                // Validate the column list and get the dmTable configuration object.
+                this.FillSyncTableWithColumns(setupTable, syncTable, lstColumns, tblManager);
+
+                // Add this table to schema
+                schema.Tables.Add(syncTable);
+
+                // Check primary Keys
+                await SetPrimaryKeysAsync(syncTable, tblManager).ConfigureAwait(false);
+
+                // get all relations
+                var tableRelations = await tblManager.GetRelationsAsync().ConfigureAwait(false);
+
+                // Since we are not sure of the order of reading tables
+                // create a tmp relations list
+                relations.AddRange(tableRelations);
+            }
+
+            // Parse and affect relations to schema
+            SetRelations(relations, schema);
+
+            // Ensure all objects have correct relations to schema
+            schema.EnsureSchema();
+
+            return (context, schema);
+        }
+
+
         /// <summary>
         /// Generate the DmTable configuration from a given columns list
         /// Validate that all columns are currently supported by the provider
         /// </summary>
-        private void ValidateTableFromColumns(DmTable dmTable, IEnumerable<DmColumn> columns, IDbManagerTable dbManagerTable)
+        private void FillSyncTableWithColumns(SetupTable setupTable, SyncTable schemaTable, IEnumerable<SyncColumn> columns, IDbTableManager dbManagerTable)
         {
-            dmTable.OriginalProvider = this.ProviderTypeName;
+            schemaTable.OriginalProvider = this.ProviderTypeName;
+            schemaTable.SyncDirection = setupTable.SyncDirection;
 
             var ordinal = 0;
 
@@ -27,30 +96,43 @@ namespace Dotmim.Sync
             if (columns == null || columns.Any() == false)
                 return;
 
-            // Get PrimaryKey
-            var dmTableKeys = dbManagerTable.GetTablePrimaryKeys();
-
-            if (dmTableKeys == null || dmTableKeys.Any() == false)
-                throw new MissingPrimaryKeyException($"No Primary Keys in table {dmTable.TableName}, Can't make a synchronization with a table without primary keys.");
-
-            //// Check if we have more than one column (excepting primarykeys)
-            //var columnsNotPkeys = columns.Count(c => !dmTableKeys.Contains(c.ColumnName));
-
-            //if (columnsNotPkeys <= 0)
-            //    throw new NotSupportedException($"{dmTable.TableName} does not contains any columns, excepting primary keys.");
-
             // Delete all existing columns
-            if (dmTable.PrimaryKey != null && dmTable.PrimaryKey.Columns != null && dmTable.PrimaryKey.Columns.Length > 0)
-                dmTable.PrimaryKey = new DmKey();
+            if (schemaTable.PrimaryKeys.Count > 0)
+                schemaTable.PrimaryKeys.Clear();
 
-            if (dmTable.Columns.Count > 0)
-                dmTable.Columns.Clear();
+            if (schemaTable.Columns.Count > 0)
+                schemaTable.Columns.Clear();
 
-            foreach (var column in columns.OrderBy(c => c.Ordinal))
+
+            IEnumerable<SyncColumn> lstColumns;
+
+            // Validate columns list from setup table if any
+            if (setupTable.Columns != null && setupTable.Columns.Count > 1)
+            {
+                lstColumns = new List<SyncColumn>();
+
+                foreach (var setupColumn in setupTable.Columns)
+                {
+                    // Check if the columns list contains the column name we specified in the setup
+                    var column = columns.FirstOrDefault(c => c.ColumnName.Equals(setupColumn, SyncGlobalization.DataSourceStringComparison));
+
+                    if (column == null)
+                        throw new MissingColumnException(setupColumn, schemaTable.TableName);
+                    else
+                        ((List<SyncColumn>)lstColumns).Add(column);
+                }
+            }
+            else
+            {
+                lstColumns = columns;
+            }
+
+
+            foreach (var column in lstColumns.OrderBy(c => c.Ordinal))
             {
                 // First of all validate if the column is currently supported
                 if (!this.Metadata.IsValid(column))
-                    throw new NotSupportedException($"The Column {column.ColumnName} of type {column.OriginalTypeName} from provider {this.ProviderTypeName} is not currently supported.");
+                    throw new UnsupportedColumnTypeException(column.ColumnName, column.OriginalTypeName, this.ProviderTypeName);
 
                 var columnNameLower = column.ColumnName.ToLowerInvariant();
                 if (columnNameLower == "sync_scope_name"
@@ -67,9 +149,7 @@ namespace Dotmim.Sync
                     || columnNameLower == "sync_scope_name"
                     || columnNameLower == "sync_scope_name"
                     )
-                    throw new NotSupportedException($"The Column name {column.ColumnName} from provider {this.ProviderTypeName} is a reserved column name. Please choose another column name.");
-
-                dmTable.Columns.Add(column);
+                    throw new UnsupportedColumnTypeException(column.ColumnName, column.OriginalTypeName, this.ProviderTypeName);
 
                 // Validate max length
                 column.MaxLength = this.Metadata.ValidateMaxLength(column.OriginalTypeName, column.IsUnsigned, column.IsUnicode, column.MaxLength);
@@ -81,7 +161,7 @@ namespace Dotmim.Sync
                 var columnType = this.Metadata.ValidateType(datastoreDbType);
 
                 // and the DbType
-                column.DbType = this.Metadata.ValidateDbType(column.OriginalTypeName, column.IsUnsigned, column.IsUnicode, column.MaxLength);
+                column.DbType = (int)this.Metadata.ValidateDbType(column.OriginalTypeName, column.IsUnsigned, column.IsUnicode, column.MaxLength);
 
                 // Gets the owner dbtype (SqlDbType, OracleDbType, MySqlDbType, NpsqlDbType & so on ...)
                 // Sqlite does not have it's own type, so it's DbType too
@@ -91,7 +171,7 @@ namespace Dotmim.Sync
                 column.IsReadOnly = this.Metadata.ValidateIsReadonly(column);
 
                 // set position ordinal
-                column.SetOrdinal(ordinal);
+                column.Ordinal = ordinal;
                 ordinal++;
 
                 // Validate the precision and scale properties
@@ -114,157 +194,99 @@ namespace Dotmim.Sync
 
                 }
 
-            }
+                // if setup table has no columns, we add all columns from db
+                // otherwise check if columns exist in the data source
+                if (setupTable.Columns == null || setupTable.Columns.Count <= 0 || setupTable.Columns.Contains(column.ColumnName))
+                    schemaTable.Columns.Add(column);
+                // If column does not allow null value and is not compute
+                // We will not be able to insert a row, so raise an error
+                else if (!column.AllowDBNull && !column.IsCompute && !column.IsReadOnly && string.IsNullOrEmpty(column.DefaultValue))
+                    throw new Exception($"Column {column.ColumnName} is not part of your setup. But it seems this columns is mandatory in your data source.");
 
-            var columnsForKey = new DmColumn[dmTableKeys.Count()];
-
-            var i = 0;
-            foreach (var rowColumn in dmTableKeys.OrderBy(r => r.Ordinal))
-            {
-                var columnKey = dmTable.Columns.FirstOrDefault(c => string.Equals(c.ColumnName, rowColumn.ColumnName, StringComparison.InvariantCultureIgnoreCase));
-                columnsForKey[i++] = columnKey ?? throw new MissingPrimaryKeyException("Primary key found is not present in the columns list");
             }
+        }
+
+        /// <summary>
+        /// Check then add primary keys to schema table
+        /// </summary>
+        private async Task SetPrimaryKeysAsync(SyncTable schemaTable, IDbTableManager dbManagerTable)
+        {
+            // Get PrimaryKey
+            var schemaPrimaryKeys = await dbManagerTable.GetPrimaryKeysAsync().ConfigureAwait(false);
+
+            if (schemaPrimaryKeys == null || schemaPrimaryKeys.Any() == false)
+                throw new MissingPrimaryKeyException(schemaTable.TableName);
 
             // Set the primary Key
-            dmTable.PrimaryKey = new DmKey(columnsForKey);
-        }
-
-        /// <summary>
-        /// Create a simple configuration, based on tables
-        /// </summary>
-        private async Task<SyncConfiguration> ReadSchemaAsync(string[] tables, DbConnection connection, DbTransaction transaction)
-        {
-            // Load the configuration
-            var configuration = new SyncConfiguration(tables);
-            await this.ReadSchemaAsync(configuration.Schema, connection, transaction);
-            return configuration;
-        }
-
-        /// <summary>
-        /// update configuration object with tables desc from server database
-        /// </summary>
-        private async Task ReadSchemaAsync(DmSet schema, DbConnection connection, DbTransaction transaction)
-        {
-            if (schema == null || schema.Tables.Count <= 0)
-                throw new ArgumentNullException("syncConfiguration", "Configuration should contains Tables, at least tables with a name");
-
-            try
+            foreach (var rowColumn in schemaPrimaryKeys.OrderBy(r => r.Ordinal))
             {
-                var relations = new List<DbRelationDefinition>(20);
-                var syncConfiguration = schema.Tables;
-                using (connection = this.CreateConnection())
-                {
-                    await connection.OpenAsync();
+                // Find the column in the schema columns
+                var columnKey = schemaTable.Columns.FirstOrDefault(sc => sc.EqualsByName(rowColumn));
 
-                    using (transaction = connection.BeginTransaction())
-                    {
-                        foreach (var dmTable in syncConfiguration)
-                        {
-                            var builderTable = this.GetDbManager(dmTable.TableName);
-                            var tblManager = builderTable.CreateManagerTable(connection, transaction);
+                if (columnKey == null)
+                    throw new MissingPrimaryKeyColumnException(rowColumn.ColumnName, schemaTable.TableName);
 
-                            // get columns list
-                            var lstColumns = tblManager.GetTableDefinition();
-
-                            // Validate the column list and get the dmTable configuration object.
-                            this.ValidateTableFromColumns(dmTable, lstColumns, tblManager);
-
-                            relations.AddRange(tblManager.GetTableRelations());
-                        }
-
-                        transaction.Commit();
-                    }
-
-                    connection.Close();
-                }
-                if (relations.Any())
-                {
-                    foreach (var r in relations)
-                    {
-                        // Get table from the relation where we need to work on
-                        var dmTable = schema.Tables[r.TableName];
-
-                        // get DmColumn from DmTable, based on the columns from relations
-                        var tblColumns = r.Columns.OrderBy(kc => kc.Order)
-                            .Select(kc => dmTable.Columns[kc.KeyColumnName])
-                            .ToArray();
-
-                        // then Get the foreign table as well
-                        var foreignTable = syncConfiguration[r.ReferenceTableName];
-
-                        // Since we can have a table with a foreign key but not the parent table
-                        // It's not a problem, just forget it
-                        if (foreignTable == null || foreignTable.Columns.Count == 0)
-                            continue;
-
-                        var foreignColumns = r.Columns.OrderBy(kc => kc.Order)
-                             .Select(fc => foreignTable.Columns[fc.ReferenceColumnName])
-                             .ToArray();
-
-
-                        if (foreignColumns == null || foreignColumns.Any(c => c == null))
-                            throw new NotSupportedException(
-                                $"Foreign columns {string.Join(",", r.Columns.Select(kc => kc.ReferenceColumnName))} does not exist in table {r.ReferenceTableName}");
-
-                        var dmRelation = new DmRelation(r.ForeignKey, tblColumns, foreignColumns);
-
-                        schema.Relations.Add(dmRelation);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new SyncException(ex, SyncStage.SchemaReading);
-            }
-            finally
-            {
-                if (connection != null && connection.State != ConnectionState.Closed)
-                    connection.Close();
+                schemaTable.PrimaryKeys.Add(columnKey.ColumnName);
             }
         }
 
         /// <summary>
-        /// Ensure configuration is correct on both server and client side
+        /// For all relations founded, create the SyncRelation and add it to schema
         /// </summary>
-        public virtual async Task<(SyncContext, DmSet)> EnsureSchemaAsync(SyncContext context, MessageEnsureSchema message)
+        private void SetRelations(List<DbRelationDefinition> relations, SyncSet schema)
         {
-            try
+            if (relations == null || relations.Count <= 0)
+                return;
+
+            foreach (var r in relations)
             {
-                context.SyncStage = SyncStage.SchemaReading;
+                // Get table from the relation where we need to work on
+                var schemaTable = schema.Tables[r.TableName, r.SchemaName];
 
-                using (var connection = this.CreateConnection())
-                {
-                    await connection.OpenAsync();
-
-                    using (var transaction = connection.BeginTransaction())
+                // get SchemaColumn from SchemaTable, based on the columns from relations
+                var schemaColumns = r.Columns.OrderBy(kc => kc.Order)
+                    .Select(kc =>
                     {
-                        // if we dont have already read the tables || we want to overwrite the current config
-                        if (message.Schema.HasTables && !message.Schema.HasColumns)
-                            await this.ReadSchemaAsync(message.Schema, connection, transaction);
+                        var schemaColumn = schemaTable.Columns[kc.KeyColumnName];
 
-                        // Progress & Interceptor
-                        context.SyncStage = SyncStage.SchemaRead;
-                        var schemaArgs = new SchemaArgs(context, message.Schema, connection, transaction);
-                        this.ReportProgress(context, schemaArgs);
-                        await this.InterceptAsync(schemaArgs);
+                        if (schemaColumn == null)
+                            return null;
 
-                        transaction.Commit();
-                    }
+                        return new SyncColumnIdentifier(schemaColumn.ColumnName, schemaTable.TableName, schemaTable.SchemaName);
+                    })
+                    .Where(sc => sc != null)
+                    .ToList(); 
 
-                    connection.Close();
-                }
+                // if we don't find the column, maybe we just dont have this column in our setup def
+                if (schemaColumns == null || schemaColumns.Count == 0)
+                    continue;
 
-                return (context, message.Schema);
+                // then Get the foreign table as well
+                var foreignTable = schemaTable.Schema.Tables[r.ReferenceTableName, r.ReferenceSchemaName];
+
+                // Since we can have a table with a foreign key but not the parent table
+                // It's not a problem, just forget it
+                if (foreignTable == null || foreignTable.Columns.Count == 0)
+                    continue;
+
+                var foreignColumns = r.Columns.OrderBy(kc => kc.Order)
+                     .Select(fc =>
+                     {
+                         var schemaColumn = foreignTable.Columns[fc.ReferenceColumnName];
+                         if (schemaColumn == null)
+                             return null;
+                         return new SyncColumnIdentifier(schemaColumn.ColumnName, foreignTable.TableName, foreignTable.SchemaName);
+                     })
+                     .Where(sc => sc != null)
+                     .ToList();
+
+                if (foreignColumns == null || foreignColumns.Count == 0)
+                    continue;
+
+                var schemaRelation = new SyncRelation(r.ForeignKey, schemaColumns, foreignColumns);
+
+                schema.Relations.Add(schemaRelation);
             }
-            catch (SyncException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new SyncException(ex, SyncStage.SchemaReading);
-            }
-
         }
 
 
