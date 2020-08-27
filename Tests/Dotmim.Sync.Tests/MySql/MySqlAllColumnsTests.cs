@@ -1,6 +1,6 @@
-﻿using Dotmim.Sync.Tests.Misc;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.SqlServer;
+﻿using DotmimSyncLegacy.Tests.Misc;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.SqlServer;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -9,13 +9,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using System.Diagnostics;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Data.SqlTypes;
-using Dotmim.Sync.MySql;
+using DotmimSyncLegacy.MySql;
 using MySql.Data.MySqlClient;
 using System.Data.Common;
 
-namespace Dotmim.Sync.Test.MySql
+namespace DotmimSyncLegacy.Test.MySql
 {
 
     public class MySqlAllColumnsFixture : IDisposable
@@ -226,7 +226,7 @@ namespace Dotmim.Sync.Test.MySql
     }
 
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class MySqlAllColumnsTests : IClassFixture<MySqlAllColumnsFixture>
     {
         private MySqlAllColumnsFixture fixture;

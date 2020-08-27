@@ -1,5 +1,5 @@
 ﻿
-using Dotmim.Sync.Builders;
+using DotmimSyncLegacy.Builders;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace Dotmim.Sync.Scope
+namespace DotmimSyncLegacy.Scope
 {
     /// <summary>
     /// Represents a config from a table, stored in the config data xml field

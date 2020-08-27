@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Data;
-using Dotmim.Sync.Data.Surrogate;
+﻿using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Data.Surrogate;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Dotmim.Sync.Batch
+namespace DotmimSyncLegacy.Batch
 {
     /// <summary>
     /// Represents a Batch, containing a full or serialized change set

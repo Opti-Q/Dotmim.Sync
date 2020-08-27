@@ -5,7 +5,7 @@ using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
-namespace Dotmim.Sync.Serialization
+namespace DotmimSyncLegacy.Serialization
 {
     public class BinaryConverter<T> : BaseConverter<T>
     {

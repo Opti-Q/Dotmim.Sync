@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <IsPackable>false</IsPackable>
-    <RootNamespace>Dotmim.Sync.Tests</RootNamespace>
+    <RootNamespace>DotmimSyncLegacy.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Web" />
@@ -23,11 +23,11 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Projects\Dotmim.Sync.Core\Dotmim.Sync.Core.csproj" />
-    <ProjectReference Include="..\..\Projects\Dotmim.Sync.MySql\Dotmim.Sync.MySql.csproj" />
-    <ProjectReference Include="..\..\Projects\Dotmim.Sync.Sqlite\Dotmim.Sync.Sqlite.csproj" />
-    <ProjectReference Include="..\..\Projects\Dotmim.Sync.SqlServer\Dotmim.Sync.SqlServer.csproj" />
-    <ProjectReference Include="..\..\Projects\Dotmim.Sync.Web.Client\Dotmim.Sync.Web.Client.csproj" />
-    <ProjectReference Include="..\..\Projects\Dotmim.Sync.Web.Server\Dotmim.Sync.Web.Server.csproj" />
+    <ProjectReference Include="..\..\Projects\Dotmim.Sync.Core\DotmimSyncLegacy.Core.csproj" />
+    <ProjectReference Include="..\..\Projects\Dotmim.Sync.MySql\DotmimSyncLegacy.MySql.csproj" />
+    <ProjectReference Include="..\..\Projects\Dotmim.Sync.Sqlite\DotmimSyncLegacy.Sqlite.csproj" />
+    <ProjectReference Include="..\..\Projects\Dotmim.Sync.SqlServer\DotmimSyncLegacy.SqlServer.csproj" />
+    <ProjectReference Include="..\..\Projects\Dotmim.Sync.Web.Client\DotmimSyncLegacy.Web.Client.csproj" />
+    <ProjectReference Include="..\..\Projects\Dotmim.Sync.Web.Server\DotmimSyncLegacy.Web.Server.csproj" />
   </ItemGroup>
 </Project>

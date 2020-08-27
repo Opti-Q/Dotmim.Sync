@@ -1,10 +1,10 @@
-﻿using Dotmim.Sync.Data.Surrogate;
-using Dotmim.Sync.Serialization;
+﻿using DotmimSyncLegacy.Data.Surrogate;
+using DotmimSyncLegacy.Serialization;
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace Dotmim.Sync.Batch
+namespace DotmimSyncLegacy.Batch
 {
     /// <summary>
     /// Batch Part

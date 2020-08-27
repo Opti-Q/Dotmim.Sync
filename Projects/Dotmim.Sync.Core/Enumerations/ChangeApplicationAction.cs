@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dotmim.Sync.Enumerations
+namespace DotmimSyncLegacy.Enumerations
 {
 
     public enum ChangeApplicationAction

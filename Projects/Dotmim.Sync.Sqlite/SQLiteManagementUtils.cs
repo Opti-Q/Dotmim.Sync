@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Data;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
 using System.Linq;
 using Microsoft.Data.Sqlite;
-using Dotmim.Sync.Builders;
+using DotmimSyncLegacy.Builders;
 
-namespace Dotmim.Sync.Sqlite
+namespace DotmimSyncLegacy.Sqlite
 {
     internal static class SqliteManagementUtils
     {

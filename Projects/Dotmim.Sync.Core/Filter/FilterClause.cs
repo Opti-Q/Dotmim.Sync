@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 
-namespace Dotmim.Sync.Filter
+namespace DotmimSyncLegacy.Filter
 {
     /// <summary>
     /// Design a filter clause on Dmtable

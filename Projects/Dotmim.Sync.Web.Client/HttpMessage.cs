@@ -1,16 +1,16 @@
-﻿using Dotmim.Sync.Batch;
-using Dotmim.Sync.Builders;
-using Dotmim.Sync.Scope;
-using Dotmim.Sync.Data.Surrogate;
+﻿using DotmimSyncLegacy.Batch;
+using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Scope;
+using DotmimSyncLegacy.Data.Surrogate;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Filter;
-using Dotmim.Sync.Messages;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Filter;
+using DotmimSyncLegacy.Messages;
 
-namespace Dotmim.Sync.Web.Client
+namespace DotmimSyncLegacy.Web.Client
 {
     /// <summary>
     /// Message send and receieved during http call

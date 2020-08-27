@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Enumerations
+namespace DotmimSyncLegacy.Enumerations
 {
     /// <summary>
     /// Sync direction : Can be Bidirectional (default), DownloadOnly, UploadOnly

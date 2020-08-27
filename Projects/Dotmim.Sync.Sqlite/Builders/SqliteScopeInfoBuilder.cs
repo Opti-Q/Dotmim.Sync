@@ -1,5 +1,5 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Log;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Log;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,7 +7,7 @@ using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using System.Diagnostics;
 
-namespace Dotmim.Sync.Sqlite
+namespace DotmimSyncLegacy.Sqlite
 {
     public class SqliteScopeInfoBuilder : IDbScopeInfoBuilder
     {

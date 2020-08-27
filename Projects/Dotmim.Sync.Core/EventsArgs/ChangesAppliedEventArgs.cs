@@ -1,10 +1,10 @@
-﻿using Dotmim.Sync.Data;
-using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
 
     /// <summary>

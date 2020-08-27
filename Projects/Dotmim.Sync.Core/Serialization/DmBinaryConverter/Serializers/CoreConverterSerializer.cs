@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 
-namespace Dotmim.Sync.Serialization.Serializers
+namespace DotmimSyncLegacy.Serialization.Serializers
 {
     class CoreConverterSerializer : TypeSerializer
     {

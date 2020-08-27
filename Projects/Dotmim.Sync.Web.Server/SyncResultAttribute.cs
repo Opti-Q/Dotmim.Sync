@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dotmim.Sync.Web.Server
+namespace DotmimSyncLegacy.Web.Server
 {
     public class SyncResultAttribute : ResultFilterAttribute, IResultFilter, IAsyncResultFilter
     {

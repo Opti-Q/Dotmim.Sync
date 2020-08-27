@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Data;
-using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     /// <summary>
     /// Represents a synchronization conflict at the row level.

@@ -1,5 +1,5 @@
 ﻿
-using Dotmim.Sync.Builders;
+using DotmimSyncLegacy.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace Dotmim.Sync.Scope
+namespace DotmimSyncLegacy.Scope
 {
     /// <summary>
     /// Represents the schema of a column from the config data xml file, stored in DB 

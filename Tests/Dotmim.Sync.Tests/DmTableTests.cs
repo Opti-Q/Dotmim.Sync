@@ -1,8 +1,8 @@
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System;
 using Xunit;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class DmTableTests
     {

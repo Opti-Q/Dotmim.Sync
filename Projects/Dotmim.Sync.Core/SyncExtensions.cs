@@ -1,10 +1,10 @@
-﻿using Dotmim.Sync.Filter;
+﻿using DotmimSyncLegacy.Filter;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     /// <summary>
     /// Contains only extensions methods

@@ -1,8 +1,8 @@
-﻿using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Sqlite;
-using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Tests.Misc;
-using Dotmim.Sync.Test.SqlUtils;
+﻿using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Sqlite;
+using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Tests.Misc;
+using DotmimSyncLegacy.Test.SqlUtils;
 using System;
 using System.Data.SqlClient;
 using Microsoft.Data.Sqlite;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Xunit;
 using System.Data;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class SqliteSyncSimpleFixture : IDisposable
     {
@@ -155,7 +155,7 @@ namespace Dotmim.Sync.Test
 
     }
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class SqliteSyncTests : IClassFixture<SqliteSyncSimpleFixture>
     {
         SqliteSyncSimpleFixture fixture;

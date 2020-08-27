@@ -9,7 +9,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Dotmim.Sync.Data
+namespace DotmimSyncLegacy.Data
 {
 
     public class DmSet

@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Serialization;
+﻿using DotmimSyncLegacy.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Dotmim.Sync.Enumerations;
+using DotmimSyncLegacy.Enumerations;
 
-namespace Dotmim.Sync.Data.Surrogate
+namespace DotmimSyncLegacy.Data.Surrogate
 {
     /// <summary>
     /// Represents a surrogate of a DmTable object, which DotMim Sync uses during custom binary serialization.

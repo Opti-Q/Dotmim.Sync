@@ -1,11 +1,11 @@
-﻿using Dotmim.Sync.Manager;
+﻿using DotmimSyncLegacy.Manager;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Data.Common;
 
 
-namespace Dotmim.Sync.Sqlite
+namespace DotmimSyncLegacy.Sqlite
 {
     public class SqliteManager : DbManager
     {

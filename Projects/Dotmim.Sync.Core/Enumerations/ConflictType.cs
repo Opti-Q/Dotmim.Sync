@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dotmim.Sync.Enumerations
+namespace DotmimSyncLegacy.Enumerations
 {
     /// <summary>
     /// Defines the types of conflicts that can occur during synchronization.

@@ -1,11 +1,11 @@
-﻿using Dotmim.Sync.Data;
-using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Enumerations;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Messages
+namespace DotmimSyncLegacy.Messages
 {
     /// <summary>
     /// Message exchanged during the Ensure Schema sync stage

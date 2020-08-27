@@ -1,9 +1,9 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System.Text;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Data.Common;
 
-namespace Dotmim.Sync.MySql
+namespace DotmimSyncLegacy.MySql
 {
 
     /// <summary>

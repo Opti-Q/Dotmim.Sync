@@ -1,6 +1,6 @@
-﻿using Dotmim.Sync.Data;
-using Dotmim.Sync.Manager;
-using Dotmim.Sync.MySql;
+﻿using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Manager;
+using DotmimSyncLegacy.MySql;
 using MySql.Data.MySqlClient;
 using System;
 using System.Data;
@@ -8,9 +8,9 @@ using System.Data.Common;
 
 using System.Linq;
 using System.Collections.Generic;
-using Dotmim.Sync.MySql.Builders;
+using DotmimSyncLegacy.MySql.Builders;
 
-namespace Dotmim.Sync.MySql
+namespace DotmimSyncLegacy.MySql
 {
     public class MySqlManagerTable : IDbManagerTable
     {

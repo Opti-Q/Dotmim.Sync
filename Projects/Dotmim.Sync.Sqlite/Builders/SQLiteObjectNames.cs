@@ -1,11 +1,11 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Linq;
 
-namespace Dotmim.Sync.Sqlite
+namespace DotmimSyncLegacy.Sqlite
 {
     public class SqliteObjectNames
     {

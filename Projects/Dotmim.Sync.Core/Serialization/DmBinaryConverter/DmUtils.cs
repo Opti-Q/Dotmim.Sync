@@ -11,7 +11,7 @@ using System.Runtime.Serialization;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Dotmim.Sync.Serialization
+namespace DotmimSyncLegacy.Serialization
 {
     internal static class DmUtils
     {

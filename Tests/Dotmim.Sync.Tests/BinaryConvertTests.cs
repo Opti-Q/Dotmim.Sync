@@ -1,13 +1,13 @@
-﻿using Dotmim.Sync.Serialization;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Data.Surrogate;
+﻿using DotmimSyncLegacy.Serialization;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Data.Surrogate;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class BinaryConvertTests
     {

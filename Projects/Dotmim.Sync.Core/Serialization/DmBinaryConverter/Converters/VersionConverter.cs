@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Serialization.Converters
+namespace DotmimSyncLegacy.Serialization.Converters
 {
     public class VersionConverter : ObjectConverter
     {

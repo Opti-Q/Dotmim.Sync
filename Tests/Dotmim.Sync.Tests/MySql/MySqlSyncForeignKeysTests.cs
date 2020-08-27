@@ -1,16 +1,16 @@
-﻿using Dotmim.Sync.MySql;
-using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.Tests.Misc;
+﻿using DotmimSyncLegacy.MySql;
+using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.Tests.Misc;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Dotmim.Sync.Enumerations;
+using DotmimSyncLegacy.Enumerations;
 using Xunit;
 
-namespace Dotmim.Sync.Tests.MySql
+namespace DotmimSyncLegacy.Tests.MySql
 {
 
     public class MySqlSyncForeignKeysTestsFixture : IDisposable
@@ -111,7 +111,7 @@ namespace Dotmim.Sync.Tests.MySql
     }
 
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class MySqlSyncForeignKeysTests : IClassFixture<MySqlSyncForeignKeysTestsFixture>
     {
         MySqlSyncProvider serverProvider;

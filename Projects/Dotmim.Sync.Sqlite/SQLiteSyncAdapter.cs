@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Data.Common;
 using System.Data;
-using Dotmim.Sync.Builders;
+using DotmimSyncLegacy.Builders;
 using Microsoft.Data.Sqlite;
 
-namespace Dotmim.Sync.Sqlite
+namespace DotmimSyncLegacy.Sqlite
 {
     public class SqliteSyncAdapter : DbSyncAdapter
     {

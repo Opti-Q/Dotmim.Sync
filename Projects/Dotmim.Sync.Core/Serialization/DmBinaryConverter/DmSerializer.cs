@@ -1,5 +1,5 @@
-﻿using Dotmim.Sync.Serialization.Converters;
-using Dotmim.Sync.Serialization.Serializers;
+﻿using DotmimSyncLegacy.Serialization.Converters;
+using DotmimSyncLegacy.Serialization.Serializers;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace Dotmim.Sync.Serialization
+namespace DotmimSyncLegacy.Serialization
 {
 
     /// <summary>

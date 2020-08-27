@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Test.SqlUtils
+namespace DotmimSyncLegacy.Test.SqlUtils
 {
     public class InlineConfigurations : IEnumerable<object[]>
     {

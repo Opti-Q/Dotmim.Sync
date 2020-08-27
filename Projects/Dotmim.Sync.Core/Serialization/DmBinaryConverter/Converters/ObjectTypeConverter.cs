@@ -6,7 +6,7 @@ using System.Text;
 using System.Runtime;
 using System.Reflection;
 
-namespace Dotmim.Sync.Serialization.Converters
+namespace DotmimSyncLegacy.Serialization.Converters
 {
     public class ObjectTypeConverter : ObjectConverter
     {

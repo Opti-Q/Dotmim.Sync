@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using Dotmim.Sync.Batch;
+using DotmimSyncLegacy.Batch;
 using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading;
 using Newtonsoft.Json;
-using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Serialization;
-using Dotmim.Sync.Data.Surrogate;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Messages;
-using Dotmim.Sync.Web.Client;
+using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Serialization;
+using DotmimSyncLegacy.Data.Surrogate;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Messages;
+using DotmimSyncLegacy.Web.Client;
 using Newtonsoft.Json.Linq;
 #if NETSTANDARD
 using Microsoft.AspNetCore.Http;
@@ -28,7 +28,7 @@ using HttpResponse = System.Web.HttpResponseBase;
 using System.Net.Http;
 #endif
 
-namespace Dotmim.Sync.Web.Server
+namespace DotmimSyncLegacy.Web.Server
 {
 
     /// <summary>

@@ -1,17 +1,17 @@
-﻿using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Data;
 using System;
 using System.IO;
 using System.Linq;
-using Dotmim.Sync.Filter;
-using Dotmim.Sync.Serialization;
+using DotmimSyncLegacy.Filter;
+using DotmimSyncLegacy.Serialization;
 using System.Collections;
 using System.Collections.Generic;
-using Dotmim.Sync.Builders;
+using DotmimSyncLegacy.Builders;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     [Serializable]
     public class SyncConfiguration

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Enumerations
+namespace DotmimSyncLegacy.Enumerations
 {
     /// <summary>
     /// Synchronization mode. Could be Normal, Reinitialize, ReinitializeWithUpload

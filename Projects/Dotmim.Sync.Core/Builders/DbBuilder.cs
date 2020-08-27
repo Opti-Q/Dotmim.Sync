@@ -1,15 +1,15 @@
-﻿using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Data;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
 using System.Linq;
 using System.Data;
-using Dotmim.Sync.Log;
-using Dotmim.Sync.Filter;
+using DotmimSyncLegacy.Log;
+using DotmimSyncLegacy.Filter;
 using System.Diagnostics;
 
-namespace Dotmim.Sync.Builders
+namespace DotmimSyncLegacy.Builders
 {
     public abstract class DbBuilder
     {

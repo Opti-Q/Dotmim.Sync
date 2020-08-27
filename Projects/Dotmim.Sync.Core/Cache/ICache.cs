@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dotmim.Sync.Cache
+namespace DotmimSyncLegacy.Cache
 {
     public interface ICache
     {

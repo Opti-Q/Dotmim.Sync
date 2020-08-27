@@ -1,6 +1,6 @@
-﻿using Dotmim.Sync.Tests.Misc;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.SqlServer;
+﻿using DotmimSyncLegacy.Tests.Misc;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.SqlServer;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -8,9 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-using Dotmim.Sync.Filter;
+using DotmimSyncLegacy.Filter;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
 
     public class SyncFilterFixture : IDisposable
@@ -121,7 +121,7 @@ namespace Dotmim.Sync.Test
     }
 
     [Collection("Sync")]
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class SyncFilterTests : IClassFixture<SyncFilterFixture>
     {
         SyncFilterFixture fixture;

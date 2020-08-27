@@ -1,6 +1,6 @@
-﻿using Dotmim.Sync.Batch;
-using Dotmim.Sync.Filter;
-using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Batch;
+using DotmimSyncLegacy.Filter;
+using DotmimSyncLegacy.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
-using Dotmim.Sync.Messages;
+using DotmimSyncLegacy.Messages;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
 
     /// <summary>

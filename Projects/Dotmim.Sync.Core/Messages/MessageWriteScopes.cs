@@ -1,9 +1,9 @@
-﻿using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Messages
+namespace DotmimSyncLegacy.Messages
 {
     /// <summary>
     /// Message exchanged during the Write Scopes sync stage

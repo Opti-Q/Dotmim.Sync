@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Data.Surrogate
+namespace DotmimSyncLegacy.Data.Surrogate
 {
     [Serializable]
     public class DmRelationSurrogate

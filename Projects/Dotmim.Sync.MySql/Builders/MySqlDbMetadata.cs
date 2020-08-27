@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Manager;
+﻿using DotmimSyncLegacy.Manager;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
 using MySql.Data.MySqlClient;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 
-namespace Dotmim.Sync.MySql.Builders
+namespace DotmimSyncLegacy.MySql.Builders
 {
     public class MySqlDbMetadata : DbMetadata
     {

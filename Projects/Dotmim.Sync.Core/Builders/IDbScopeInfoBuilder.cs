@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Text;
 
-namespace Dotmim.Sync.Builders
+namespace DotmimSyncLegacy.Builders
 {
     public interface IDbScopeInfoBuilder
     {

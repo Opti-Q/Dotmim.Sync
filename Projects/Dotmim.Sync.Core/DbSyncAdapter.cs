@@ -1,17 +1,17 @@
-﻿using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Log;
-using Dotmim.Sync.Manager;
-using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Log;
+using DotmimSyncLegacy.Manager;
+using DotmimSyncLegacy.Data;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.Linq;
-using Dotmim.Sync.Builders;
+using DotmimSyncLegacy.Builders;
 using System.Diagnostics;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
 
 

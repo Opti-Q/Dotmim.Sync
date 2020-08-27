@@ -1,8 +1,8 @@
-﻿using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Sqlite;
-using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.Tests.Misc;
+﻿using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Sqlite;
+using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.Tests.Misc;
 using System;
 using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Dotmim.Sync.Tests
+namespace DotmimSyncLegacy.Tests
 {
     public class SyncDirectionFixture : IDisposable
     {
@@ -68,7 +68,7 @@ namespace Dotmim.Sync.Tests
     }
 
     [Collection("ADVLT2012")]
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class SyncDirectionTests : IClassFixture<SyncDirectionFixture>
     {
         SqlSyncProvider serverProvider;

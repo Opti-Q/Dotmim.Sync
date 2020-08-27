@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 
-namespace Dotmim.Sync.Builders
+namespace DotmimSyncLegacy.Builders
 {
 
     /// <summary>

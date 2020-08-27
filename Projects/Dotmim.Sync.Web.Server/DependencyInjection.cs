@@ -1,5 +1,5 @@
-﻿using Dotmim.Sync;
-using Dotmim.Sync.Web.Server;
+﻿using DotmimSyncLegacy;
+using DotmimSyncLegacy.Web.Server;
 using System;
 
 namespace Microsoft.Extensions.DependencyInjection

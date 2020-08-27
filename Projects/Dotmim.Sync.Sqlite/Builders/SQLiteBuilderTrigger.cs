@@ -1,17 +1,17 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System;
 using System.Text;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Data.Common;
 using System.Linq;
-using Dotmim.Sync.Log;
+using DotmimSyncLegacy.Log;
 using System.Data;
 using Microsoft.Data.Sqlite;
-using Dotmim.Sync.Filter;
+using DotmimSyncLegacy.Filter;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-namespace Dotmim.Sync.Sqlite
+namespace DotmimSyncLegacy.Sqlite
 {
     public class SqliteBuilderTrigger : IDbBuilderTriggerHelper
     {

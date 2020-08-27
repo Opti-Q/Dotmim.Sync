@@ -1,16 +1,16 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System;
 using System.Text;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Data;
-using Dotmim.Sync.Log;
+using DotmimSyncLegacy.Log;
 using MySql.Data.MySqlClient;
-using Dotmim.Sync.MySql.Builders;
+using DotmimSyncLegacy.MySql.Builders;
 using System.Diagnostics;
 
-namespace Dotmim.Sync.MySql
+namespace DotmimSyncLegacy.MySql
 {
     public class MySqlBuilderTable : IDbBuilderTableHelper
     {

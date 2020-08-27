@@ -1,8 +1,8 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System.Data.Common;
 using MySql.Data.MySqlClient;
 
-namespace Dotmim.Sync.MySql
+namespace DotmimSyncLegacy.MySql
 {
     public class MySqlScopeBuilder : DbScopeBuilder
     {

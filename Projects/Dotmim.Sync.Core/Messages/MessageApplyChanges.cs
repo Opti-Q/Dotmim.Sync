@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Batch;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Batch;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Enumerations;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Messages
+namespace DotmimSyncLegacy.Messages
 {
     /// <summary>
     /// Message exchanged during the Begin session sync stage

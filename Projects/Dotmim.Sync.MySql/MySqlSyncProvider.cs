@@ -1,13 +1,13 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Cache;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Manager;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Cache;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Manager;
 using System.Data.Common;
 using MySql.Data.MySqlClient;
-using Dotmim.Sync.MySql.Builders;
+using DotmimSyncLegacy.MySql.Builders;
 using System;
 
-namespace Dotmim.Sync.MySql
+namespace DotmimSyncLegacy.MySql
 {
 
     public class MySqlSyncProvider : CoreProvider

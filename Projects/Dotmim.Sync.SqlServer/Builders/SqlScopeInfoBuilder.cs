@@ -1,6 +1,6 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Log;
-using Dotmim.Sync.SqlServer.Manager;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Log;
+using DotmimSyncLegacy.SqlServer.Manager;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -8,7 +8,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Diagnostics;
 
-namespace Dotmim.Sync.SqlServer.Scope
+namespace DotmimSyncLegacy.SqlServer.Scope
 {
     public class SqlScopeInfoBuilder : IDbScopeInfoBuilder
     {

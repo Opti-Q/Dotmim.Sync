@@ -5,7 +5,7 @@
 //using System.Globalization;
 //using System.Text;
 
-//namespace Dotmim.Sync.Data
+//namespace DotmimSyncLegacy.Data
 //{
 //    public class DmRelationCollection : IEnumerable<DmRelation>
 //    {

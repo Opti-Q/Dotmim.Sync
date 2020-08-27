@@ -1,5 +1,5 @@
 ﻿
-using Dotmim.Sync.Cache;
+using DotmimSyncLegacy.Cache;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Specialized;
@@ -12,7 +12,7 @@ using System.Web.SessionState;
 using HttpContext = System.Web.HttpContextBase;
 #endif
 
-namespace Dotmim.Sync.Web.Server
+namespace DotmimSyncLegacy.Web.Server
 {
     public class SessionCache : ICache
     {

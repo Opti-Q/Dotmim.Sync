@@ -1,9 +1,9 @@
-﻿using Dotmim.Sync.Serialization;
+﻿using DotmimSyncLegacy.Serialization;
 using System;
 using System.Data;
 using System.Text;
 
-namespace Dotmim.Sync.Data.Surrogate
+namespace DotmimSyncLegacy.Data.Surrogate
 {
     /// <summary>
     /// Represents a surrogate of a DmColumn object, which DotMim sync uses during custom binary serialization.

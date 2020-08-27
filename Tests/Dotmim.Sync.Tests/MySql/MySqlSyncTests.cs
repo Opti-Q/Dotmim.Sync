@@ -1,6 +1,6 @@
-﻿using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.MySql;
-using Dotmim.Sync.SqlServer;
+﻿using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.MySql;
+using DotmimSyncLegacy.SqlServer;
 using System;
 using System.Data.SqlClient;
 using System.IO;
@@ -8,10 +8,10 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Xunit;
 using MySql.Data.MySqlClient;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.Tests.Misc;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.Tests.Misc;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class MySqlSyncSimpleFixture : IDisposable
     {
@@ -113,7 +113,7 @@ namespace Dotmim.Sync.Test
         }
     }
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class MySqlSyncTests : IClassFixture<MySqlSyncSimpleFixture>, IDisposable
     {
         MySqlSyncSimpleFixture fixture;

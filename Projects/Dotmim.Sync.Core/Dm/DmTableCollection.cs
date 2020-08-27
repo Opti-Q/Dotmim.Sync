@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Dotmim.Sync.Data
+namespace DotmimSyncLegacy.Data
 {
     public class DmTableCollection : ICollection<DmTable>
     {

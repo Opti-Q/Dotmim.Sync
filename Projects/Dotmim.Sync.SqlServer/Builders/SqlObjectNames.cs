@@ -1,10 +1,10 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Data;
 using System;
 using System.Collections.Generic;
 
 
-namespace Dotmim.Sync.SqlServer.Builders
+namespace DotmimSyncLegacy.SqlServer.Builders
 {
     public class SqlObjectNames
     {

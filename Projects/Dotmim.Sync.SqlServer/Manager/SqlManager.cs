@@ -1,7 +1,7 @@
-﻿using Dotmim.Sync.Manager;
+﻿using DotmimSyncLegacy.Manager;
 using System.Data.Common;
 
-namespace Dotmim.Sync.SqlServer.Manager
+namespace DotmimSyncLegacy.SqlServer.Manager
 {
     public class SqlManager : DbManager
     {

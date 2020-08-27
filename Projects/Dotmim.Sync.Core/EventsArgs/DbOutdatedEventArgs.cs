@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     public class OutdatedEventArgs : EventArgs
     {

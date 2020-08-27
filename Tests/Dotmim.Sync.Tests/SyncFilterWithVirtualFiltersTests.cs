@@ -2,14 +2,14 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Filter;
-using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.Tests.Misc;
+using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Filter;
+using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.Tests.Misc;
 using Xunit;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class SyncVirtualFilterFixture
     {
@@ -120,7 +120,7 @@ namespace Dotmim.Sync.Test
     }
 
     [Collection("Sync")]
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class SyncFilterWithVirtualFiltersTests : IClassFixture<SyncVirtualFilterFixture>, IDisposable
     {
         SyncVirtualFilterFixture fixture;

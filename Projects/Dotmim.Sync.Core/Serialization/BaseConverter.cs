@@ -1,10 +1,10 @@
-﻿using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Dotmim.Sync.Serialization
+namespace DotmimSyncLegacy.Serialization
 {
     public abstract class BaseConverter<T>
     {

@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 
-namespace Dotmim.Sync.Web
+namespace DotmimSyncLegacy.Web
 {
     public class WebSyncException : HttpRequestException
     {
@@ -16,7 +16,7 @@ namespace Dotmim.Sync.Web
         /// <summary>
         /// Get message string from Exception
         /// </summary>
-        internal static WebSyncException GetWebSyncException(Exception exception)
+        public static WebSyncException GetWebSyncException(Exception exception)
         {
             WebSyncException webSyncException = new WebSyncException(exception.Message);
 

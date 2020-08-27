@@ -1,11 +1,11 @@
-﻿using Dotmim.Sync.Batch;
-using Dotmim.Sync.Builders;
-using Dotmim.Sync.Cache;
-using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Log;
-using Dotmim.Sync.Manager;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Data.Surrogate;
+﻿using DotmimSyncLegacy.Batch;
+using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Cache;
+using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Log;
+using DotmimSyncLegacy.Manager;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Data.Surrogate;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,12 +14,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
-using Dotmim.Sync.Serialization;
+using DotmimSyncLegacy.Serialization;
 using System.Diagnostics;
 using System.Text;
-using Dotmim.Sync.Messages;
+using DotmimSyncLegacy.Messages;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     /// <summary>
     /// Core provider : should be implemented by any server / client provider

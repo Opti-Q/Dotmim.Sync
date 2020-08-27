@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.IO;
 
-namespace Dotmim.Sync.Serialization
+namespace DotmimSyncLegacy.Serialization
 {
     public class JsonConverter<T> : BaseConverter<T>
     {

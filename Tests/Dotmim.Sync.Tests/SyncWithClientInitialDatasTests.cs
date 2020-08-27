@@ -1,19 +1,19 @@
-﻿using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Tests.Misc;
-using Dotmim.Sync.Test.SqlUtils;
+﻿using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Tests.Misc;
+using DotmimSyncLegacy.Test.SqlUtils;
 using System;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Xunit;
 using System.IO;
 using Microsoft.Data.Sqlite;
-using Dotmim.Sync.Sqlite;
+using DotmimSyncLegacy.Sqlite;
 using System.Data.Common;
 using System.Data;
 using System.Diagnostics;
 
-namespace Dotmim.Sync.Tests
+namespace DotmimSyncLegacy.Tests
 {
 
 
@@ -139,7 +139,7 @@ namespace Dotmim.Sync.Tests
     }
 
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class SyncWithClientInitialDatasTests : IClassFixture<SyncWithClientInitialDatasTestsFixture>
     {
         SqlSyncProvider serverProvider;

@@ -1,5 +1,5 @@
-﻿using Dotmim.Sync.Data;
-using Dotmim.Sync.Manager;
+﻿using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Manager;
 using System;
 using System.Data;
 using System.Data.Common;
@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Dotmim.Sync.SqlServer.Manager
+namespace DotmimSyncLegacy.SqlServer.Manager
 {
     public class SqlManagerTable : IDbManagerTable
     {

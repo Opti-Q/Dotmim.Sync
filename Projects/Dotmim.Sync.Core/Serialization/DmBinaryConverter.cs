@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Dotmim.Sync.Serialization
+namespace DotmimSyncLegacy.Serialization
 {
     public class DmBinaryConverter<T> : BaseConverter<T>
     {

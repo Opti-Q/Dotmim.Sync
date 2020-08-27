@@ -1,11 +1,11 @@
-﻿using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using System.Linq;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class DmRowTests
     {

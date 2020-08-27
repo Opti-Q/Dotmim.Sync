@@ -5,7 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 
-namespace Dotmim.Sync.Test.SqlUtils
+namespace DotmimSyncLegacy.Test.SqlUtils
 {
     public class HelperDB
     {  

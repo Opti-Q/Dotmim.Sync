@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 
-namespace Dotmim.Sync.Serialization.Serializers
+namespace DotmimSyncLegacy.Serialization.Serializers
 {
     public class ArraySerializer : TypeSerializer
     {

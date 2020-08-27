@@ -1,4 +1,4 @@
-﻿using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,7 +6,7 @@ using System.Data.Common;
 using System.Data;
 using System.Threading.Tasks;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
 
     /// <summary>

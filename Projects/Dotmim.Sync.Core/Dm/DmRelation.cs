@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Linq;
 
-namespace Dotmim.Sync.Data
+namespace DotmimSyncLegacy.Data
 {
     public class DmRelation
     {

@@ -1,14 +1,14 @@
-﻿using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Tests.Misc;
-using Dotmim.Sync.Test.SqlUtils;
+﻿using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Tests.Misc;
+using DotmimSyncLegacy.Test.SqlUtils;
 using System;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Xunit;
-using Dotmim.Sync.MySql;
+using DotmimSyncLegacy.MySql;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class MySqlSyncIdentityColumnNotPkFixture : IDisposable
     {
@@ -60,7 +60,7 @@ namespace Dotmim.Sync.Test
     }
 
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class MySqlSyncIdentityColumnNotPkTests : IClassFixture<MySqlSyncIdentityColumnNotPkFixture>
     {
         SqlSyncProvider serverProvider;

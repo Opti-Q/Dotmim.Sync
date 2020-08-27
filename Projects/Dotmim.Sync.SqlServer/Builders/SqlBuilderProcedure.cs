@@ -1,18 +1,18 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System;
 using System.Text;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Data;
-using Dotmim.Sync.Log;
+using DotmimSyncLegacy.Log;
 using System.Linq;
-using Dotmim.Sync.Filter;
-using Dotmim.Sync.SqlServer.Manager;
+using DotmimSyncLegacy.Filter;
+using DotmimSyncLegacy.SqlServer.Manager;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-namespace Dotmim.Sync.SqlServer.Builders
+namespace DotmimSyncLegacy.SqlServer.Builders
 {
     public class SqlBuilderProcedure : IDbBuilderProcedureHelper
     {

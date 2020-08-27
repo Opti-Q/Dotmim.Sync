@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Messages
+namespace DotmimSyncLegacy.Messages
 {
     /// <summary>
     /// Message exchanged during the Begin session sync stage

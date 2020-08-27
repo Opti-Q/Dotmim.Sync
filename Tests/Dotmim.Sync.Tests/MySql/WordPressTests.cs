@@ -1,6 +1,6 @@
-﻿using Dotmim.Sync.MySql;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.Tests.Misc;
+﻿using DotmimSyncLegacy.MySql;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.Tests.Misc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class WordPressFixture : IDisposable
     {
@@ -57,7 +57,7 @@ namespace Dotmim.Sync.Test
         }
     }
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class WordPressTests : IClassFixture<WordPressFixture>
     {
         WordPressFixture fixture;

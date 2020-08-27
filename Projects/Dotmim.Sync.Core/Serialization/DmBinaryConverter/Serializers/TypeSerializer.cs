@@ -7,9 +7,9 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Collections.ObjectModel;
-using Dotmim.Sync.Serialization.Converters;
+using DotmimSyncLegacy.Serialization.Converters;
 
-namespace Dotmim.Sync.Serialization.Serializers
+namespace DotmimSyncLegacy.Serialization.Serializers
 {
     public abstract class TypeSerializer
     {

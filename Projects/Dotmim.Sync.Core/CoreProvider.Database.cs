@@ -1,18 +1,18 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Data;
 using System;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
-using Dotmim.Sync.Filter;
+using DotmimSyncLegacy.Filter;
 using System.Collections.Generic;
-using Dotmim.Sync.EventsArgs;
-using Dotmim.Sync.Messages;
+using DotmimSyncLegacy.EventsArgs;
+using DotmimSyncLegacy.Messages;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     /// <summary>
     /// Core provider : should be implemented by any server / client provider

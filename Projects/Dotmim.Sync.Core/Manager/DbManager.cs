@@ -3,7 +3,7 @@ using System.Data.Common;
 using System.Globalization;
 using System.Text;
 
-namespace Dotmim.Sync.Manager
+namespace DotmimSyncLegacy.Manager
 {
     public abstract class DbManager
     {

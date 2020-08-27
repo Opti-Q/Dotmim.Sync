@@ -1,13 +1,13 @@
-﻿using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Tests.Misc;
-using Dotmim.Sync.Test.SqlUtils;
+﻿using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Tests.Misc;
+using DotmimSyncLegacy.Test.SqlUtils;
 using System;
 using System.Data.SqlClient;
 using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class SyncTwoTablesFixture : IDisposable
     {
@@ -87,7 +87,7 @@ namespace Dotmim.Sync.Test
 
     }
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class SyncTwoTablesTests : IClassFixture<SyncTwoTablesFixture>
     {
         SyncTwoTablesFixture fixture;

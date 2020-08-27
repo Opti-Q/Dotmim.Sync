@@ -1,8 +1,8 @@
 ﻿using System.Data.Common;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Enumerations;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Enumerations;
 
-namespace Dotmim.Sync.EventsArgs
+namespace DotmimSyncLegacy.EventsArgs
 {
     public class TableProvisionedEventArgs
     {

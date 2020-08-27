@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Globalization;
 
-namespace Dotmim.Sync.Serialization.Converters
+namespace DotmimSyncLegacy.Serialization.Converters
 {
     public abstract class ObjectConverter
     {

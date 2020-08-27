@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Filter;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Filter;
 
-namespace Dotmim.Sync.Builders
+namespace DotmimSyncLegacy.Builders
 {
     /// <summary>
     /// This class is responsible to create a stored proc for one particular sync table

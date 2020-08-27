@@ -6,9 +6,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Data;
-using Dotmim.Sync.Enumerations;
+using DotmimSyncLegacy.Enumerations;
 
-namespace Dotmim.Sync.Data
+namespace DotmimSyncLegacy.Data
 {
 
     public class DmTable

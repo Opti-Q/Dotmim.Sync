@@ -1,9 +1,9 @@
-﻿using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Manager
+namespace DotmimSyncLegacy.Manager
 {
     public abstract class DbConverter
     {

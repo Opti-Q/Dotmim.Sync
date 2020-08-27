@@ -1,10 +1,10 @@
-﻿using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Data;
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace Dotmim.Sync.Data.Surrogate
+namespace DotmimSyncLegacy.Data.Surrogate
 {
     /// <summary>
     /// Represents a surrogate of a DmSet object, which DotMim Sync uses during custom binary serialization.

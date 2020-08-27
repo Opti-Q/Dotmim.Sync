@@ -1,6 +1,6 @@
-﻿using Dotmim.Sync.Tests.Misc;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.SqlServer;
+﻿using DotmimSyncLegacy.Tests.Misc;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.SqlServer;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -9,14 +9,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using System.Diagnostics;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.IO;
 using Microsoft.Data.Sqlite;
-using Dotmim.Sync.Sqlite;
+using DotmimSyncLegacy.Sqlite;
 using System.ComponentModel;
 using System.Data.Common;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
 
     public class SqliteSyncAllColumnsFixture : IDisposable
@@ -241,7 +241,7 @@ namespace Dotmim.Sync.Test
 
     }
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class SqliteSyncAllColumnsTests : IClassFixture<SqliteSyncAllColumnsFixture>
     {
         SqliteSyncAllColumnsFixture fixture;

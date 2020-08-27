@@ -4,8 +4,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Sébastien Pertus</Authors>
     <Company>Microsoft</Company>
-    <RootNamespace>Dotmim.Sync</RootNamespace>
-    <Title>Dotmim.Sync.Core</Title>
+    <RootNamespace>DotmimSyncLegacy</RootNamespace>
+    <Title>DotmimSyncLegacy.Core</Title>
     <Summary>Manage a sync process beetween two relational databases provider. Core assembly</Summary>
     <Description>Dotmim Sync core assembly. Manage a sync process beetween two relational databases provider.
 Can't be used alone. Choose a server and a client provider such as Dotmim.Sync.SqlServerProvider or Dotmim.Sync.SqliteProvider</Description>

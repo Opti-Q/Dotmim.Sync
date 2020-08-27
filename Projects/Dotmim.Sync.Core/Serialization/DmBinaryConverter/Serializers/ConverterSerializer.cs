@@ -1,11 +1,11 @@
-﻿using Dotmim.Sync.Serialization.Converters;
+﻿using DotmimSyncLegacy.Serialization.Converters;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
 
-namespace Dotmim.Sync.Serialization.Serializers
+namespace DotmimSyncLegacy.Serialization.Serializers
 {
     class ConverterSerializer : TypeSerializer
     {

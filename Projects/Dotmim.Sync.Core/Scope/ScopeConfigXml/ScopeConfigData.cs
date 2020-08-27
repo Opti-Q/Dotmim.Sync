@@ -1,4 +1,4 @@
-﻿using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace Dotmim.Sync.Scope
+namespace DotmimSyncLegacy.Scope
 {
     /// <summary>
     /// Represents a scope config xml or json data

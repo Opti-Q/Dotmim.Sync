@@ -1,7 +1,7 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Log;
-using Dotmim.Sync.SqlServer.Manager;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Log;
+using DotmimSyncLegacy.SqlServer.Manager;
 using System;
 using System.Data;
 using System.Data.Common;
@@ -10,7 +10,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace Dotmim.Sync.SqlServer.Builders
+namespace DotmimSyncLegacy.SqlServer.Builders
 {
     public class SqlBuilderTable : IDbBuilderTableHelper
     {

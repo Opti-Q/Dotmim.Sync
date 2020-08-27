@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Data;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 
-namespace Dotmim.Sync.SqlServer
+namespace DotmimSyncLegacy.SqlServer
 {
     public static class SqlExtensionsMethods
     {

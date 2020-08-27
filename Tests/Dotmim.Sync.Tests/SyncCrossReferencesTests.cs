@@ -1,13 +1,13 @@
-﻿using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.Tests.Misc;
+﻿using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.Tests.Misc;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Dotmim.Sync.Tests
+namespace DotmimSyncLegacy.Tests
 {
 
     public class SyncCrossReferencesFixture : IDisposable
@@ -66,7 +66,7 @@ namespace Dotmim.Sync.Tests
 
     }
 
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class SyncCrossReferencesTests : IClassFixture<SyncCrossReferencesFixture>
     {
         SqlSyncProvider serverProvider;

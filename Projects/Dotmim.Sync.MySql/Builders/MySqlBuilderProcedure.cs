@@ -1,19 +1,19 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System;
 using System.Text;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Data.Common;
 using System.Data;
-using Dotmim.Sync.Log;
+using DotmimSyncLegacy.Log;
 using System.Linq;
-using Dotmim.Sync.Filter;
+using DotmimSyncLegacy.Filter;
 using MySql.Data.MySqlClient;
-using Dotmim.Sync.MySql;
-using Dotmim.Sync.MySql.Builders;
+using DotmimSyncLegacy.MySql;
+using DotmimSyncLegacy.MySql.Builders;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-namespace Dotmim.Sync.MySql
+namespace DotmimSyncLegacy.MySql
 {
     public class MySqlBuilderProcedure : IDbBuilderProcedureHelper
     {

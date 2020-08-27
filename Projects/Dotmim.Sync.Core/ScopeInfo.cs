@@ -1,7 +1,7 @@
-﻿using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Enumerations;
 using System;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     /// <summary>
     /// Mapping sur la table ScopeInfo

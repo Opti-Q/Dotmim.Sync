@@ -1,15 +1,15 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Cache;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Manager;
-using Dotmim.Sync.SqlServer.Builders;
-using Dotmim.Sync.SqlServer.Manager;
-using Dotmim.Sync.SqlServer.Scope;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Cache;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Manager;
+using DotmimSyncLegacy.SqlServer.Builders;
+using DotmimSyncLegacy.SqlServer.Manager;
+using DotmimSyncLegacy.SqlServer.Scope;
 using System;
 using System.Data.Common;
 using System.Data.SqlClient;
 
-namespace Dotmim.Sync.SqlServer
+namespace DotmimSyncLegacy.SqlServer
 {
     public class SqlSyncProvider : CoreProvider
     {

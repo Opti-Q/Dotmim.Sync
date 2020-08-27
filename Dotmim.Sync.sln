@@ -1,19 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27019.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotmim.Sync.Core", "Projects\Dotmim.Sync.Core\Dotmim.Sync.Core.csproj", "{C58C0E87-84B4-4DC7-A2F2-CCC2B9DAEF86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotmimSyncLegacy.Core", "Projects\Dotmim.Sync.Core\DotmimSyncLegacy.Core.csproj", "{C58C0E87-84B4-4DC7-A2F2-CCC2B9DAEF86}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotmim.Sync.SqlServer", "Projects\Dotmim.Sync.SqlServer\Dotmim.Sync.SqlServer.csproj", "{6F38701F-1DC0-4E80-BA56-29BF5A37B768}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotmimSyncLegacy.SqlServer", "Projects\Dotmim.Sync.SqlServer\DotmimSyncLegacy.SqlServer.csproj", "{6F38701F-1DC0-4E80-BA56-29BF5A37B768}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AC37FDEF-1057-4915-806D-DC22DD68F44B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotmim.Sync.SampleConsole", "Samples\Dotmim.Sync.SampleConsole\Dotmim.Sync.SampleConsole.csproj", "{F8C90F8B-6A00-4A03-A74D-5703860EF406}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotmim.Sync.Sqlite", "Projects\Dotmim.Sync.Sqlite\Dotmim.Sync.Sqlite.csproj", "{92259FC7-577B-4328-A336-3B0FD5E265E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotmimSyncLegacy.Sqlite", "Projects\Dotmim.Sync.Sqlite\DotmimSyncLegacy.Sqlite.csproj", "{92259FC7-577B-4328-A336-3B0FD5E265E1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotmim.Sync.MySql", "Projects\Dotmim.Sync.MySql\Dotmim.Sync.MySql.csproj", "{C8DD2EBA-777F-498F-ACDA-D9966C8FD1A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotmimSyncLegacy.MySql", "Projects\Dotmim.Sync.MySql\DotmimSyncLegacy.MySql.csproj", "{C8DD2EBA-777F-498F-ACDA-D9966C8FD1A1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotmim.Sync.Tests", "Tests\Dotmim.Sync.Tests\Dotmim.Sync.Tests.csproj", "{3AEABB50-D3EA-428B-BF01-06CA578EDA73}"
 EndProject
@@ -29,9 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthSyncSampleWebServer", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthSyncSampleAppClient", "Samples\AuthSyncSampleAppClient\AuthSyncSampleAppClient.csproj", "{E0C5AE28-1C86-4904-9827-DBE3445F394C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotmim.Sync.Web.Server", "Projects\Dotmim.Sync.Web.Server\Dotmim.Sync.Web.Server.csproj", "{48DBC5C6-B339-411C-870E-76F2489120C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotmimSyncLegacy.Web.Server", "Projects\Dotmim.Sync.Web.Server\DotmimSyncLegacy.Web.Server.csproj", "{48DBC5C6-B339-411C-870E-76F2489120C1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotmim.Sync.Web.Client", "Projects\Dotmim.Sync.Web.Client\Dotmim.Sync.Web.Client.csproj", "{270D05BA-80DB-4C45-A19B-75309EB6B839}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotmimSyncLegacy.Web.Client", "Projects\Dotmim.Sync.Web.Client\DotmimSyncLegacy.Web.Client.csproj", "{270D05BA-80DB-4C45-A19B-75309EB6B839}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UWPSyncSampleWebApi2", "Samples\Dotmim.Sync.SampleUWP.WebApi2\UWPSyncSampleWebApi2.csproj", "{D25BC4DC-93D6-4EB5-84AD-30B851E397C2}"
 EndProject
@@ -313,8 +313,8 @@ Global
 		{D3BF4ABB-329B-40BA-BA00-B07A15B6EE00} = {AC37FDEF-1057-4915-806D-DC22DD68F44B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {348020ED-748B-4CC8-AA1D-9F7D36E2AC12}
 		BuildVersion_StartDate = 2000/1/1
+		SolutionGuid = {348020ED-748B-4CC8-AA1D-9F7D36E2AC12}
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

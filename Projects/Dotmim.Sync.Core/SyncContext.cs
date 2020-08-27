@@ -1,8 +1,8 @@
-﻿using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Enumerations;
 using System;
-using Dotmim.Sync.Filter;
+using DotmimSyncLegacy.Filter;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     /// <summary>
     /// Context of the current Sync session

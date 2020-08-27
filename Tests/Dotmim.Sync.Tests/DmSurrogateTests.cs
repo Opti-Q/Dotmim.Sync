@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Data;
-using Dotmim.Sync.Data.Surrogate;
+﻿using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Data.Surrogate;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class DmSurrogateTests
     {

@@ -1,15 +1,15 @@
-﻿using Dotmim.Sync.Batch;
-using Dotmim.Sync.Builders;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Filter;
-using Dotmim.Sync.Messages;
+﻿using DotmimSyncLegacy.Batch;
+using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Filter;
+using DotmimSyncLegacy.Messages;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     public interface IProvider
     {

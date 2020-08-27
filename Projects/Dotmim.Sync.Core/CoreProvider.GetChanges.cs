@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Batch;
-using Dotmim.Sync.Builders;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Data.Surrogate;
-using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Filter;
-using Dotmim.Sync.Manager;
-using Dotmim.Sync.Messages;
-using Dotmim.Sync.Serialization;
+﻿using DotmimSyncLegacy.Batch;
+using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Data.Surrogate;
+using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Filter;
+using DotmimSyncLegacy.Manager;
+using DotmimSyncLegacy.Messages;
+using DotmimSyncLegacy.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,9 +17,9 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DbColumn = Dotmim.Sync.Manager.DbColumn;
+using DbColumn = DotmimSyncLegacy.Manager.DbColumn;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
     public abstract partial class CoreProvider
     {

@@ -1,13 +1,13 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Cache;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.Manager;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Cache;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Manager;
 using System;
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using System.IO;
 
-namespace Dotmim.Sync.Sqlite
+namespace DotmimSyncLegacy.Sqlite
 {
 
     public class SqliteSyncProvider : CoreProvider

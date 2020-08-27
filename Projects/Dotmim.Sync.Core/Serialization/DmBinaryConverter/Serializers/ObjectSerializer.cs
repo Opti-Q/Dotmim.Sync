@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Dotmim.Sync.Serialization.Serializers
+namespace DotmimSyncLegacy.Serialization.Serializers
 {
     public class ObjectSerializer : TypeSerializer
     {

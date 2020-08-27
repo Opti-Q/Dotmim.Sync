@@ -1,9 +1,9 @@
-﻿using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
     public class DmViewTests
     {

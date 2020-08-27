@@ -1,15 +1,15 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System;
 using System.Text;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Data;
-using Dotmim.Sync.Log;
+using DotmimSyncLegacy.Log;
 using Microsoft.Data.Sqlite;
 using System.Diagnostics;
 
-namespace Dotmim.Sync.Sqlite
+namespace DotmimSyncLegacy.Sqlite
 {
     public class SqliteBuilderTable : IDbBuilderTableHelper
     {

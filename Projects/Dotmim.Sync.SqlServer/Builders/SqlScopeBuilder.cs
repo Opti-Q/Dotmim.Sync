@@ -1,7 +1,7 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System.Data.Common;
 
-namespace Dotmim.Sync.SqlServer.Scope
+namespace DotmimSyncLegacy.SqlServer.Scope
 {
     public class SqlScopeBuilder : DbScopeBuilder
     {

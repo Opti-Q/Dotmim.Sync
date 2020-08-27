@@ -1,10 +1,10 @@
-﻿using Dotmim.Sync.Builders;
+﻿using DotmimSyncLegacy.Builders;
 using System;
 using System.Text;
-using Dotmim.Sync.Data;
+using DotmimSyncLegacy.Data;
 using System.Data.Common;
 
-namespace Dotmim.Sync.SqlServer.Builders
+namespace DotmimSyncLegacy.SqlServer.Builders
 {
 
     /// <summary>

@@ -1,10 +1,10 @@
-﻿using Dotmim.Sync.Data;
-using Dotmim.Sync.Enumerations;
+﻿using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Enumerations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dotmim.Sync
+namespace DotmimSyncLegacy
 {
 
     public abstract class BaseProgressEventArgs

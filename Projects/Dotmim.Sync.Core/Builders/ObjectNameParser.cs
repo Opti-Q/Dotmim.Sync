@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Dotmim.Sync.Builders
+namespace DotmimSyncLegacy.Builders
 {
     /// <summary>
     /// Parse a database object (like Fabrikam.dbo.Client or dbo.Client or [dbo].[Client] etc ...

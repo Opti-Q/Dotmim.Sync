@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dotmim.Sync.Data
+namespace DotmimSyncLegacy.Data
 {
 
     public class DmView : ICollection<DmRow>, IDisposable

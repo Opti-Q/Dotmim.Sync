@@ -1,6 +1,6 @@
-﻿using Dotmim.Sync.Builders;
-using Dotmim.Sync.Data;
-using Dotmim.Sync.SqlServer.Manager;
+﻿using DotmimSyncLegacy.Builders;
+using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.SqlServer.Manager;
 using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Concurrent;
@@ -12,7 +12,7 @@ using System.Diagnostics;
 using System.Linq;
 
 
-namespace Dotmim.Sync.SqlServer.Builders
+namespace DotmimSyncLegacy.SqlServer.Builders
 {
     public class SqlSyncAdapter : DbSyncAdapter
     {

@@ -8,19 +8,19 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
-using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Sqlite;
-using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Test.SqlUtils;
-using Dotmim.Sync.Tests.Misc;
-using Dotmim.Sync.Web.Client;
-using Dotmim.Sync.Web.Server;
+using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Sqlite;
+using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Test.SqlUtils;
+using DotmimSyncLegacy.Tests.Misc;
+using DotmimSyncLegacy.Web.Client;
+using DotmimSyncLegacy.Web.Server;
 using Microsoft.Data.Sqlite;
 using Microsoft.Owin.Hosting;
 using Owin;
 using Xunit;
 
-namespace Dotmim.Sync.Tests
+namespace DotmimSyncLegacy.Tests
 {
     public class SqliteSyncHttpFixture : IDisposable
     {
@@ -178,7 +178,7 @@ namespace Dotmim.Sync.Tests
     }
 
     [Collection("Http")]
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.WebApi2.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.WebApi2.Tests")]
     public class SqliteSyncHttpTests : IClassFixture<SqliteSyncHttpFixture>, IDisposable
     {
         SqlSyncProvider serverProvider;

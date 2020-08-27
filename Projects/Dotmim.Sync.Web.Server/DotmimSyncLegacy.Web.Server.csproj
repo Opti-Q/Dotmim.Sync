@@ -4,14 +4,14 @@
     <Version>0.2.9.2</Version>
     <Authors>Sébastien Pertus, Gentledepp</Authors>
     <Company>Microsoft</Company>
-    <Title>Dotmim.Sync.Web.Server</Title>
+    <Title>DotmimSyncLegacy.Web.Server</Title>
     <Description>Proxy to be able to Sync through an ASP.NET CORE application. 
 Can't work without a Server provider, you have to choose an existing one to be able to work with the Proxy</Description>
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
     <PackageTags>Dotmim.Sync, ASP.NET, ASP.NET Core, ASP.NET Core Web Sync Proxy, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyName>Dotmim.Sync.Web.Server</AssemblyName>
-    <RootNamespace>Dotmim.Sync.Web.Server</RootNamespace>
+    <AssemblyName>DotmimSyncLegacy.Web.Server</AssemblyName>
+    <RootNamespace>DotmimSyncLegacy.Web.Server</RootNamespace>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Product>Dotmim.Sync.Web.Server OPTI-Q</Product>
   </PropertyGroup>
@@ -46,8 +46,8 @@ Can't work without a Server provider, you have to choose an existing one to be a
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dotmim.Sync.Core\Dotmim.Sync.Core.csproj" />
-    <ProjectReference Include="..\Dotmim.Sync.Web.Client\Dotmim.Sync.Web.Client.csproj" />
+    <ProjectReference Include="..\Dotmim.Sync.Core\DotmimSyncLegacy.Core.csproj" />
+    <ProjectReference Include="..\Dotmim.Sync.Web.Client\DotmimSyncLegacy.Web.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

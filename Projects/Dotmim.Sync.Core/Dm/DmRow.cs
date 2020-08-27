@@ -9,7 +9,7 @@ using System.Xml;
 using System.Collections.ObjectModel;
 using System.Text;
 
-namespace Dotmim.Sync.Data
+namespace DotmimSyncLegacy.Data
 {
 
     /// <summary>

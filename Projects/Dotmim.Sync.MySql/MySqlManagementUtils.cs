@@ -1,14 +1,14 @@
-﻿using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Data;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
 using System.Linq;
 using MySql.Data.MySqlClient;
-using Dotmim.Sync.Builders;
+using DotmimSyncLegacy.Builders;
 using System;
 using System.Text.RegularExpressions;
 
-namespace Dotmim.Sync.MySql
+namespace DotmimSyncLegacy.MySql
 {
     public static class MySqlManagementUtils
     {

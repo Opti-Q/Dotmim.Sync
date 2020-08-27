@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Batch
+namespace DotmimSyncLegacy.Batch
 {
     public enum BatchType
     {

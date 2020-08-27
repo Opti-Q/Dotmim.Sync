@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Filter
+namespace DotmimSyncLegacy.Filter
 {
     [Serializable]
     public class SyncParameterCollection : List<SyncParameter>

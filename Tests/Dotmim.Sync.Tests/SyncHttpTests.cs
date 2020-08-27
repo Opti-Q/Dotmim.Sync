@@ -1,17 +1,17 @@
-﻿using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Web;
-using Dotmim.Sync.SqlServer;
-using Dotmim.Sync.Tests.Misc;
-using Dotmim.Sync.Test.SqlUtils;
+﻿using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Web;
+using DotmimSyncLegacy.SqlServer;
+using DotmimSyncLegacy.Tests.Misc;
+using DotmimSyncLegacy.Test.SqlUtils;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Dotmim.Sync.Web.Client;
-using Dotmim.Sync.Web.Server;
+using DotmimSyncLegacy.Web.Client;
+using DotmimSyncLegacy.Web.Server;
 using Xunit;
 
-namespace Dotmim.Sync.Test
+namespace DotmimSyncLegacy.Test
 {
 
     public class SyncSimpleHttpFixture : IDisposable
@@ -120,7 +120,7 @@ namespace Dotmim.Sync.Test
 
 
     [Collection("Http")]
-    [TestCaseOrderer("Dotmim.Sync.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
+    [TestCaseOrderer("DotmimSyncLegacy.Tests.Misc.PriorityOrderer", "Dotmim.Sync.Tests")]
     public class SyncHttpTests : IClassFixture<SyncSimpleHttpFixture>
     {
         SqlSyncProvider serverProvider;

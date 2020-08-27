@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Cache
+namespace DotmimSyncLegacy.Cache
 {
     public class InMemoryCache : ICache
     {

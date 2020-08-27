@@ -1,12 +1,12 @@
-﻿using Dotmim.Sync.Data;
-using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Filter;
+﻿using DotmimSyncLegacy.Data;
+using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Filter;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dotmim.Sync.Messages
+namespace DotmimSyncLegacy.Messages
 {
     /// <summary>
     /// Message exchanged during the Get Changes Batch sync stage

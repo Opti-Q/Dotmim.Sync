@@ -1,16 +1,16 @@
-﻿using Dotmim.Sync.Data;
+﻿using DotmimSyncLegacy.Data;
 using System;
 using System.Data;
 using MySql.Data.MySqlClient;
-using Dotmim.Sync.Builders;
+using DotmimSyncLegacy.Builders;
 using System.Collections.Generic;
 using System.Linq;
-using Dotmim.Sync.MySql.Builders;
+using DotmimSyncLegacy.MySql.Builders;
 using System.Data.SqlTypes;
 using System.Text;
 using System.Globalization;
 
-namespace Dotmim.Sync.MySql
+namespace DotmimSyncLegacy.MySql
 {
     public static class MySqlExtensionsMethods
     {

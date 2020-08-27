@@ -1,5 +1,5 @@
-﻿using Dotmim.Sync.Enumerations;
-using Dotmim.Sync.Serialization;
+﻿using DotmimSyncLegacy.Enumerations;
+using DotmimSyncLegacy.Serialization;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ using System.Net.Http.Headers;
 
 
 
-namespace Dotmim.Sync.Web.Client
+namespace DotmimSyncLegacy.Web.Client
 {
     /// <summary>
     /// Object in charge to send requests
