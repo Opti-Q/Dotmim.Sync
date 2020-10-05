@@ -301,9 +301,10 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine("\t)");
             stringBuilder.AppendLine(")");
 
+            var sql = stringBuilder.ToString();
 
-            this.AddName(DbCommandType.SelectChanges, stringBuilder.ToString());
-            this.AddName(DbCommandType.SelectChangesWitFilters, stringBuilder.ToString());
+            this.AddName(DbCommandType.SelectChanges, sql);
+            this.AddName(DbCommandType.SelectChangesWitFilters, sql);
         }
 
     }
