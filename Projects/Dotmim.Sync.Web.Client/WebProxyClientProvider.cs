@@ -122,6 +122,12 @@ namespace Dotmim.Sync.Web.Client
 
         }
 
+        // used for testing only
+        internal WebProxyClientProvider(HttpRequestHandler handler)
+        {
+            this.httpRequestHandler = handler;
+
+        }
 
         public void AddScopeParameter(string key, string value)
         {
