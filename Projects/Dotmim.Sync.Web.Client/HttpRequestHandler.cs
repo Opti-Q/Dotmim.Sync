@@ -54,7 +54,7 @@ namespace DotmimSyncLegacy.Web.Client
         /// <summary>
         /// Process a request message with HttpClient object. 
         /// </summary>
-        public async Task<T> ProcessRequest<T>(T content, SerializationFormat serializationFormat,  CancellationToken cancellationToken)
+        public virtual async Task<T> ProcessRequest<T>(T content, SerializationFormat serializationFormat,  CancellationToken cancellationToken)
         {
             if (this.BaseUri == null)
                 throw new ArgumentException("BaseUri is not defined");
