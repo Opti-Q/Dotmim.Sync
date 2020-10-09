@@ -117,6 +117,18 @@ namespace Dotmim.Sync.Tests
             {
                 // Act
                 await agent.SynchronizeAsync();
+
+                // show what happens when bugfix is not in place
+                using (var sc = serverProvider.CreateConnection())
+                {
+                    sc.Open();
+                    var scmd = (SqlCommand)sc.CreateCommand();
+                    scmd.CommandText = "select count(*) from servicetickets where title like @title";
+                    scmd.Parameters.AddWithValue("@title", "test ticket %");
+
+                    var serverCount = scmd.ExecuteScalar();
+                    serverCount.ShouldBe(count);
+                }
             }
             catch (SyncException x)
             {

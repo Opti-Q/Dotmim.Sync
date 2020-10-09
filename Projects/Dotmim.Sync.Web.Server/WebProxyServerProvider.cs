@@ -643,7 +643,7 @@ namespace Dotmim.Sync.Web.Server
             // otherwise, the session was lost somehow and we may loose data!
             if (batchInfo is null && httpMessageContent.BatchIndex != 0)
             {
-                throw new SyncException("Session corrupted/lost: Received another batch part but no batch info exists in session", 
+                throw new SyncException("Session corrupted/lost: Received another batch part but no batch info exists in session",
                     httpMessage.SyncContext.SyncStage, this.LocalProvider.ProviderTypeName, SyncExceptionType.KeyNotFound);
             }
 
@@ -708,7 +708,8 @@ namespace Dotmim.Sync.Web.Server
             }
 
             httpMessageContent.BatchPartInfo.Clear();
-            httpMessageContent.BatchPartInfo.FileName = null;
+            // NOTE: Must not delete the filename, otherwise final batch will fail to load file
+            //httpMessageContent.BatchPartInfo.FileName = null;
 
             httpMessage.Content = httpMessageContent;
 
