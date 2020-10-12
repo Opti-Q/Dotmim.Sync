@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -24,6 +25,7 @@ using Microsoft.Owin.Hosting;
 using Owin;
 using Shouldly;
 using Xunit;
+using SerializationFormat = DotmimSyncLegacy.Enumerations.SerializationFormat;
 
 
 namespace Dotmim.Sync.Tests
@@ -93,7 +95,7 @@ namespace Dotmim.Sync.Tests
 
             // insert 1001 rows
             var count = 3001;
-            InsertRows(count);
+            InsertRowsToClientDb(count);
             var url = new Uri(fixture.BaseAddress, "api/values");
 
             int batchSent = 0;
@@ -147,7 +149,7 @@ namespace Dotmim.Sync.Tests
             exception.ShouldNotBeNull();
             var wse = exception.InnerException as WebSyncException;
             wse.ShouldNotBeNull();
-            wse.Message.ShouldBe("Session corrupted/lost: Received another batch part but no batch info exists in session");
+            wse.Message.ShouldBe("Session corrupted/lost: batchInfo stored in session can't be null if sending an additional batch part info.");
 
             // Arrange 2
             clientProvider = new SqliteSyncProvider(fixture.ClientSqliteFilePath);
@@ -175,6 +177,99 @@ namespace Dotmim.Sync.Tests
             }
         }
 
+        
+        [Fact, TestPriority(2)]
+        public async Task ReceiveMultipleBatches()
+        {
+            // Arrange
+            await agent.SynchronizeAsync();
+
+
+            // insert 1001 rows
+            const int count = 3001;
+            const string ticketPrefix = "server ticket";
+            InsertRowsToServerDb(count, ticketPrefix);
+            var url = new Uri(fixture.BaseAddress, "api/values");
+
+            int batchSent = 0;
+            // create brand new client
+            // make sure the server looses its session after the first successful request!
+            var handler = new TestHttpHandler(
+                url, 
+                CancellationToken.None,
+                (o) =>
+                {
+                    if (o is HttpMessage m && m.Step == HttpStep.GetChangeBatch)
+                    {
+                        // Clear the session cache of the serve - simulating an application pool reset
+                        if(batchSent == 1)
+                            serverProvider.CacheManager.Clear();
+
+                        batchSent++;
+                    }
+                });
+
+            clientProvider = new SqliteSyncProvider(fixture.ClientSqliteFilePath);
+            proxyClientProvider = new WebProxyClientProvider(handler);
+            agent = new SyncAgent(clientProvider, proxyClientProvider);
+            agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
+            agent.Configuration.DownloadBatchSizeInKB = 500;
+
+            SyncException exception = null;
+            try
+            {
+                // Act
+                await agent.SynchronizeAsync();
+
+                // show what happens when bugfix is not in place
+                using (var sc = clientProvider.CreateConnection())
+                {
+                    sc.Open();
+                    var scmd = (SqliteCommand)sc.CreateCommand();
+                    scmd.CommandText = "select count(*) from servicetickets where title like @title";
+                    scmd.Parameters.AddWithValue("@title", $"{ticketPrefix} %");
+
+                    var serverCount = scmd.ExecuteScalar();
+                    serverCount.ShouldBe(count);
+                }
+            }
+            catch (SyncException x)
+            {
+                exception = x;
+            }
+
+            // Assert
+            exception.ShouldNotBeNull();
+            var wse = exception.InnerException as WebSyncException;
+            wse.ShouldNotBeNull();
+            wse.Message.ShouldBe("Session corrupted/lost: batchInfo stored in session can't be null if requesting another batch part info.");
+
+            // Arrange 2
+            clientProvider = new SqliteSyncProvider(fixture.ClientSqliteFilePath);
+            proxyClientProvider = new WebProxyClientProvider(url);
+            agent = new SyncAgent(clientProvider, proxyClientProvider);
+            agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
+            agent.Configuration.DownloadBatchSizeInKB = 500;
+
+            // Act 2
+            var session = await agent.SynchronizeAsync();
+
+            // Assert 2
+            session.TotalChangesUploaded.ShouldBe(0);
+            session.TotalChangesDownloaded.ShouldBe(count);
+
+            using (var sc = clientProvider.CreateConnection())
+            {
+                sc.Open();
+                var scmd = (SqliteCommand)sc.CreateCommand();
+                scmd.CommandText = "select count(*) from servicetickets where title like @title";
+                scmd.Parameters.AddWithValue("@title", "test ticket %");
+
+                var serverCount = scmd.ExecuteScalar();
+                serverCount.ShouldBe(count);
+            }
+        }
+
         public class TestHttpHandler : HttpRequestHandler
         {
             private readonly Action<object> action;
@@ -193,7 +288,7 @@ namespace Dotmim.Sync.Tests
             }
         }
 
-        private void InsertRows(int count)
+        private void InsertRowsToClientDb(int count)
         {
             var insertRowScript =
                 $@"INSERT INTO [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) 
@@ -237,6 +332,50 @@ namespace Dotmim.Sync.Tests
 
         }
 
+        private void InsertRowsToServerDb(int count, string titlePrefix)
+        {
+            var insertRowScript =
+                $@"INSERT INTO [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) 
+                VALUES (@id, @title, @description, 1, 0, getutcdate(), NULL, 1)";
+
+            var longString = new String('x', 100);
+
+            using (var sqlConnection = new SqlConnection(fixture.ServerConnectionString))
+            {
+                sqlConnection.Open();
+                using (var tx = sqlConnection.BeginTransaction())
+                {
+                    using (var sqlCmd = new SqlCommand(insertRowScript, sqlConnection))
+                    {
+                        sqlCmd.Parameters.AddWithValue("@id", Guid.NewGuid()).SetDbType(DbType.Guid).SetLength(16);
+                        sqlCmd.Parameters.AddWithValue("@title", $"test ticket ").SetDbType(DbType.String).SetLength(100);
+                        sqlCmd.Parameters.AddWithValue("@description", longString).SetDbType(DbType.String).SetLength(100);
+                        sqlCmd.Transaction = tx;
+                        sqlCmd.Prepare();
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            foreach (SqlParameter p in sqlCmd.Parameters)
+                            {
+                                if (p.ParameterName == "@id")
+                                    p.Value = Guid.NewGuid();
+                                if (p.ParameterName == "@title")
+                                    p.Value = $"{titlePrefix} {i + 1:0000}";
+                                if (p.ParameterName == "@description")
+                                    p.Value = longString;
+                            }
+
+                            var nbRowsInserted = sqlCmd.ExecuteNonQuery();
+                            if (nbRowsInserted < 0)
+                                throw new Exception("Row not inserted");
+                        }
+                    }
+                    tx.Commit();
+                }
+            }
+
+        }
+
 
         public void Dispose()
         {
@@ -247,6 +386,20 @@ namespace Dotmim.Sync.Tests
 
             if (Directory.Exists(this.batchDir))
                 Directory.Delete(this.batchDir, true);
+        }
+    }
+
+    internal static class SqlParameterExtensions
+    {
+        public static SqlParameter SetDbType(this SqlParameter p, DbType type)
+        {
+            p.DbType = type;
+            return p;
+        }
+        public static SqlParameter SetLength(this SqlParameter p, int size)
+        {
+            p.Size = size;
+            return p;
         }
     }
 }

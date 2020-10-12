@@ -563,7 +563,8 @@ namespace DotmimSyncLegacy.Web.Server
             var stats = this.LocalProvider.CacheManager.GetValue<ChangesSelected>("GetChangeBatch_ChangesSelected");
 
             if (batchInfo == null)
-                throw new ArgumentNullException("batchInfo stored in session can't be null if request more batch part info.");
+                throw new SyncException("Session corrupted/lost: batchInfo stored in session can't be null if requesting another batch part info.",
+                    httpMessage.SyncContext.SyncStage, this.LocalProvider.ProviderTypeName, SyncExceptionType.Argument);
 
             httpMessageContent.ChangesSelected = stats;
             httpMessageContent.InMemory = batchInfo.InMemory;
@@ -643,8 +644,8 @@ namespace DotmimSyncLegacy.Web.Server
             // otherwise, the session was lost somehow and we may loose data!
             if (batchInfo is null && httpMessageContent.BatchIndex != 0)
             {
-                throw new SyncException("Session corrupted/lost: Received another batch part but no batch info exists in session",
-                    httpMessage.SyncContext.SyncStage, this.LocalProvider.ProviderTypeName, SyncExceptionType.KeyNotFound);
+                throw new SyncException("Session corrupted/lost: batchInfo stored in session can't be null if sending an additional batch part info.",
+                    httpMessage.SyncContext.SyncStage, this.LocalProvider.ProviderTypeName, SyncExceptionType.Argument);
             }
 
             if (batchInfo == null)
