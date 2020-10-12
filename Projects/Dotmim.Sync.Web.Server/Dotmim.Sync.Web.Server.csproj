@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
-    <Version>0.2.9.2</Version>
+    <Version>0.2.9.3</Version>
     <Authors>Sébastien Pertus, Gentledepp</Authors>
     <Company>Microsoft</Company>
     <Title>Dotmim.Sync.Web.Server</Title>
@@ -14,6 +14,7 @@ Can't work without a Server provider, you have to choose an existing one to be a
     <RootNamespace>Dotmim.Sync.Web.Server</RootNamespace>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Product>Dotmim.Sync.Web.Server OPTI-Q</Product>
+    <PackageReleaseNotes>fixed session cache issue where changes sent to server could get lost</PackageReleaseNotes>
   </PropertyGroup>
 
   <!--generate NUGET package including symbols ans source on each release build -->
