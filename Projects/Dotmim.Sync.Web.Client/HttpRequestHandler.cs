@@ -97,7 +97,16 @@ namespace Dotmim.Sync.Web.Client
 
                 // add it to the default header
                 if (this.Cookie != null)
-                    client.DefaultRequestHeaders.Add("Cookie", this.Cookie.ToString());
+                {
+                    var cookieValue = this.Cookie.ToString();
+                    if (client.DefaultRequestHeaders.TryGetValues("Cookie", out var cookies))
+                    {
+                        if(cookies.All(c => !string.Equals(cookieValue, c)))
+                            client.DefaultRequestHeaders.Add("Cookie", cookieValue);
+                    }
+                    else
+                        client.DefaultRequestHeaders.Add("Cookie", cookieValue);
+                }
 
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri.ToString())
                 {
