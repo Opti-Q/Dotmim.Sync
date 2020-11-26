@@ -158,6 +158,107 @@ namespace Dotmim.Sync.Tests
             }
         }
         
+        [Fact, TestPriority(2)]
+        public async Task DetectingDmRowState_ServerChange()
+        {
+            // Arrange
+            var _ = await agent.SynchronizeAsync();
+
+            var count = 1;
+            var ticketIds = InsertRowsToClientDb(count);
+            var url = new Uri(fixture.BaseAddress, "api/values");
+
+            clientProvider = new SqliteSyncProvider(fixture.ClientSqliteFilePath);
+            proxyClientProvider = new WebProxyClientProvider(url);
+            agent = new SyncAgent(clientProvider, proxyClientProvider);
+            agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
+            agent.Configuration.DownloadBatchSizeInKB = 500;
+            var __ = await agent.SynchronizeAsync();
+
+            // Now update on server
+            UpdateRowInServerDb(ticketIds.Single(), "updated on server :-)");
+
+            // Act
+            var session2 = await agent.SynchronizeAsync();
+
+            // Assert 2
+            session2.TotalChangesUploaded.ShouldBe(0);
+            session2.TotalChangesDownloaded.ShouldBe(count);
+
+            using (var sc = clientProvider.CreateConnection())
+            {
+                sc.Open();
+                var scmd = (SqliteCommand)sc.CreateCommand();
+                scmd.CommandText = "select title from servicetickets where serviceticketid = @id";
+                scmd.Parameters.AddWithValue("@id", ticketIds.Single());
+
+                using (var reader = await scmd.ExecuteReaderAsync())
+                {
+                    while (reader.Read())
+                    {
+                        var col = reader.GetString(0);
+                        col.ShouldBe("updated on server :-)");
+                    }
+
+                }
+            }
+        }
+        
+        [Fact, TestPriority(3)]
+        public async Task DetectingDmRowState_ClientChange()
+        {
+            // Arrange
+            var _ = await agent.SynchronizeAsync();
+
+            var count = 1;
+            var ticketIds = InsertRowsToClientDb(count);
+            var url = new Uri(fixture.BaseAddress, "api/values");
+
+            clientProvider = new SqliteSyncProvider(fixture.ClientSqliteFilePath);
+            proxyClientProvider = new WebProxyClientProvider(url);
+            agent = new SyncAgent(clientProvider, proxyClientProvider);
+            agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
+            agent.Configuration.DownloadBatchSizeInKB = 500;
+            var __ = await agent.SynchronizeAsync();
+
+            // Now update on server
+            UpdateRowInServerDb(ticketIds.Single(), "updated on server :-)");
+
+            // Act
+            var session2 = await agent.SynchronizeAsync();
+
+            // Assert 2
+            session2.TotalChangesUploaded.ShouldBe(0);
+            session2.TotalChangesDownloaded.ShouldBe(count);
+
+            // Act 3
+            UpdateRowInClientDb(ticketIds.Single(), "re-updated on CLIENT!!");
+
+            var session3 = await agent.SynchronizeAsync();
+
+            // Assert
+            session3.TotalChangesUploaded.ShouldBe(count);
+            session3.TotalChangesDownloaded.ShouldBe(0);
+
+            using (var sc = serverProvider.CreateConnection())
+            {
+                sc.Open();
+                var scmd = (SqlCommand)sc.CreateCommand();
+                scmd.CommandText = "select title from servicetickets where serviceticketid = @id";
+                scmd.Parameters.AddWithValue("@id", ticketIds.Single());
+
+                using (var reader = await scmd.ExecuteReaderAsync())
+                {
+                    while (reader.Read())
+                    {
+                        var col = reader.GetString(0);
+                        col.ShouldBe("re-updated on CLIENT!!");
+                    }
+
+                }
+            }
+        }
+        
         public class TestHttpHandler : HttpRequestHandler
         {
             private readonly Action<object> action;
@@ -308,6 +409,43 @@ namespace Dotmim.Sync.Tests
                 }
             }
 
+        }
+
+        private void UpdateRowInServerDb(Guid id, string title)
+        {
+            var insertRowScript =
+                $@"UPDATE  [ServiceTickets]  set [Title] = @title 
+                    where [ServiceTicketID] = @id";
+
+            using (var sqlConnection = new SqlConnection(fixture.ServerConnectionString))
+            {
+                sqlConnection.Open();
+                using (var tx = sqlConnection.BeginTransaction())
+                {
+                    using (var sqlCmd = new SqlCommand(insertRowScript, sqlConnection))
+                    {
+                        sqlCmd.Parameters.AddWithValue("@id", Guid.Empty);
+                        sqlCmd.Parameters.AddWithValue("@title", $"test ticket ");
+                        sqlCmd.Transaction = tx;
+                        //sqlCmd.Prepare();
+
+                        foreach (SqlParameter p in sqlCmd.Parameters)
+                        {
+                            if (p.ParameterName == "@id")
+                                p.Value = id;
+                            if (p.ParameterName == "@title")
+                                p.Value = title;
+                        }
+
+                        var nbRowsUpdated = sqlCmd.ExecuteNonQuery();
+                        if (nbRowsUpdated < 0)
+                            throw new Exception("Row not updated");
+
+
+                    }
+                    tx.Commit();
+                }
+            }
         }
 
 
