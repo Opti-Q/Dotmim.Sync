@@ -845,7 +845,7 @@ namespace Dotmim.Sync.Test
                     // check statistics
                     Assert.Equal(1, session.TotalChangesDownloaded);
                     Assert.Equal(1, session.TotalChangesUploaded);
-                    Assert.Equal(1, session.TotalSyncConflicts);
+                    Assert.Equal(0, session.TotalSyncConflicts);
                 });
                 await server.Run(serverHandler, clientHandler);
             }
@@ -862,7 +862,7 @@ namespace Dotmim.Sync.Test
                     // check statistics
                     Assert.Equal(1, session.TotalChangesDownloaded);
                     Assert.Equal(1, session.TotalChangesUploaded);
-                    Assert.Equal(1, session.TotalSyncConflicts);
+                    Assert.Equal(0, session.TotalSyncConflicts);
                 });
                 await server.Run(serverHandler, clientHandler);
             }

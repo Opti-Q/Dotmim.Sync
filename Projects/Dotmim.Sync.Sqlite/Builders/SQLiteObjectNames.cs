@@ -80,33 +80,74 @@ namespace Dotmim.Sync.Sqlite
 
         private void CreateUpdateCommandText()
         {
-
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"UPDATE {tableName.FullQuotedString}");
-            stringBuilder.Append($"SET {SqliteManagementUtils.CommaSeparatedUpdateFromParameters(this.TableDescription)}");
-            stringBuilder.Append($"WHERE {SqliteManagementUtils.WhereColumnAndParameters(this.TableDescription.PrimaryKey.Columns, "")}");
+            StringBuilder stringBuilderArguments = new StringBuilder();
+            StringBuilder stringBuilderParameters = new StringBuilder();
+            string empty = string.Empty;
+            foreach (var mutableColumn in this.TableDescription.Columns.Where(c => !c.IsReadOnly))
+            {
+                ObjectNameParser columnName = ObjectNameParser.Create(mutableColumn.ColumnName);
+                stringBuilderArguments.Append(string.Concat(empty, columnName.FullQuotedString));
+                stringBuilderParameters.Append(string.Concat(empty, $"@{columnName.FullUnquotedString}"));
+                empty = ", ";
+            }
+            stringBuilder.AppendLine($"INSERT INTO {tableName.FullQuotedString}");
+            stringBuilder.AppendLine($"\t({stringBuilderArguments.ToString()})");
+            stringBuilder.AppendLine($"\tVALUES ({stringBuilderParameters.ToString()})");
+
+            var pkNames = string.Join(", ", 
+                this.TableDescription.PrimaryKey.Columns.Select(c =>
+                    ObjectNameParser.Create(c.ColumnName).FullQuotedString));
+
+            stringBuilder.Append($"ON CONFLICT(").Append(pkNames).AppendLine(") DO UPDATE ");
+            stringBuilder.Append($"SET {SqliteManagementUtils.CommaSeparatedUpdateFromParameters(this.TableDescription)};");
             // sync conflict resolution does not make sense at all
             //stringBuilder.AppendLine($" AND ((SELECT [timestamp] FROM {trackingName.QuotedObjectName} ");
             //stringBuilder.AppendLine($"  WHERE {SqliteManagementUtils.JoinTwoTablesOnClause(this.TableDescription.PrimaryKey.Columns, tableName.QuotedObjectName, trackingName.QuotedObjectName)}");
             //stringBuilder.AppendLine(" ) <= @sync_min_timestamp OR @sync_force_write = 1");
             //stringBuilder.AppendLine(");");
-            this.AddName(DbCommandType.UpdateRow, stringBuilder.ToString());
+            var sql = stringBuilder.ToString();
+            this.AddName(DbCommandType.UpdateRow, sql);
 
         }
 
         private void CreateUpdatedMetadataCommandText()
         {
             StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilderArguments = new StringBuilder();
+            StringBuilder stringBuilderParameters = new StringBuilder();
 
-            stringBuilder.AppendLine($"UPDATE {trackingName.FullQuotedString}");
+            stringBuilder.AppendLine($"INSERT INTO {trackingName.FullQuotedString}");
+
+            string empty = string.Empty;
+            foreach (var pkColumn in this.TableDescription.PrimaryKey.Columns)
+            {
+                ObjectNameParser columnName = ObjectNameParser.Create(pkColumn.ColumnName);
+                stringBuilderArguments.Append(string.Concat(empty, columnName.FullQuotedString));
+                stringBuilderParameters.Append(string.Concat(empty, $"@{columnName.FullUnquotedString}"));
+                empty = ", ";
+            }
+            stringBuilder.AppendLine($"\t({stringBuilderArguments.ToString()}, ");
+            stringBuilder.AppendLine($"\t[create_scope_id], [create_timestamp], [update_scope_id], [update_timestamp],");
+            stringBuilder.AppendLine($"\t[sync_row_is_tombstone], [timestamp], [last_change_datetime])");
+            stringBuilder.AppendLine($"\tVALUES ({stringBuilderParameters.ToString()}, ");
+            stringBuilder.AppendLine($"\t@create_scope_id, @create_timestamp, @update_scope_id, @update_timestamp, ");
+            stringBuilder.AppendLine($"\t@sync_row_is_tombstone, {SqliteObjectNames.TimestampValue}, datetime('now'))");
+
+            var pkNames = string.Join(", ",
+                this.TableDescription.PrimaryKey.Columns.Select(c =>
+                    ObjectNameParser.Create(c.ColumnName).FullQuotedString));
+            // using UPSERT syntax of SQLite 3.24.0 https://www.sqlite.org/draft/lang_UPSERT.html
+            stringBuilder.Append($"ON CONFLICT(").Append(pkNames).AppendLine(") DO UPDATE ");
             stringBuilder.AppendLine($"SET [update_scope_id] = @update_scope_id, ");
             stringBuilder.AppendLine($"\t [update_timestamp] = @update_timestamp, ");
             stringBuilder.AppendLine($"\t [sync_row_is_tombstone] = @sync_row_is_tombstone, ");
             stringBuilder.AppendLine($"\t [timestamp] = {SqliteObjectNames.TimestampValue}, ");
-            stringBuilder.AppendLine($"\t [last_change_datetime] = datetime('now') ");
-            stringBuilder.Append($"WHERE {SqliteManagementUtils.WhereColumnAndParameters(this.TableDescription.PrimaryKey.Columns, "")}");
+            stringBuilder.AppendLine($"\t [last_change_datetime] = datetime('now');");
 
-            this.AddName(DbCommandType.UpdateMetadata, stringBuilder.ToString());
+            var sql = stringBuilder.ToString();
+
+            this.AddName(DbCommandType.UpdateMetadata, sql);
 
         }
         private void CreateInsertMetadataCommandText()
@@ -148,7 +189,8 @@ namespace Dotmim.Sync.Sqlite
                 stringBuilderParameters.Append(string.Concat(empty, $"@{columnName.FullUnquotedString}"));
                 empty = ", ";
             }
-            stringBuilder.AppendLine($"\tINSERT OR IGNORE INTO {tableName.FullQuotedString}");
+            // Insert or REPLACE is required, as otherwise a resolved Primary Key sync conflict cannot be resolved
+            stringBuilder.AppendLine($"\tINSERT OR REPLACE INTO {tableName.FullQuotedString}");
             stringBuilder.AppendLine($"\t({stringBuilderArguments.ToString()})");
             stringBuilder.AppendLine($"\tVALUES ({stringBuilderParameters.ToString()});");
 

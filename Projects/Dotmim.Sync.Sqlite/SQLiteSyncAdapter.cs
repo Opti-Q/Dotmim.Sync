@@ -135,16 +135,6 @@ namespace Dotmim.Sync.Sqlite
                 command.Parameters.Add(p);
             }
 
-            p = command.CreateParameter();
-            p.ParameterName = "@sync_force_write";
-            p.DbType = DbType.Int64;
-            command.Parameters.Add(p);
-
-            p = command.CreateParameter();
-            p.ParameterName = "@sync_min_timestamp";
-            p.DbType = DbType.Int64;
-            command.Parameters.Add(p);
-
         }
 
         private void SetUpdateMetadataParameters(DbCommand command)
@@ -156,10 +146,15 @@ namespace Dotmim.Sync.Sqlite
                 ObjectNameParser quotedColumn = ObjectNameParser.Create(column.ColumnName);
                 p = command.CreateParameter();
                 p.ParameterName = $"@{quotedColumn.ObjectNameNormalized}";
-                p.DbType = GetValidDbType(column.DbType);
+                p.DbType = column.DbType;
                 p.SourceColumn = column.ColumnName;
                 command.Parameters.Add(p);
             }
+
+            p = command.CreateParameter();
+            p.ParameterName = "@create_scope_id";
+            p.DbType = DbType.Guid;
+            command.Parameters.Add(p);
 
             p = command.CreateParameter();
             p.ParameterName = "@update_scope_id";
@@ -169,6 +164,11 @@ namespace Dotmim.Sync.Sqlite
             p = command.CreateParameter();
             p.ParameterName = "@sync_row_is_tombstone";
             p.DbType = DbType.Int32;
+            command.Parameters.Add(p);
+
+            p = command.CreateParameter();
+            p.ParameterName = "@create_timestamp";
+            p.DbType = DbType.Int64;
             command.Parameters.Add(p);
 
             p = command.CreateParameter();

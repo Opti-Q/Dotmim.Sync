@@ -383,9 +383,11 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(6)]
         public async Task UpdateFromServer(SyncConfiguration conf)
         {
+            _ = await agent.SynchronizeAsync();
+
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
-
+            
             var updateRowScript =
             $@" Declare @id uniqueidentifier;
                 Select top 1 @id = ServiceTicketID from ServiceTickets;
@@ -524,7 +526,7 @@ namespace Dotmim.Sync.Tests
             // check statistics
             Assert.Equal(1, session.TotalChangesDownloaded);
             Assert.Equal(1, session.TotalChangesUploaded);
-            Assert.Equal(1, session.TotalSyncConflicts);
+            Assert.Equal(0, session.TotalSyncConflicts);
 
             string expectedRes = string.Empty;
             using (var sqlConnection = new SqliteConnection(fixture.ClientSqliteConnectionString))
