@@ -311,7 +311,7 @@ namespace Dotmim.Sync.SqlServer.Builders
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Can't create a SqlRecord based on the rows we have: {ex.Message}");
+                throw new InvalidOperationException($"Can't create a SqlRecord based on the rows we have: {ex.Message}", ex);
             }
 
             ((SqlParameterCollection)cmd.Parameters)["@changeTable"].TypeName = string.Empty;

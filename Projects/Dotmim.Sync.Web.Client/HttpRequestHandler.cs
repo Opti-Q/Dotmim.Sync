@@ -165,14 +165,14 @@ namespace Dotmim.Sync.Web.Client
                 return responseMessage;
 
             }
-            catch (TaskCanceledException ex)
+            catch (TaskCanceledException)
             {
-                throw ex;
+                throw;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (response == null || response.Content == null)
-                    throw e;
+                    throw;
 
                 try
                 {
@@ -187,12 +187,8 @@ namespace Dotmim.Sync.Web.Client
                 {
                     throw;
                 }
-                catch (Exception )
-                {
-                    throw;
-                }
 
-                throw e;
+                throw;
 
             }
 

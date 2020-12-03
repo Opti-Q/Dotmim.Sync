@@ -483,8 +483,9 @@ namespace Dotmim.Sync
                         conflicts.Add(conflict);
 
                         localTable.Clear();
-
                     }
+                    else
+                        throw;
                 }
 
 
