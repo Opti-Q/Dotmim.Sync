@@ -830,112 +830,20 @@ namespace Dotmim.Sync
             else
             {
                 var dmRowState = DmRowState.Unchanged;
-                var createdTimeStamp = DbManager.ParseTimestamp(dataRow[columnCache["create_timestamp"]]);
+                //var createdTimeStamp = DbManager.ParseTimestamp(dataRow[columnCache["create_timestamp"]]);
                 var updatedTimeStamp = DbManager.ParseTimestamp(dataRow[columnCache["update_timestamp"]]);
-                var updateScopeIdRow = dataRow[columnCache["update_scope_id"]];
-                var createScopeIdRow = dataRow[columnCache["create_scope_id"]];
+                //var updateScopeIdRow = dataRow[columnCache["update_scope_id"]];
+                //var createScopeIdRow = dataRow[columnCache["create_scope_id"]];
 
-                Guid? updateScopeId = (updateScopeIdRow != DBNull.Value && updateScopeIdRow != null) ? (Guid)updateScopeIdRow : (Guid?)null;
-                Guid? createScopeId = (createScopeIdRow != DBNull.Value && createScopeIdRow != null) ? (Guid)createScopeIdRow : (Guid?)null;
 
-                var isLocallyCreated = !createScopeId.HasValue;
-                var isLocallyUpdated = !updateScopeId.HasValue;
-
-                var wasCreatedOnOtherClient = createScopeId.HasValue && createScopeId.Value != scopeInfo.Id;
-                var wasUpdatedOnOtherClient = updateScopeId.HasValue && updateScopeId.Value != scopeInfo.Id;
-
-                var syncCreation = isLocallyCreated || wasCreatedOnOtherClient;
-                var syncUpdate = isLocallyUpdated || wasUpdatedOnOtherClient;
+                var isUpdate = updatedTimeStamp > 0;
                 
-                // Check if a row is modified :
-                // 1) Row is not new
-                // 2) Row update is AFTER last sync of asker
-                // 3) Row insert is BEFORE last sync of asker (if insert is after last sync, it's not an update, it's an insert)
-                if (!scopeInfo.IsNewScope && syncUpdate && updatedTimeStamp > scopeInfo.Timestamp && (createdTimeStamp <= scopeInfo.Timestamp || !isLocallyCreated))
-                    dmRowState = DmRowState.Modified;
-                else if (scopeInfo.IsNewScope || (syncCreation && createdTimeStamp >= scopeInfo.Timestamp))
+                if (scopeInfo.IsNewScope)
                     dmRowState = DmRowState.Added;
-                // The line has been updated from an other host
-                else if (syncUpdate && updateScopeId.HasValue && updateScopeId.Value != scopeInfo.Id)
+                else if(!isUpdate)
+                    dmRowState = DmRowState.Added;
+                else 
                     dmRowState = DmRowState.Modified;
-                else
-                {
-                    dmRowState = DmRowState.Unchanged;
-
-                    var t = dataRow.Table;
-                    var columns = t.Columns.Select(c => c.ColumnName).ToList();
-                    var values = dataRow.ItemArray.Select((a) => (a?.ToString() ?? "<null>")).ToList();
-
-                    // pad values and columns for better formatting in output
-                    for (int i = 0; i < t.Columns.Count; i++)
-                    {
-                        var cN = columns[i];
-                        var vN = values[i];
-
-                        var toPad = Math.Max(cN.Length, vN.Length);
-                        columns[i] = cN.PadRight(toPad, ' ');
-                        values[i] = vN.PadRight(toPad, ' ');
-                    }
-
-
-                    var ids = string.Join(", ",
-                        t.PrimaryKey.Columns.Select(c => $"{c.ColumnName}: " + dataRow[columnCache[c.ColumnName]]));
-                    var msg = $"Row {ids} of table {dataRow.Table.TableName} is in 'Unchanged' state ({this.GetType().Name})" +
-                              $"\n\tscopeInfo.Id:{scopeInfo.Id}, scopeInfo.IsNewScope :{scopeInfo.IsNewScope}, scopeInfo.LastTimestamp:{scopeInfo.Timestamp}" +
-                              $"\n\tcreateScopeId:{createScopeId}, updateScopeId:{updateScopeId}, createdTimeStamp:{createdTimeStamp}, updatedTimeStamp:{updatedTimeStamp}." +
-                              $"\n\t{string.Join(" | ", columns)}" +
-                              $"\n\t{string.Join(" | ", values)}";
-                    LogError(msg);
-                }
-
-                //// Check if a row is modified :
-                //// 1) Row is not new
-                //// 2) Row update is AFTER last sync of asker
-                //// 3) Row insert is BEFORE last sync of asker (if insert is after last sync, it's not an update, it's an insert)
-                //if (scopeInfo.IsNewScope)
-                //    dmRowState = DmRowState.Added;
-                //// We check for an update first as it has precedence over inserts (if update AND insert => we send an update)
-                //else if (syncUpdate && updatedTimeStamp > scopeInfo.Timestamp &&
-                //         // however, we check if this row was not inserted AND updated on the same device (scope) **before** syncing
-                //         // if we did not do this, a newly inserted AND updated row would be sent as "update" to the remove scope and break the sync (as there is no row to update yet)
-                //         // So in that edge case, it must be send as "insert"
-                //         (createdTimeStamp <= scopeInfo.Timestamp || !isLocallyCreated))
-                //    dmRowState = DmRowState.Modified;
-                //else if (syncCreation && createdTimeStamp >= scopeInfo.Timestamp)
-                //    dmRowState = DmRowState.Added;
-                //// if there was a conflict because another client inserted a row with the same id as the server with "ClientWins"
-                //// the tracking table will show "creationtimestamp" of the client, but an "update_timestamp" of 0 (which is lower than the update timestamp of another client that has already synced before)
-                //// TODO: Solve this by including the [timestamp] column of the _tracking table
-                //else if (syncUpdate && wasUpdatedOnOtherClient)
-                //    dmRowState = DmRowState.Modified;
-                //else
-                //{
-                //    dmRowState = DmRowState.Unchanged;
-                //    var t = dataRow.Table;
-                //    var columns = t.Columns.Select(c => c.ColumnName).ToList();
-                //    var values = dataRow.ItemArray.Select((a) => (a?.ToString() ?? "<null>")).ToList();
-
-                //    // pad values and columns for better formatting in output
-                //    for (int i = 0; i < t.Columns.Count; i++)
-                //    {
-                //        var cN = columns[i];
-                //        var vN = values[i];
-
-                //        var toPad = Math.Max(cN.Length, vN.Length);
-                //        columns[i] = cN.PadRight(toPad, ' ');
-                //        values[i] = vN.PadRight(toPad, ' ');
-                //    }
-
-
-                //    var ids = string.Join(", ",
-                //        t.PrimaryKey.Columns.Select(c => $"{c.ColumnName}: " + dataRow[columnCache[c.ColumnName]]));
-                //    var msg = $"Row {ids} of table {dataRow.Table.TableName} is in 'Unchanged' state ({this.GetType().Name})" +
-                //              $"\n\tscopeInfo.Id:{scopeInfo.Id}, scopeInfo.IsNewScope :{scopeInfo.IsNewScope}, scopeInfo.LastTimestamp:{scopeInfo.Timestamp}" +
-                //              $"\n\tcreateScopeId:{createScopeId}, updateScopeId:{updateScopeId}, createdTimeStamp:{createdTimeStamp}, updatedTimeStamp:{updatedTimeStamp}." +
-                //              $"\n\t{string.Join(" | ", columns)}" +
-                //              $"\n\t{string.Join(" | ", values)}";
-                //    LogError(msg);
-                //}
 
                 return dmRowState;
             }
