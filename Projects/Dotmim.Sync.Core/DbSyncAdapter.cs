@@ -399,7 +399,7 @@ namespace Dotmim.Sync
 
             // Generate a conflict and add it
             foreach (var dmFailedRow in dmFailedRows)
-                conflicts.Add(GetConflict(dmFailedRow));
+                conflicts.Add(GetConflict(dmFailedRow, fromScope));
 
             int failedRows = dmFailedRows.Count;
 
@@ -461,7 +461,7 @@ namespace Dotmim.Sync
                         appliedRows++;
                     else
                         // Generate a conflict and add it
-                        conflicts.Add(GetConflict(dmRow));
+                        conflicts.Add(GetConflict(dmRow, scope));
 
                 }
                 catch (Exception ex)
@@ -665,7 +665,7 @@ namespace Dotmim.Sync
         /// <summary>
         /// We have a conflict, try to get the source row and generate a conflict
         /// </summary>
-        private SyncConflict GetConflict(DmRow dmRow)
+        private SyncConflict GetConflict(DmRow dmRow, ScopeInfo fromScope)
         {
             DmRow localRow = null;
 
@@ -724,6 +724,7 @@ namespace Dotmim.Sync
             }
             // Generate the conflict
             var conflict = new SyncConflict(dbConflictType);
+            conflict.RemoteScope = fromScope;
             conflict.AddRemoteRow(dmRow);
 
             if (localRow != null)

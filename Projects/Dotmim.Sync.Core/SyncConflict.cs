@@ -59,6 +59,8 @@ namespace Dotmim.Sync
         /// </summary>
         public ConflictType Type { get; set; }
 
+        public ScopeInfo RemoteScope { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the SyncConflict class by using default values.
         /// </summary>
