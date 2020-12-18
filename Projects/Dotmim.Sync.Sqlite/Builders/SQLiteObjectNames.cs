@@ -291,8 +291,7 @@ namespace Dotmim.Sync.Sqlite
                 empty = " AND ";
             }
             stringBuilder.AppendLine();
-            stringBuilder.AppendLine("WHERE (");
-            string str = string.Empty;
+            stringBuilder.AppendLine("WHERE ");
 
             //if (!SqlManagementUtils.IsStringNullOrWhitespace(this._filterClause))
             //{
@@ -316,19 +315,9 @@ namespace Dotmim.Sync.Sqlite
             //}
 
             stringBuilder.AppendLine("\t-- Update made by the local instance");
-            stringBuilder.AppendLine("\t[side].[update_scope_id] IS NULL");
-            stringBuilder.AppendLine("\t-- Or Update different from remote");
-            stringBuilder.AppendLine("\tOR [side].[update_scope_id] <> @sync_scope_id");
-            stringBuilder.AppendLine("\t-- Or we are in reinit mode so we take rows even thoses updated by the scope");
-            stringBuilder.AppendLine("\tOR @sync_scope_is_reinit = 1");
-            stringBuilder.AppendLine("    )");
-            stringBuilder.AppendLine("AND (");
+            stringBuilder.AppendLine("\t[side].[update_scope_id] IS NULL"); // only ever send local changes on sqlite!!!
             stringBuilder.AppendLine("\t-- And Timestamp is > from remote timestamp");
-            stringBuilder.AppendLine("\t[side].[timestamp] > @sync_min_timestamp");
-            stringBuilder.AppendLine("\tOR");
-            stringBuilder.AppendLine("\t-- remote instance is new, so we don't take the last timestamp");
-            stringBuilder.AppendLine("\t@sync_scope_is_new = 1");
-            stringBuilder.AppendLine("\t)");
+            stringBuilder.AppendLine("\tAND [side].[timestamp] > @sync_min_timestamp");
             stringBuilder.AppendLine("AND (");
             stringBuilder.AppendLine("\t[side].[sync_row_is_tombstone] = 1 ");
             stringBuilder.AppendLine("\tOR");
@@ -343,9 +332,10 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine("\t)");
             stringBuilder.AppendLine(")");
 
+            var sqlString = stringBuilder.ToString();
 
-            this.AddName(DbCommandType.SelectChanges, stringBuilder.ToString());
-            this.AddName(DbCommandType.SelectChangesWitFilters, stringBuilder.ToString());
+             this.AddName(DbCommandType.SelectChanges, sqlString);
+            this.AddName(DbCommandType.SelectChangesWitFilters, sqlString);
         }
 
     }
