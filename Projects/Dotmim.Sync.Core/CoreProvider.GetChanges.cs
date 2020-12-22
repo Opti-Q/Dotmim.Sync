@@ -829,11 +829,8 @@ namespace Dotmim.Sync
                 return DmRowState.Deleted;
             else
             {
-                var dmRowState = DmRowState.Unchanged;
-                //var createdTimeStamp = DbManager.ParseTimestamp(dataRow[columnCache["create_timestamp"]]);
+                DmRowState dmRowState;
                 var updatedTimeStamp = DbManager.ParseTimestamp(dataRow[columnCache["update_timestamp"]]);
-                //var updateScopeIdRow = dataRow[columnCache["update_scope_id"]];
-                //var createScopeIdRow = dataRow[columnCache["create_scope_id"]];
 
 
                 var isUpdate = updatedTimeStamp > 0;
