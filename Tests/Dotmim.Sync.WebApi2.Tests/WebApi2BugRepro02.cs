@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using Dotmim.Sync.Messages;
 using Dotmim.Sync.Sqlite;
 using Dotmim.Sync.SqlServer;
 using Dotmim.Sync.Tests.Misc;
@@ -20,6 +21,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Owin.Hosting;
 using Owin;
 using Shouldly;
+using SQLitePCL;
 using Xunit;
 using SerializationFormat = Dotmim.Sync.Enumerations.SerializationFormat;
 
@@ -88,7 +90,7 @@ namespace Dotmim.Sync.Tests
             // Arrange
             var _ = await agent.SynchronizeAsync();
 
-            var count = 2;
+            var count = 1;
             var ticketIds = InsertRowsToClientDb(count);
             var url = new Uri(fixture.BaseAddress, "api/values");
 
@@ -99,7 +101,7 @@ namespace Dotmim.Sync.Tests
                 CancellationToken.None,
                 (o) =>
                 {
-                    if (o is HttpMessage m && m.Step == HttpStep.GetChangeBatch)
+                    if (o is HttpMessage m && m.Step == HttpStep.GetLocalTimestamp)
                     {
                         throw new WebException("some connection issue... 🤷‍♂️");
                     }
@@ -157,8 +159,85 @@ namespace Dotmim.Sync.Tests
                 serverCount.ShouldBe(count);
             }
         }
-        
+
+        private class LocalProviderFailingOnWriteScopes : ProviderProxy
+        {
+            public LocalProviderFailingOnWriteScopes(IProvider p) : base(p)
+            {
+            }
+
+            public override Task<SyncContext> WriteScopesAsync(SyncContext context, MessageWriteScopes message)
+            {
+                throw new SqliteException("Faked 'Busy' exception", raw.SQLITE_BUSY);
+            }
+        }
+
         [Fact, TestPriority(2)]
+        public async Task WhenSendingOnSecondTry_AfterCrashingOnStoringScopes_StillUpdatesServiceTickets()
+        {
+            // Arrange
+            var _ = await agent.SynchronizeAsync();
+
+            var count = 2;
+            var ticketIds = InsertRowsToClientDb(count);
+            var url = new Uri(fixture.BaseAddress, "api/values");
+
+            // create brand new client that fails on "writescopes"
+            clientProvider = new SqliteSyncProvider(fixture.ClientSqliteFilePath);
+            agent = new SyncAgent(new LocalProviderFailingOnWriteScopes(clientProvider), proxyClientProvider);
+            agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
+            agent.Configuration.DownloadBatchSizeInKB = 500;
+
+            SyncException exception = null;
+            try
+            {
+                // Act
+                await agent.SynchronizeAsync();
+            }
+            catch (SyncException x)
+            {
+                exception = x;
+            }
+
+            // Assert
+            exception.ShouldNotBeNull(" aw web exception was thrown!");
+            exception.InnerException.ShouldBeOfType<SqliteException>("fake busy exception expected");
+            exception.InnerException?.Message.ShouldBe("Faked 'Busy' exception");
+
+            // Arrange 2
+            clientProvider = new SqliteSyncProvider(fixture.ClientSqliteFilePath);
+            proxyClientProvider = new WebProxyClientProvider(url);
+            agent = new SyncAgent(clientProvider, proxyClientProvider);
+            agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
+            agent.Configuration.DownloadBatchSizeInKB = 500;
+
+            int ticketNumber = 0;
+            foreach (var ticketId in ticketIds)
+            {
+                UpdateRowInClientDb(ticketId, $"updated title {++ticketNumber}");
+            }
+
+
+            // Act 2
+            var session = await agent.SynchronizeAsync();
+
+            // Assert 2
+            session.TotalChangesUploaded.ShouldBe(count);
+            session.TotalChangesDownloaded.ShouldBe(0);
+
+            using (var sc = serverProvider.CreateConnection())
+            {
+                sc.Open();
+                var scmd = (SqlCommand)sc.CreateCommand();
+                scmd.CommandText = "select count(*) from servicetickets where title like @title";
+                scmd.Parameters.AddWithValue("@title", "updated title %");
+
+                var serverCount = scmd.ExecuteScalar();
+                serverCount.ShouldBe(count);
+            }
+        }
+
+        [Fact, TestPriority(3)]
         public async Task DetectingDmRowState_ServerChange()
         {
             // Arrange
@@ -204,7 +283,7 @@ namespace Dotmim.Sync.Tests
             }
         }
         
-        [Fact, TestPriority(3)]
+        [Fact, TestPriority(4)]
         public async Task DetectingDmRowState_ClientChange()
         {
             // Arrange
@@ -218,7 +297,7 @@ namespace Dotmim.Sync.Tests
             proxyClientProvider = new WebProxyClientProvider(url);
             agent = new SyncAgent(clientProvider, proxyClientProvider);
             agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
-            agent.Configuration.DownloadBatchSizeInKB = 500;
+            agent.Configuration.DownloadBatchSizeInKB = 0;
             var __ = await agent.SynchronizeAsync();
 
             // Now update on server
@@ -259,6 +338,7 @@ namespace Dotmim.Sync.Tests
             }
         }
         
+
         public class TestHttpHandler : HttpRequestHandler
         {
             private readonly Action<object> action;
@@ -448,7 +528,6 @@ namespace Dotmim.Sync.Tests
             }
         }
 
-
         public void Dispose()
         {
             proxyClientProvider?.Dispose();
@@ -460,6 +539,5 @@ namespace Dotmim.Sync.Tests
                 Directory.Delete(this.batchDir, true);
         }
     }
-
 }
 

@@ -11,7 +11,7 @@ Can't work without a Server provider, you have to choose an existing one to be a
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyName>Dotmim.Sync.Web.Server</AssemblyName>
     <RootNamespace>Dotmim.Sync.Web.Server</RootNamespace>
-    <Version>0.2.9.7</Version>
+    <Version>0.2.9.8</Version>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Product>Dotmim.Sync.Web.Server OPTI-Q</Product>
     <PackageReleaseNotes>fixed session cache issue where changes sent to server could get lost</PackageReleaseNotes>
