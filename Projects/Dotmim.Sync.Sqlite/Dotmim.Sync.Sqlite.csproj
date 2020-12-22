@@ -9,9 +9,10 @@
     <Description>SQLite Sync Provider. Actually can be used as Client provider (Don't use it as a Server provider)</Description>
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
     <PackageTags>Dotmim.Sync, SQLite Sync Core Provider, SQLite Sync, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
-    <Version>0.2.9.8</Version>
+    <Version>0.2.9.9</Version>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Product>Dotmim.Sync.Sqlite OPTI-Q</Product>
+    <PackageReleaseNotes>sqlite select_changes query only returns local changes and ignores "reinit" (it is the client db after all...)</PackageReleaseNotes>
   </PropertyGroup>
 
   <!--generate NUGET package including symbols ans source on each release build -->
