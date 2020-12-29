@@ -64,23 +64,24 @@ namespace Dotmim.Sync
                         if (changeApplicationAction == ChangeApplicationAction.Rollback)
                             throw new SyncException("Rollback during applying deletes", context.SyncStage, this.ProviderTypeName, SyncExceptionType.Rollback);
                     }
-                    // -----------------------------------------------------
-                    // 2) Applying updates
-                    // -----------------------------------------------------
-                    changeApplicationAction = this.ApplyChangesInternal(context, message, connection, applyTransaction, DmRowState.Modified, changesApplied);
-
-                    // Rollback
-                    if (changeApplicationAction == ChangeApplicationAction.Rollback)
-                        throw new SyncException("Rollback during applying updates", context.SyncStage, this.ProviderTypeName, SyncExceptionType.Rollback);
 
                     // -----------------------------------------------------
-                    // 3) Applying Inserts
+                    // 2) Applying Inserts
                     // -----------------------------------------------------
                     changeApplicationAction = this.ApplyChangesInternal(context, message, connection, applyTransaction, DmRowState.Added, changesApplied);
 
                     // Rollback
                     if (changeApplicationAction == ChangeApplicationAction.Rollback)
                         throw new SyncException("Rollback during applying inserts", context.SyncStage, this.ProviderTypeName, SyncExceptionType.Rollback);
+
+                    // -----------------------------------------------------
+                    // 3) Applying updates
+                    // -----------------------------------------------------
+                    changeApplicationAction = this.ApplyChangesInternal(context, message, connection, applyTransaction, DmRowState.Modified, changesApplied);
+
+                    // Rollback
+                    if (changeApplicationAction == ChangeApplicationAction.Rollback)
+                        throw new SyncException("Rollback during applying updates", context.SyncStage, this.ProviderTypeName, SyncExceptionType.Rollback);
 
 
                     applyTransaction.Commit();
