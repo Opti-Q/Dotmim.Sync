@@ -53,7 +53,7 @@ namespace Dotmim.Sync
                     if (outdatedEventArgs.Action == OutdatedSyncAction.Rollback)
                         throw new OutOfDateException("The provider is out of date ! Try to make a Reinitialize sync");
                 }
-                
+
                 // Statistics about changes that are selected
                 ChangesSelected changesSelected;
 
@@ -65,7 +65,7 @@ namespace Dotmim.Sync
                     (batchInfo, changesSelected) = await this.EnumerateChangesInternal(context, message.ScopeInfo, message.Schema, message.BatchDirectory, message.Policy, message.Filters);
                 else
                     (batchInfo, changesSelected) = await this.EnumerateChangesInBatchesInternal(context, message.ScopeInfo, message.DownloadBatchSizeInKB, message.Schema, message.BatchDirectory, message.Policy, message.Filters);
-                
+
                 return (context, batchInfo, changesSelected);
             }
             catch (Exception ex)
@@ -83,7 +83,7 @@ namespace Dotmim.Sync
         /// destination knowledge, and change data retriever parameters.
         /// </summary>
         /// <returns>A DbSyncContext object that will be used to retrieve the modified data.</returns>
-        public virtual async Task<TimeSpan> PrepareArchiveAsync(string[] tables, int downloadBatchSizeInKB, string batchDirectory, ConflictResolutionPolicy policy,  ICollection<FilterClause> filters)
+        public virtual async Task<TimeSpan> PrepareArchiveAsync(string[] tables, int downloadBatchSizeInKB, string batchDirectory, ConflictResolutionPolicy policy, ICollection<FilterClause> filters)
         {
             try
             {
@@ -456,12 +456,12 @@ namespace Dotmim.Sync
                     // Open the connection
                     await connection.OpenAsync();
 
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        // create the in memory changes set
-                        DmSet changesSet = new DmSet(configTables.DmSetName);
+                    // create the in memory changes set
+                    DmSet changesSet = new DmSet(configTables.DmSetName);
 
-                        foreach (var tableDescription in configTables.Tables)
+                    foreach (var tableDescription in configTables.Tables)
+                    {
+                        using (var transaction = connection.BeginTransaction())
                         {
                             // if we are in upload stage, so check if table is not download only
                             if (context.SyncWay == SyncWay.Upload &&
@@ -571,7 +571,7 @@ namespace Dotmim.Sync
                                     using (var dataReader = selectIncrementalChangesCommand.ExecuteReader())
                                     {
                                         var columnCache = dmTable.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
-                                        
+
                                         while (dataReader.Read())
                                         {
                                             DmRow dmRow = CreateRowFromReader(dataReader, dmTable, columnCache);
@@ -645,7 +645,7 @@ namespace Dotmim.Sync
 
                                                 // re-initialize column cache, as column instances are always directly linked to their parent column
                                                 columnCache = dmTable.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
-                                                
+
                                                 // Init the row memory size
                                                 memorySizeFromDmRows = 0L;
 
@@ -685,21 +685,20 @@ namespace Dotmim.Sync
                                 {
                                 }
                             }
+
+                            transaction.Commit();
                         }
-
-                        // We are in batch mode, and we are at the last batchpart info
-                        if (changesSet != null && changesSet.HasTables && changesSet.HasChanges())
-                        {
-                            var batchPartInfo = batchInfo.GenerateBatchInfo(batchIndex, changesSet, batchDirectory);
-
-                            if (batchPartInfo != null)
-                                batchPartInfo.IsLastBatch = true;
-
-                        }
-
-                        transaction.Commit();
                     }
 
+                    // We are in batch mode, and we are at the last batchpart info
+                    if (changesSet != null && changesSet.HasTables && changesSet.HasChanges())
+                    {
+                        var batchPartInfo = batchInfo.GenerateBatchInfo(batchIndex, changesSet, batchDirectory);
+
+                        if (batchPartInfo != null)
+                            batchPartInfo.IsLastBatch = true;
+
+                    }
                 }
                 catch (Exception)
                 {
@@ -720,12 +719,12 @@ namespace Dotmim.Sync
         /// <summary>
         /// Create a DmRow from a IDataReader
         /// </summary>
-        private DmRow CreateRowFromReader(IDataReader dataReader, DmTable dmTable, Dictionary<string,DmColumn> columnCache)
+        private DmRow CreateRowFromReader(IDataReader dataReader, DmTable dmTable, Dictionary<string, DmColumn> columnCache)
         {
-            
+
             // we have an insert / update or delete
             DmRow dataRow = dmTable.NewRow();
-            
+
             for (int i = 0; i < dataReader.FieldCount; i++)
             {
                 var columnName = dataReader.GetName(i);
@@ -816,21 +815,13 @@ namespace Dotmim.Sync
 
         }
 
-        public virtual bool UseSimplifiedDmRowStateCalculation { get; set; } = false;
 
         /// <summary>
         /// Get a DmRow state to know is we have an inserted, updated, or deleted row to apply
         /// </summary>
         private DmRowState GetStateFromDmRow(DmRow dataRow, ScopeInfo scopeInfo, Dictionary<string, DmColumn> columnCache)
         {
-            if(UseSimplifiedDmRowStateCalculation)
-                return GetSimplifiedDmRowState(dataRow, scopeInfo, columnCache);
 
-            return GetLegacyDmRowState(dataRow, scopeInfo, columnCache);
-        }
-
-        private DmRowState GetSimplifiedDmRowState(DmRow dataRow, ScopeInfo scopeInfo, Dictionary<string, DmColumn> columnCache)
-        {
             var isTombstone = Convert.ToInt64(dataRow[columnCache["sync_row_is_tombstone"]]) > 0;
 
             if (isTombstone)
@@ -849,126 +840,6 @@ namespace Dotmim.Sync
                     dmRowState = DmRowState.Added;
                 else
                     dmRowState = DmRowState.Modified;
-
-                return dmRowState;
-            }
-        }
-
-        private DmRowState GetLegacyDmRowState(DmRow dataRow, ScopeInfo scopeInfo, Dictionary<string, DmColumn> columnCache)
-        {
-            var isTombstone = Convert.ToInt64(dataRow[columnCache["sync_row_is_tombstone"]]) > 0;
-
-            if (isTombstone)
-                return DmRowState.Deleted;
-            else
-            {
-                var dmRowState = DmRowState.Unchanged;
-                var createdTimeStamp = DbManager.ParseTimestamp(dataRow[columnCache["create_timestamp"]]);
-                var updatedTimeStamp = DbManager.ParseTimestamp(dataRow[columnCache["update_timestamp"]]);
-                var updateScopeIdRow = dataRow[columnCache["update_scope_id"]];
-                var createScopeIdRow = dataRow[columnCache["create_scope_id"]];
-
-                Guid? updateScopeId = (updateScopeIdRow != DBNull.Value && updateScopeIdRow != null) ? (Guid)updateScopeIdRow : (Guid?)null;
-                Guid? createScopeId = (createScopeIdRow != DBNull.Value && createScopeIdRow != null) ? (Guid)createScopeIdRow : (Guid?)null;
-
-                var isLocallyCreated = !createScopeId.HasValue;
-                var isLocallyUpdated = !updateScopeId.HasValue;
-
-                var wasCreatedOnOtherClient = createScopeId.HasValue && createScopeId.Value != scopeInfo.Id;
-                var wasUpdatedOnOtherClient = updateScopeId.HasValue && updateScopeId.Value != scopeInfo.Id;
-
-                var syncCreation = isLocallyCreated || wasCreatedOnOtherClient;
-                var syncUpdate = isLocallyUpdated || wasUpdatedOnOtherClient;
-                
-                // Check if a row is modified :
-                // 1) Row is not new
-                // 2) Row update is AFTER last sync of asker
-                // 3) Row insert is BEFORE last sync of asker (if insert is after last sync, it's not an update, it's an insert)
-                if (!scopeInfo.IsNewScope && syncUpdate && updatedTimeStamp > scopeInfo.Timestamp && (createdTimeStamp <= scopeInfo.Timestamp || !isLocallyCreated))
-                    dmRowState = DmRowState.Modified;
-                else if (scopeInfo.IsNewScope || (syncCreation && createdTimeStamp >= scopeInfo.Timestamp))
-                    dmRowState = DmRowState.Added;
-                // The line has been updated from an other host
-                else if (syncUpdate && updateScopeId.HasValue && updateScopeId.Value != scopeInfo.Id)
-                    dmRowState = DmRowState.Modified;
-                else
-                {
-                    dmRowState = DmRowState.Unchanged;
-
-                    var t = dataRow.Table;
-                    var columns = t.Columns.Select(c => c.ColumnName).ToList();
-                    var values = dataRow.ItemArray.Select((a) => (a?.ToString() ?? "<null>")).ToList();
-
-                    // pad values and columns for better formatting in output
-                    for (int i = 0; i < t.Columns.Count; i++)
-                    {
-                        var cN = columns[i];
-                        var vN = values[i];
-
-                        var toPad = Math.Max(cN.Length, vN.Length);
-                        columns[i] = cN.PadRight(toPad, ' ');
-                        values[i] = vN.PadRight(toPad, ' ');
-                    }
-
-
-                    var ids = string.Join(", ",
-                        t.PrimaryKey.Columns.Select(c => $"{c.ColumnName}: " + dataRow[columnCache[c.ColumnName]]));
-                    var msg = $"Row {ids} of table {dataRow.Table.TableName} is in 'Unchanged' state ({this.GetType().Name})" +
-                              $"\n\tscopeInfo.Id:{scopeInfo.Id}, scopeInfo.IsNewScope :{scopeInfo.IsNewScope}, scopeInfo.LastTimestamp:{scopeInfo.Timestamp}" +
-                              $"\n\tcreateScopeId:{createScopeId}, updateScopeId:{updateScopeId}, createdTimeStamp:{createdTimeStamp}, updatedTimeStamp:{updatedTimeStamp}." +
-                              $"\n\t{string.Join(" | ", columns)}" +
-                              $"\n\t{string.Join(" | ", values)}";
-                    LogError(msg);
-                }
-
-                //// Check if a row is modified :
-                //// 1) Row is not new
-                //// 2) Row update is AFTER last sync of asker
-                //// 3) Row insert is BEFORE last sync of asker (if insert is after last sync, it's not an update, it's an insert)
-                //if (scopeInfo.IsNewScope)
-                //    dmRowState = DmRowState.Added;
-                //// We check for an update first as it has precedence over inserts (if update AND insert => we send an update)
-                //else if (syncUpdate && updatedTimeStamp > scopeInfo.Timestamp &&
-                //         // however, we check if this row was not inserted AND updated on the same device (scope) **before** syncing
-                //         // if we did not do this, a newly inserted AND updated row would be sent as "update" to the remove scope and break the sync (as there is no row to update yet)
-                //         // So in that edge case, it must be send as "insert"
-                //         (createdTimeStamp <= scopeInfo.Timestamp || !isLocallyCreated))
-                //    dmRowState = DmRowState.Modified;
-                //else if (syncCreation && createdTimeStamp >= scopeInfo.Timestamp)
-                //    dmRowState = DmRowState.Added;
-                //// if there was a conflict because another client inserted a row with the same id as the server with "ClientWins"
-                //// the tracking table will show "creationtimestamp" of the client, but an "update_timestamp" of 0 (which is lower than the update timestamp of another client that has already synced before)
-                //// TODO: Solve this by including the [timestamp] column of the _tracking table
-                //else if (syncUpdate && wasUpdatedOnOtherClient)
-                //    dmRowState = DmRowState.Modified;
-                //else
-                //{
-                //    dmRowState = DmRowState.Unchanged;
-                //    var t = dataRow.Table;
-                //    var columns = t.Columns.Select(c => c.ColumnName).ToList();
-                //    var values = dataRow.ItemArray.Select((a) => (a?.ToString() ?? "<null>")).ToList();
-
-                //    // pad values and columns for better formatting in output
-                //    for (int i = 0; i < t.Columns.Count; i++)
-                //    {
-                //        var cN = columns[i];
-                //        var vN = values[i];
-
-                //        var toPad = Math.Max(cN.Length, vN.Length);
-                //        columns[i] = cN.PadRight(toPad, ' ');
-                //        values[i] = vN.PadRight(toPad, ' ');
-                //    }
-
-
-                //    var ids = string.Join(", ",
-                //        t.PrimaryKey.Columns.Select(c => $"{c.ColumnName}: " + dataRow[columnCache[c.ColumnName]]));
-                //    var msg = $"Row {ids} of table {dataRow.Table.TableName} is in 'Unchanged' state ({this.GetType().Name})" +
-                //              $"\n\tscopeInfo.Id:{scopeInfo.Id}, scopeInfo.IsNewScope :{scopeInfo.IsNewScope}, scopeInfo.LastTimestamp:{scopeInfo.Timestamp}" +
-                //              $"\n\tcreateScopeId:{createScopeId}, updateScopeId:{updateScopeId}, createdTimeStamp:{createdTimeStamp}, updatedTimeStamp:{updatedTimeStamp}." +
-                //              $"\n\t{string.Join(" | ", columns)}" +
-                //              $"\n\t{string.Join(" | ", values)}";
-                //    LogError(msg);
-                //}
 
                 return dmRowState;
             }
