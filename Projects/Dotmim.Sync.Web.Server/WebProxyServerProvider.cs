@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using Dotmim.Sync.Batch;
 using System.Threading.Tasks;
 using System.IO;
@@ -14,6 +15,7 @@ using Dotmim.Sync.Data;
 using Dotmim.Sync.Messages;
 using Dotmim.Sync.Web.Client;
 using Newtonsoft.Json.Linq;
+using Polly;
 #if NETSTANDARD
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Session;
@@ -131,6 +133,18 @@ namespace Dotmim.Sync.Web.Server
         public WebProxyServerProvider(CoreProvider localProvider)
         {
             this.LocalProvider = localProvider;
+        }
+
+        public virtual Polly.AsyncPolicy GetRetryPolicy()
+        {
+            return Policy.NoOpAsync();
+            //return Policy.Handle<SqlException>(ex => ex.Message.Contains("deadlock victim"))
+            //    .WaitAndRetryAsync(new[]
+            //    {
+            //        TimeSpan.FromMilliseconds(500),
+            //        TimeSpan.FromMilliseconds(1000),
+            //        TimeSpan.FromMilliseconds(1500)
+            //    });
         }
 
         /// <summary>
@@ -281,7 +295,7 @@ namespace Dotmim.Sync.Web.Server
                         httpMessageResponse = await EnsureDatabaseAsync(httpMessage);
                         break;
                     case HttpStep.GetChangeBatch:
-                        httpMessageResponse = await GetChangeBatchAsync(httpMessage);
+                        httpMessageResponse = await GetRetryPolicy().ExecuteAsync(() => GetChangeBatchAsync(httpMessage));
                         break;
                     case HttpStep.ApplyChanges:
                         httpMessageResponse = await ApplyChangesAsync(httpMessage);
