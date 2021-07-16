@@ -133,10 +133,6 @@ namespace Dotmim.Sync
             }
         }
 
-
-
-
-
         /// <summary>
         /// Generate an empty BatchInfo
         /// </summary>

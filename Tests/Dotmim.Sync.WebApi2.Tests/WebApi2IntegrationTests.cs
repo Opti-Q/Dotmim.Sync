@@ -18,6 +18,7 @@ using Dotmim.Sync.Web.Server;
 using Microsoft.Data.Sqlite;
 using Microsoft.Owin.Hosting;
 using Owin;
+using Polly;
 using Xunit;
 
 namespace Dotmim.Sync.Tests
@@ -200,6 +201,22 @@ namespace Dotmim.Sync.Tests
 
             serverProvider = new SqlSyncProvider(fixture.ServerConnectionString);
             proxyServerProvider = new WebProxyServerProvider(serverProvider);
+            proxyServerProvider.ApplyChangesPolicy = 
+                Policy.Handle<SqlException>(ex => ex.Message.Contains("deadlock victim"))
+                .WaitAndRetryAsync(new[]
+                {
+                    TimeSpan.FromMilliseconds(500),
+                    TimeSpan.FromMilliseconds(1000),
+                    TimeSpan.FromMilliseconds(1500)
+                });
+            proxyServerProvider.GetChangesBatchPolicy = 
+                Policy.Handle<SqlException>(ex => ex.Message.Contains("deadlock victim"))
+                .WaitAndRetryAsync(new[]
+                {
+                    TimeSpan.FromMilliseconds(500),
+                    TimeSpan.FromMilliseconds(1000),
+                    TimeSpan.FromMilliseconds(1500)
+                });
 
             webApp = WebApp.Start(fixture.BaseAddress.OriginalString, (appBuilder) =>
             {
