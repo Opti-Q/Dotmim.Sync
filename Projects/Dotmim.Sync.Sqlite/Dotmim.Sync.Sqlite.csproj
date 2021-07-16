@@ -9,7 +9,7 @@
     <Description>SQLite Sync Provider. Actually can be used as Client provider (Don't use it as a Server provider)</Description>
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
     <PackageTags>Dotmim.Sync, SQLite Sync Core Provider, SQLite Sync, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
-    <Version>0.2.9.12</Version>
+    <Version>0.2.9.13</Version>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Product>Dotmim.Sync.Sqlite OPTI-Q</Product>
     <PackageReleaseNotes>coreprovider.getstatefromdmrow greatly simplified,

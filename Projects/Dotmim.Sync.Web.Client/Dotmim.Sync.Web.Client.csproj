@@ -9,7 +9,7 @@ Can't work without a Server provider, you have to choose an existing one to be a
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
     <PackageTags>Dotmim.Sync, ASP.NET Core, ASP.NET Core Web Sync Proxy, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.2.9.12</Version>
+    <Version>0.2.9.13</Version>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Product>Dotmim.Sync.Web.Client OPTI-Q</Product>
     <PackageReleaseNotes>Cookies are not applied multiple times across sessions - this led to "400 request headers too long"</PackageReleaseNotes>
