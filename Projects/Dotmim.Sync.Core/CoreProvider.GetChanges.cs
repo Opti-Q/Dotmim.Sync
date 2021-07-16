@@ -452,12 +452,12 @@ namespace Dotmim.Sync
                     // Open the connection
                     await connection.OpenAsync();
 
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        // create the in memory changes set
-                        DmSet changesSet = new DmSet(configTables.DmSetName);
+                    // create the in memory changes set
+                    DmSet changesSet = new DmSet(configTables.DmSetName);
 
-                        foreach (var tableDescription in configTables.Tables)
+                    foreach (var tableDescription in configTables.Tables)
+                    {
+                        using (var transaction = connection.BeginTransaction())
                         {
                             // if we are in upload stage, so check if table is not download only
                             if (context.SyncWay == SyncWay.Upload &&
@@ -567,7 +567,7 @@ namespace Dotmim.Sync
                                     using (var dataReader = selectIncrementalChangesCommand.ExecuteReader())
                                     {
                                         var columnCache = dmTable.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
-                                        
+
                                         while (dataReader.Read())
                                         {
                                             DmRow dmRow = CreateRowFromReader(dataReader, dmTable, columnCache);
@@ -641,7 +641,7 @@ namespace Dotmim.Sync
 
                                                 // re-initialize column cache, as column instances are always directly linked to their parent column
                                                 columnCache = dmTable.Columns.ToDictionary(c => c.ColumnName, c => c, StringComparer.CurrentCultureIgnoreCase);
-                                                
+
                                                 // Init the row memory size
                                                 memorySizeFromDmRows = 0L;
 
@@ -681,21 +681,20 @@ namespace Dotmim.Sync
                                 {
                                 }
                             }
+
+                            transaction.Commit();
                         }
-
-                        // We are in batch mode, and we are at the last batchpart info
-                        if (changesSet != null && changesSet.HasTables && changesSet.HasChanges())
-                        {
-                            var batchPartInfo = batchInfo.GenerateBatchInfo(batchIndex, changesSet, batchDirectory);
-
-                            if (batchPartInfo != null)
-                                batchPartInfo.IsLastBatch = true;
-
-                        }
-
-                        transaction.Commit();
                     }
 
+                    // We are in batch mode, and we are at the last batchpart info
+                    if (changesSet != null && changesSet.HasTables && changesSet.HasChanges())
+                    {
+                        var batchPartInfo = batchInfo.GenerateBatchInfo(batchIndex, changesSet, batchDirectory);
+
+                        if (batchPartInfo != null)
+                            batchPartInfo.IsLastBatch = true;
+
+                    }
                 }
                 catch (Exception)
                 {
