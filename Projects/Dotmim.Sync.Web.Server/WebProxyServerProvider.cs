@@ -204,6 +204,7 @@ namespace Dotmim.Sync.Web.Server
 
             try
             {
+                bool firstAttempt = true;
                 var serializer = BaseConverter<HttpMessage>.GetConverter(serializationFormat);
 
                 var httpMessage = serializer.Deserialize(streamArray);
@@ -225,10 +226,30 @@ namespace Dotmim.Sync.Web.Server
                         httpMessageResponse = await EnsureDatabaseAsync(httpMessage);
                         break;
                     case HttpStep.GetChangeBatch:
-                        httpMessageResponse = await GetChangesBatchPolicy.ExecuteAsync(() => GetChangeBatchAsync(httpMessage));
+                        httpMessageResponse = await GetChangesBatchPolicy.ExecuteAsync(() =>
+                        {
+                            if (firstAttempt)
+                            {
+                                firstAttempt = false;
+                                return GetChangeBatchAsync(httpMessage);
+                            }
+                            // if any other attempt then the first, re-deserialize the message as GetChangesBatch modifies it!
+                            var httpMessage2 = serializer.Deserialize(httpRequest.GetBody());
+                            return GetChangeBatchAsync(httpMessage2);
+                        });
                         break;
                     case HttpStep.ApplyChanges:
-                        httpMessageResponse = await ApplyChangesPolicy.ExecuteAsync(() => ApplyChangesAsync(httpMessage));
+                        httpMessageResponse = await ApplyChangesPolicy.ExecuteAsync(() =>
+                        {
+                            if (firstAttempt)
+                            {
+                                firstAttempt = false;
+                                return ApplyChangesAsync(httpMessage);
+                            }
+                            // if any other attempt then the first, re-deserialize the message as GetChangesBatch modifies it!
+                            var httpMessage2 = serializer.Deserialize(httpRequest.GetBody());
+                            return ApplyChangesAsync(httpMessage2);
+                        });
                         break;
                     case HttpStep.GetLocalTimestamp:
                         httpMessageResponse = await GetLocalTimestampAsync(httpMessage);
