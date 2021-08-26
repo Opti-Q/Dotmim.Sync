@@ -11,9 +11,13 @@
 Can't be used alone. Choose a server and a client provider such as Dotmim.Sync.SqlServerProvider or Dotmim.Sync.SqliteProvider</Description>
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
     <PackageTags>Dotmim.Sync, Sync Core Provider, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
-    <Version>0.2.9.13</Version>
+    <Version>0.2.10.0</Version>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Product>Dotmim.Sync.Core OPTI-Q</Product>
+    <PackageReleaseNotes>
+      #0.2.10.0
+      - JsonConverter does not close stream
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <!--generate NUGET package including symbols ans source on each release build -->
