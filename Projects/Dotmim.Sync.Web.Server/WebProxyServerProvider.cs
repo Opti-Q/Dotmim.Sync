@@ -204,67 +204,76 @@ namespace Dotmim.Sync.Web.Server
 
             try
             {
-                bool firstAttempt = true;
-                var serializer = BaseConverter<HttpMessage>.GetConverter(serializationFormat);
-
-                var httpMessage = serializer.Deserialize(streamArray);
-
-                HttpMessage httpMessageResponse = null;
-                switch (httpMessage.Step)
+                using (var ms = new MemoryStream())
                 {
-                    case HttpStep.BeginSession:
-                        // on first message, replace the Configuration with the server one !
-                        httpMessageResponse = await BeginSessionAsync(httpMessage);
-                        break;
-                    case HttpStep.EnsureScopes:
-                        httpMessageResponse = await EnsureScopesAsync(httpMessage);
-                        break;
-                    case HttpStep.EnsureConfiguration:
-                        httpMessageResponse = await EnsureSchemaAsync(httpMessage);
-                        break;
-                    case HttpStep.EnsureDatabase:
-                        httpMessageResponse = await EnsureDatabaseAsync(httpMessage);
-                        break;
-                    case HttpStep.GetChangeBatch:
-                        httpMessageResponse = await GetChangesBatchPolicy.ExecuteAsync(() =>
-                        {
-                            if (firstAttempt)
+                    await streamArray.CopyToAsync(ms);
+                    ms.Seek(0, SeekOrigin.Begin);
+
+                    bool firstAttempt = true;
+                    var serializer = BaseConverter<HttpMessage>.GetConverter(serializationFormat);
+
+                    var httpMessage = serializer.Deserialize(ms);
+
+                    HttpMessage httpMessageResponse = null;
+                    switch (httpMessage.Step)
+                    {
+                        case HttpStep.BeginSession:
+                            // on first message, replace the Configuration with the server one !
+                            httpMessageResponse = await BeginSessionAsync(httpMessage);
+                            break;
+                        case HttpStep.EnsureScopes:
+                            httpMessageResponse = await EnsureScopesAsync(httpMessage);
+                            break;
+                        case HttpStep.EnsureConfiguration:
+                            httpMessageResponse = await EnsureSchemaAsync(httpMessage);
+                            break;
+                        case HttpStep.EnsureDatabase:
+                            httpMessageResponse = await EnsureDatabaseAsync(httpMessage);
+                            break;
+                        case HttpStep.GetChangeBatch:
+                            httpMessageResponse = await GetChangesBatchPolicy.ExecuteAsync(() =>
                             {
-                                firstAttempt = false;
-                                return GetChangeBatchAsync(httpMessage);
-                            }
-                            // if any other attempt then the first, re-deserialize the message as GetChangesBatch modifies it!
-                            var httpMessage2 = serializer.Deserialize(httpRequest.GetBody());
-                            return GetChangeBatchAsync(httpMessage2);
-                        });
-                        break;
-                    case HttpStep.ApplyChanges:
-                        httpMessageResponse = await ApplyChangesPolicy.ExecuteAsync(() =>
-                        {
-                            if (firstAttempt)
+                                if (firstAttempt)
+                                {
+                                    firstAttempt = false;
+                                    return GetChangeBatchAsync(httpMessage);
+                                }
+
+                                // if any other attempt then the first, re-deserialize the message as GetChangesBatch modifies it!
+                                ms.Seek(0, SeekOrigin.Begin);
+                                var httpMessage2 = serializer.Deserialize(ms);
+                                return GetChangeBatchAsync(httpMessage2);
+                            });
+                            break;
+                        case HttpStep.ApplyChanges:
+                            httpMessageResponse = await ApplyChangesPolicy.ExecuteAsync(() =>
                             {
-                                firstAttempt = false;
-                                return ApplyChangesAsync(httpMessage);
-                            }
-                            // if any other attempt then the first, re-deserialize the message as GetChangesBatch modifies it!
-                            var httpMessage2 = serializer.Deserialize(httpRequest.GetBody());
-                            return ApplyChangesAsync(httpMessage2);
-                        });
-                        break;
-                    case HttpStep.GetLocalTimestamp:
-                        httpMessageResponse = await GetLocalTimestampAsync(httpMessage);
-                        break;
-                    case HttpStep.WriteScopes:
-                        httpMessageResponse = await WriteScopesAsync(httpMessage);
-                        break;
-                    case HttpStep.EndSession:
-                        httpMessageResponse = await EndSessionAsync(httpMessage);
-                        break;
+                                if (firstAttempt)
+                                {
+                                    firstAttempt = false;
+                                    return ApplyChangesAsync(httpMessage);
+                                }
+
+                                // if any other attempt then the first, re-deserialize the message as GetChangesBatch modifies it!
+                                ms.Seek(0, SeekOrigin.Begin);
+                                var httpMessage2 = serializer.Deserialize(ms);
+                                return ApplyChangesAsync(httpMessage2);
+                            });
+                            break;
+                        case HttpStep.GetLocalTimestamp:
+                            httpMessageResponse = await GetLocalTimestampAsync(httpMessage);
+                            break;
+                        case HttpStep.WriteScopes:
+                            httpMessageResponse = await WriteScopesAsync(httpMessage);
+                            break;
+                        case HttpStep.EndSession:
+                            httpMessageResponse = await EndSessionAsync(httpMessage);
+                            break;
+                    }
+
+                    var binaryData = serializer.Serialize(httpMessageResponse);
+                    await httpResponse.GetBody().WriteAsync(binaryData, 0, binaryData.Length);
                 }
-
-                var binaryData = serializer.Serialize(httpMessageResponse);
-                await httpResponse.GetBody().WriteAsync(binaryData, 0, binaryData.Length);
-
             }
             catch (Exception ex)
             {
@@ -313,51 +322,83 @@ namespace Dotmim.Sync.Web.Server
 
             try
             {
+                bool firstAttempt = true;
                 var serializer = BaseConverter<HttpMessage>.GetConverter(serializationFormat);
                 HttpMessage httpMessage;
 
-                using(var streamArray = await httpRequest.Content.ReadAsStreamAsync())
-                    httpMessage = serializer.Deserialize(streamArray);
-
-                HttpMessage httpMessageResponse = null;
-                switch (httpMessage.Step)
+                using (var ms = new MemoryStream())
                 {
-                    case HttpStep.BeginSession:
-                        // on first message, replace the Configuration with the server one !
-                        httpMessageResponse = await BeginSessionAsync(httpMessage);
-                        break;
-                    case HttpStep.EnsureScopes:
-                        httpMessageResponse = await EnsureScopesAsync(httpMessage);
-                        break;
-                    case HttpStep.EnsureConfiguration:
-                        httpMessageResponse = await EnsureSchemaAsync(httpMessage);
-                        break;
-                    case HttpStep.EnsureDatabase:
-                        httpMessageResponse = await EnsureDatabaseAsync(httpMessage);
-                        break;
-                    case HttpStep.GetChangeBatch:
-                        httpMessageResponse = await GetChangesBatchPolicy.ExecuteAsync(() => GetChangeBatchAsync(httpMessage));
-                        break;
-                    case HttpStep.ApplyChanges:
-                        httpMessageResponse = await ApplyChangesPolicy.ExecuteAsync(() => ApplyChangesAsync(httpMessage));
-                        break;
-                    case HttpStep.GetLocalTimestamp:
-                        httpMessageResponse = await GetLocalTimestampAsync(httpMessage);
-                        break;
-                    case HttpStep.WriteScopes:
-                        httpMessageResponse = await WriteScopesAsync(httpMessage);
-                        break;
-                    case HttpStep.EndSession:
-                        httpMessageResponse = await EndSessionAsync(httpMessage);
-                        break;
+                    using (var streamArray = await httpRequest.Content.ReadAsStreamAsync())
+                    {
+                        streamArray.CopyTo(ms);
+                        ms.Seek(0, SeekOrigin.Begin);
+                        httpMessage = serializer.Deserialize(ms);
+                    }
+
+                    HttpMessage httpMessageResponse = null;
+                    switch (httpMessage.Step)
+                    {
+                        case HttpStep.BeginSession:
+                            // on first message, replace the Configuration with the server one !
+                            httpMessageResponse = await BeginSessionAsync(httpMessage);
+                            break;
+                        case HttpStep.EnsureScopes:
+                            httpMessageResponse = await EnsureScopesAsync(httpMessage);
+                            break;
+                        case HttpStep.EnsureConfiguration:
+                            httpMessageResponse = await EnsureSchemaAsync(httpMessage);
+                            break;
+                        case HttpStep.EnsureDatabase:
+                            httpMessageResponse = await EnsureDatabaseAsync(httpMessage);
+                            break;
+                        case HttpStep.GetChangeBatch:
+                            httpMessageResponse = await GetChangesBatchPolicy.ExecuteAsync(async () =>
+                            {
+                                if (firstAttempt)
+                                {
+                                    firstAttempt = false;
+                                    return await GetChangeBatchAsync(httpMessage);
+                                }
+
+                                // if any other attempt then the first, re-deserialize the message as GetChangesBatchAsync modifies it!
+                                ms.Seek(0, SeekOrigin.Begin);
+                                var httpMessage2 = serializer.Deserialize(ms);
+                                return await GetChangeBatchAsync(httpMessage2);
+                            });
+                            break;
+                        case HttpStep.ApplyChanges:
+                            httpMessageResponse = await ApplyChangesPolicy.ExecuteAsync(async () =>
+                            {
+                                if (firstAttempt)
+                                {
+                                    firstAttempt = false;
+                                    return await ApplyChangesAsync(httpMessage);
+                                }
+
+                                // if any other attempt then the first, re-deserialize the message as ApplyChangesAsync modifies it!
+                                ms.Seek(0, SeekOrigin.Begin);
+                                var httpMessage2 = serializer.Deserialize(ms);
+                                return await ApplyChangesAsync(httpMessage2);
+                            });
+                            break;
+                        case HttpStep.GetLocalTimestamp:
+                            httpMessageResponse = await GetLocalTimestampAsync(httpMessage);
+                            break;
+                        case HttpStep.WriteScopes:
+                            httpMessageResponse = await WriteScopesAsync(httpMessage);
+                            break;
+                        case HttpStep.EndSession:
+                            httpMessageResponse = await EndSessionAsync(httpMessage);
+                            break;
+                    } 
+                    
+                    var binaryData = serializer.Serialize(httpMessageResponse);
+                    //await httpResponse.GetBody().WriteAsync(binaryData, 0, binaryData.Length);
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new ByteArrayContent(binaryData)
+                    };
                 }
-
-                var binaryData = serializer.Serialize(httpMessageResponse);
-                //await httpResponse.GetBody().WriteAsync(binaryData, 0, binaryData.Length);
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new ByteArrayContent(binaryData)
-                };
 
             }
             catch (Exception ex)

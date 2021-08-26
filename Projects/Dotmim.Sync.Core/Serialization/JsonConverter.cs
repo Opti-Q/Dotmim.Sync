@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.IO;
+using System.Text;
 
 namespace Dotmim.Sync.Serialization
 {
@@ -7,7 +8,7 @@ namespace Dotmim.Sync.Serialization
     {
         public override T Deserialize(Stream ms)
         {
-            using (StreamReader sr = new StreamReader(ms))
+            using (StreamReader sr = new StreamReader(ms, Encoding.UTF8,false, 4096, true))
             using (JsonReader reader = new JsonTextReader(sr))
             {
                 JsonSerializer serializer = new JsonSerializer();
@@ -17,7 +18,7 @@ namespace Dotmim.Sync.Serialization
 
         public override void Serialize(T obj, Stream ms)
         {
-            using (var writer = new StreamWriter(ms))
+            using (var writer = new StreamWriter(ms, Encoding.UTF8, 4096, true))
             using (var jsonWriter = new JsonTextWriter(writer))
             {
                 var serializer = new JsonSerializer();

@@ -275,6 +275,7 @@ namespace Dotmim.Sync.Tests
         {
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
+            await agent.SynchronizeAsync();
 
             var insertRowScript =
             $@"INSERT [ServiceTickets] ([ServiceTicketID], [Title], [Description], [StatusValue], [EscalationLevel], [Opened], [Closed], [CustomerID]) 
