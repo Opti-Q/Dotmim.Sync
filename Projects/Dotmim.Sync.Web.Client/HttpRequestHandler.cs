@@ -39,6 +39,8 @@ namespace Dotmim.Sync.Web.Client
 
         internal CookieHeaderValue Cookie { get; set; }
 
+        internal TimeSpan? RequestTimeout { get; set; } = TimeSpan.FromSeconds(120);
+
         public HttpRequestHandler()
         {
             this.CancellationToken = CancellationToken.None;
@@ -83,8 +85,14 @@ namespace Dotmim.Sync.Web.Client
                     }
                 }
 
-                // default handler if no one specified
-                HttpClientHandler httpClientHandler = this.Handler ?? new HttpClientHandler();
+                // use timeouthandler so we get a real timeout exception in case a request takes too long instead of a non-specific taskcanceledexception!
+                var handler = new TimeoutHandler
+                {
+                    DefaultTimeout = RequestTimeout ?? TimeSpan.FromSeconds(120),
+                    // default handler if no one specified
+                    InnerHandler = this.Handler ?? new HttpClientHandler()
+                };
+
 
                 // serialize dmSet content to bytearraycontent
                 var serializer = BaseConverter<T>.GetConverter(serializationFormat);
@@ -93,7 +101,11 @@ namespace Dotmim.Sync.Web.Client
 
                 // do not dispose HttpClient for performance issue
                 if (client == null)
-                    client = new HttpClient(httpClientHandler);
+                {
+                    client = new HttpClient(handler);
+                    // give the HttpClient infinite time, because we only want to use the timeout handling provided by our TimeoutHandler
+                    client.Timeout = Timeout.InfiniteTimeSpan;
+                }
 
                 // add it to the default header
                 if (this.Cookie != null)

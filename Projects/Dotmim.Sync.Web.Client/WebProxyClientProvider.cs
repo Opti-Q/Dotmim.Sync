@@ -96,6 +96,21 @@ namespace Dotmim.Sync.Web.Client
                 this.httpRequestHandler.Handler = value;
             }
         }
+        /// <summary>
+        /// The time a httprequest is being waited for before a timeoutexception is thrown
+        /// Set to Timeout.InfiniteTimeSpan in case you do not want any request to ever run into a timeout
+        /// </summary>
+        public TimeSpan? RequestTimeout
+        {
+            get
+            {
+                return this.httpRequestHandler.RequestTimeout;
+            }
+            set
+            {
+                this.httpRequestHandler.RequestTimeout = value;
+            }
+        }
         public CookieHeaderValue Cookie
         {
             get

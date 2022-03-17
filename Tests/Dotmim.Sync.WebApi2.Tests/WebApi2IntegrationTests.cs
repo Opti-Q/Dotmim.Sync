@@ -19,6 +19,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Owin.Hosting;
 using Owin;
 using Polly;
+using Shouldly;
 using Xunit;
 
 namespace Dotmim.Sync.Tests
@@ -1173,7 +1174,32 @@ namespace Dotmim.Sync.Tests
             Assert.Equal(0, session1.TotalSyncConflicts);
             Assert.Equal(0, session1.TotalSyncErrors);
         }
-        
+
+
+        [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(17)]
+        public async Task WhenRequestRunsIntoTimeout_ThrowsTimeoutException(SyncConfiguration conf)
+        {
+            conf.Add(fixture.Tables);
+            configurationProvider = () => conf;
+
+            // set ridiculously low timeout
+            proxyClientProvider.RequestTimeout = TimeSpan.FromMilliseconds(1);
+
+            try
+            {
+                // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
+                await agent.SynchronizeAsync().ShouldThrowAsync<TimeoutException>();
+            }
+            finally
+            {
+                if (Directory.Exists(this.batchDir))
+                    Directory.Delete(this.batchDir, true);
+            }
+
+        }
+
+
+
         public void Dispose()
         {
             proxyClientProvider?.Dispose();
