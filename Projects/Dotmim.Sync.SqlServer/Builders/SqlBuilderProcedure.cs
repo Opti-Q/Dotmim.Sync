@@ -16,13 +16,13 @@ namespace Dotmim.Sync.SqlServer.Builders
 {
     public class SqlBuilderProcedure : IDbBuilderProcedureHelper
     {
-        private ObjectNameParser tableName;
-        private ObjectNameParser trackingName;
-        private SqlConnection connection;
-        private SqlTransaction transaction;
-        private DmTable tableDescription;
-        private SqlObjectNames sqlObjectNames;
-        private SqlDbMetadata sqlDbMetadata;
+        protected ObjectNameParser tableName;
+        protected ObjectNameParser trackingName;
+        protected SqlConnection connection;
+        protected SqlTransaction transaction;
+        protected DmTable tableDescription;
+        protected SqlObjectNames sqlObjectNames;
+        protected SqlDbMetadata sqlDbMetadata;
 
         public ICollection<FilterClause> Filters { get; set; }
 
@@ -1648,7 +1648,7 @@ namespace Dotmim.Sync.SqlServer.Builders
         //------------------------------------------------------------------
         // Select changes command
         //------------------------------------------------------------------
-        private SqlCommand BuildSelectIncrementalChangesCommand(bool withFilter = false)
+        protected virtual SqlCommand BuildSelectIncrementalChangesCommand(bool withFilter = false)
         { 
             SqlCommand sqlCommand = new SqlCommand();
             SqlParameter pTimestamp = new SqlParameter("@sync_min_timestamp", SqlDbType.BigInt);
