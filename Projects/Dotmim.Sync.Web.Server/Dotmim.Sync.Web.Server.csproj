@@ -11,10 +11,13 @@ Can't work without a Server provider, you have to choose an existing one to be a
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyName>Dotmim.Sync.Web.Server</AssemblyName>
     <RootNamespace>Dotmim.Sync.Web.Server</RootNamespace>
-    <Version>0.2.11.0</Version>
+    <Version>0.2.12.0</Version>
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Product>Dotmim.Sync.Web.Server OPTI-Q</Product>
     <PackageReleaseNotes>
+      #0.2.12.0
+      - TableChangesApplyingEventArgs contains the canges view and sync context
+
       #0.2.10.0
       - WebProxyServerProvider supports retrying ApplyChanges and GetChangesBatch
 

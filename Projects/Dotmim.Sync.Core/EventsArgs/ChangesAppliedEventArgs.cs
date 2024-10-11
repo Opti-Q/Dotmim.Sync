@@ -25,16 +25,28 @@ namespace Dotmim.Sync
     /// </summary>
     public class TableChangesApplyingEventArgs : BaseProgressEventArgs
     {
-        public TableChangesApplyingEventArgs(string providerTypeName, SyncStage stage, string tableName, DmRowState state) : base(providerTypeName, stage)
+        public TableChangesApplyingEventArgs(string providerTypeName, SyncStage stage, string tableName, DmRowState state, SyncContext context, DmView changes) : base(providerTypeName, stage)
         {
             this.TableName = tableName;
             this.State = state;
+            Context = context;
+            Changes = changes;
         }
 
         /// <summary>
         /// Gets the RowState of the applied rows
         /// </summary>
         public DmRowState State { get; set; }
+
+        /// <summary>
+        /// The current sync context
+        /// </summary>
+        public SyncContext Context { get; }
+        
+        /// <summary>
+        /// The changes to be applied
+        /// </summary>
+        public DmView Changes { get; }
 
         /// <summary>
         /// Gets the table name where changes are going to be applied
