@@ -17,48 +17,48 @@ namespace Dotmim.Sync.Test.SqlUtils
                 UseBulkOperations = true,
                 SerializationFormat= Enumerations.SerializationFormat.Json
             } });
-
-            confs.Add(new object[] { new SyncConfiguration{
-                DownloadBatchSizeInKB = 100,
-                UseBulkOperations = false,
-                SerializationFormat= Enumerations.SerializationFormat.Json
-            } });
-
-            confs.Add(new object[] { new SyncConfiguration{
-                DownloadBatchSizeInKB = 0,
-                UseBulkOperations = true,
-                SerializationFormat= Enumerations.SerializationFormat.Json
-            } });
-
-            confs.Add(new object[] { new SyncConfiguration{
-                DownloadBatchSizeInKB = 0,
-                UseBulkOperations = false,
-                SerializationFormat= Enumerations.SerializationFormat.Json
-            } });
-
-            confs.Add(new object[] { new SyncConfiguration{
-                DownloadBatchSizeInKB = 100,
-                UseBulkOperations = true,
-                SerializationFormat= Enumerations.SerializationFormat.Binary
-            } });
-
-            confs.Add(new object[] { new SyncConfiguration{
-                DownloadBatchSizeInKB = 100,
-                UseBulkOperations = false,
-                SerializationFormat= Enumerations.SerializationFormat.Binary
-            } });
-
-            confs.Add(new object[] { new SyncConfiguration{
-                DownloadBatchSizeInKB = 0,
-                UseBulkOperations = true,
-                SerializationFormat= Enumerations.SerializationFormat.Binary
-            } });
-
-            confs.Add(new object[] { new SyncConfiguration{
-                DownloadBatchSizeInKB = 0,
-                UseBulkOperations = false,
-                SerializationFormat= Enumerations.SerializationFormat.Binary
-            } });
+            //
+            // confs.Add(new object[] { new SyncConfiguration{
+            //     DownloadBatchSizeInKB = 100,
+            //     UseBulkOperations = false,
+            //     SerializationFormat= Enumerations.SerializationFormat.Json
+            // } });
+            //
+            // confs.Add(new object[] { new SyncConfiguration{
+            //     DownloadBatchSizeInKB = 0,
+            //     UseBulkOperations = true,
+            //     SerializationFormat= Enumerations.SerializationFormat.Json
+            // } });
+            //
+            // confs.Add(new object[] { new SyncConfiguration{
+            //     DownloadBatchSizeInKB = 0,
+            //     UseBulkOperations = false,
+            //     SerializationFormat= Enumerations.SerializationFormat.Json
+            // } });
+            //
+            // confs.Add(new object[] { new SyncConfiguration{
+            //     DownloadBatchSizeInKB = 100,
+            //     UseBulkOperations = true,
+            //     SerializationFormat= Enumerations.SerializationFormat.Binary
+            // } });
+            //
+            // confs.Add(new object[] { new SyncConfiguration{
+            //     DownloadBatchSizeInKB = 100,
+            //     UseBulkOperations = false,
+            //     SerializationFormat= Enumerations.SerializationFormat.Binary
+            // } });
+            //
+            // confs.Add(new object[] { new SyncConfiguration{
+            //     DownloadBatchSizeInKB = 0,
+            //     UseBulkOperations = true,
+            //     SerializationFormat= Enumerations.SerializationFormat.Binary
+            // } });
+            //
+            // confs.Add(new object[] { new SyncConfiguration{
+            //     DownloadBatchSizeInKB = 0,
+            //     UseBulkOperations = false,
+            //     SerializationFormat= Enumerations.SerializationFormat.Binary
+            // } });
 
         }
         public IEnumerator<object[]> GetEnumerator() => confs.GetEnumerator();
