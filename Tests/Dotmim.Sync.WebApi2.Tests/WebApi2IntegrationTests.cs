@@ -133,8 +133,8 @@ namespace Dotmim.Sync.Tests
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            if (File.Exists(this.ClientSqliteFilePath))
-                File.Delete(this.ClientSqliteFilePath);
+            // if (File.Exists(this.ClientSqliteFilePath))
+            //     File.Delete(this.ClientSqliteFilePath);
 
         }
     }
