@@ -11,10 +11,12 @@
 		<PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
 		<PackageTags>Dotmim.Sync, ASP.NET Core, ASP.NET Core Web Sync Proxy, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>0.2.12.0</Version>
-		<AssemblyVersion>0.2.1.0</AssemblyVersion>
+		<Version>0.3.0.0</Version>
+		<AssemblyVersion>0.3.0.0</AssemblyVersion>
 		<Product>Dotmim.Sync.Web.Client OPTI-Q</Product>
 		<PackageReleaseNotes>
+			#0.3.0.0
+			- allowed sqlite to use IsDirty column for change tracking
 			#0.2.12.0
 			- TableChangesApplyingEventArgs contains the canges view and sync context
 

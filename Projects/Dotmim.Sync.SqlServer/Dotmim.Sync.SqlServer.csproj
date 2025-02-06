@@ -8,10 +8,13 @@
     <Description>Sql Server Sync Provider. Can be used as Client or Server provider. Compatible with .Net Standard 2.0</Description>
     <PackageTags>Dotmim.Sync,Sync, Sql Server Provider, .Net Standard 2.0</PackageTags>
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
-    <Version>0.2.12.0</Version>
-    <AssemblyVersion>0.2.1.0</AssemblyVersion>
+    <Version>0.3.0.0</Version>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
     <Product>Dotmim.Sync.SqlServer OPTI-Q</Product>
     <PackageReleaseNotes>
+      #0.3.0.0
+      - allowed sqlite to use IsDirty column for change tracking
+      
       #0.2.12.0
       - TableChangesApplyingEventArgs contains the canges view and sync context
 

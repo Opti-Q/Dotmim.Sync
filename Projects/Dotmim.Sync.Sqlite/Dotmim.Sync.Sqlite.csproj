@@ -13,6 +13,10 @@
     <AssemblyVersion>0.2.1.0</AssemblyVersion>
     <Product>Dotmim.Sync.Sqlite OPTI-Q</Product>
     <PackageReleaseNotes>
+      #0.3.0.0
+      - allowed sqlite to use IsDirty column for change tracking
+      - updated to Microsoft.Data.Sqlite 9.0.1
+      - guids MUST now be stored as texts/strings and NOT as blobs
       #0.2.12.0
       - TableChangesApplyingEventArgs contains the canges view and sync context
       #0.2.11.0
