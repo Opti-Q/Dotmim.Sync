@@ -46,6 +46,8 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine($"\t,[update_timestamp] = {SqliteObjectNames.TimestampValue}");
             stringBuilder.AppendLine($"\t,[timestamp] = {SqliteObjectNames.TimestampValue}");
             stringBuilder.AppendLine("\t,[last_change_datetime] = datetime('now')");
+            stringBuilder.AppendLine("\t,[is_dirty] = 1");
+            stringBuilder.AppendLine("\t,[sync_session_id] = NULL");
 
             // --------------------------------------------------------------------------------
             // SQLITE doesnot support (yet) filtering columns, since it's only a client provider
@@ -166,6 +168,8 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine("\t\t,[timestamp]");
             stringBuilder.AppendLine("\t\t,[sync_row_is_tombstone]");
             stringBuilder.AppendLine("\t\t,[last_change_datetime]");
+            stringBuilder.AppendLine("\t\t,[is_dirty]");
+            stringBuilder.AppendLine("\t\t,[sync_session_id]");
 
             StringBuilder filterColumnsString = new StringBuilder();
 
@@ -197,6 +201,8 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine($"\t\t,{SqliteObjectNames.TimestampValue}");
             stringBuilder.AppendLine("\t\t,0");
             stringBuilder.AppendLine("\t\t,datetime('now')");
+            stringBuilder.AppendLine("\t\t,1");
+            stringBuilder.AppendLine("\t\t,NULL");
 
             if (Filters != null && Filters.Count > 0)
                 stringBuilder.AppendLine(filterColumnsString.ToString());
@@ -275,6 +281,8 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine($"\t\t,[update_timestamp] = {SqliteObjectNames.TimestampValue}");
             stringBuilder.AppendLine($"\t\t,[timestamp] = {SqliteObjectNames.TimestampValue}");
             stringBuilder.AppendLine("\t\t,[last_change_datetime] = datetime('now')");
+            stringBuilder.AppendLine("\t\t,[is_dirty] = 1");
+            stringBuilder.AppendLine("\t\t,[sync_session_id] = NULL");
 
             // --------------------------------------------------------------------------------
             // SQLITE doesnot support (yet) filtering columns, since it's only a client provider

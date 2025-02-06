@@ -71,6 +71,7 @@ namespace Dotmim.Sync.Sqlite
 
         protected override void SetCommandParameters(DbCommandType commandType, DbCommand command)
         {
+            
             switch (commandType)
             {
                 case DbCommandType.SelectChanges:
@@ -100,10 +101,33 @@ namespace Dotmim.Sync.Sqlite
                 case DbCommandType.Reset:
                     this.SetResetParameters(command);
                     break;
+                case DbCommandType.MarkRowsAsSyncing:
+                    this.SetMarkRowsAsSyncingParameters(command);
+                    break;
+                case DbCommandType.MarkRowsAsSynced:
+                    this.SetMarkRowsAsSyncedParameters(command);
+                    break;
                 default:
                     break;
             }
         }
+
+        private void SetMarkRowsAsSyncedParameters(DbCommand command)
+        {
+            var p = command.CreateParameter();
+            p.ParameterName = "@sync_session_id";
+            p.DbType = GetValidDbType(DbType.String);
+            command.Parameters.Add(p);
+        }
+
+        private void SetMarkRowsAsSyncingParameters(DbCommand command)
+        { 
+            var p = command.CreateParameter();
+            p.ParameterName = "@sync_session_id";
+            p.DbType = GetValidDbType(DbType.String);
+            command.Parameters.Add(p);
+        }
+        
 
         private void SetResetParameters(DbCommand command)
         {

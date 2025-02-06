@@ -430,7 +430,6 @@ namespace Dotmim.Sync
                 if (cancellationToken.IsCancellationRequested)
                     cancellationToken.ThrowIfCancellationRequested();
 
-
                 // fromId : When applying rows, make sure it's identified as applied by this client scope
                 fromId = localScopeInfo.Id;
                 // lastSyncTS : apply lines only if thye are not modified since last client sync
@@ -472,7 +471,7 @@ namespace Dotmim.Sync
                     ////Direction set to Download
                     //context.SyncWay = SyncWay.Download;
 
-                    //(context, serverBatchInfo, serverChangesSelected) = await this.RemoteProvider.GetArchiveAsync(context, scope);
+                    //// (context, serverBatchInfo, serverChangesSelected) = await this.RemoteProvider.GetArchiveAsync(context, scope);
 
                     //// fromId : When applying rows, make sure it's identified as applied by this server scope
                     //fromId = serverScopeInfo.Id;
@@ -482,7 +481,7 @@ namespace Dotmim.Sync
                     //isNew = localScopeInfo.IsNewScope;
                     //scope = new ScopeInfo { Id = fromId, IsNewScope = isNew, LastTimestamp = lastSyncTS };
 
-                    //(context, clientChangesApplied) = await this.LocalProvider.ApplyArchiveAsync(context, scope, serverBatchInfo);
+                    //// (context, clientChangesApplied) = await this.LocalProvider.ApplyArchiveAsync(context, scope, serverBatchInfo);
 
                     //// Here we have to change the localScopeInfo.LastTimestamp to the good one
                     //// last ts from archive

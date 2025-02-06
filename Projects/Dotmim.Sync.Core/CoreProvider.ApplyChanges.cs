@@ -32,6 +32,7 @@ namespace Dotmim.Sync
             DbConnection connection = null;
             ChangesApplied changesApplied = new ChangesApplied();
 
+
             try
             {
                 using (connection = this.CreateConnection())
@@ -40,6 +41,8 @@ namespace Dotmim.Sync
 
                     // Create a transaction
                     applyTransaction = connection.BeginTransaction();
+
+                    await OnApplyingChangesAsync(context, message, connection, applyTransaction);
 
                     // -----------------------------------------------------
                     // 0) Check if we are in a reinit mode
@@ -131,6 +134,10 @@ namespace Dotmim.Sync
                     message.Changes.Clear();
 
             }
+        }
+
+        protected virtual async Task OnApplyingChangesAsync(SyncContext context, MessageApplyChanges message, DbConnection connection, DbTransaction applyTransaction)
+        {
         }
 
         /// <summary>

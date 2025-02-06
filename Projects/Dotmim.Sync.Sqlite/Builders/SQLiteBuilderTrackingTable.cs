@@ -9,6 +9,7 @@ using Microsoft.Data.Sqlite;
 using Dotmim.Sync.Filter;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Dotmim.Sync.Sqlite
 {
@@ -101,19 +102,25 @@ namespace Dotmim.Sync.Sqlite
 
             try
             {
-                using (var command = new SqliteCommand())
+                var statements = this.CreateTableCommandText();
+                var allStatements = statements.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Where(s => !string.IsNullOrEmpty(s)).ToList();
+                foreach(var statement in allStatements)
                 {
-                    if (!alreadyOpened)
-                        this.connection.Open();
+                    using (var command = new SqliteCommand())
+                    {
+                        if (!alreadyOpened)
+                            this.connection.Open();
 
-                    if (this.transaction != null)
-                        command.Transaction = this.transaction;
+                        if (this.transaction != null)
+                            command.Transaction = this.transaction;
 
-                    command.CommandText = this.CreateTableCommandText();
-                    command.Connection = this.connection;
-                    command.ExecuteNonQuery();
-
+                        command.CommandText = statement;
+                        command.Connection = this.connection;
+                        command.ExecuteNonQuery();
+                    }
                 }
+                
             }
             catch (Exception ex)
             {
@@ -163,6 +170,9 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine($"[timestamp] [integer] NULL, ");
             stringBuilder.AppendLine($"[sync_row_is_tombstone] [integer] NOT NULL default(0), ");
             stringBuilder.AppendLine($"[last_change_datetime] [datetime] NULL, ");
+            // Add new columns for tracking sync state
+            stringBuilder.AppendLine($"[is_dirty] [integer] NOT NULL default(0), ");
+            stringBuilder.AppendLine($"[sync_session_id] [text] NULL COLLATE NOCASE, ");
 
             // adding the filter columns
             // --------------------------------------------------------------------------------
@@ -193,11 +203,11 @@ namespace Dotmim.Sync.Sqlite
 
                 if (i < this.tableDescription.PrimaryKey.Columns.Length - 1)
                     stringBuilder.Append(", ");
-            }
-            stringBuilder.Append(")");
+            }stringBuilder.Append(")");
+            stringBuilder.AppendLine(");");
 
-
-            stringBuilder.Append(")");
+            // Add index for sync_session_id
+            stringBuilder.Append($"CREATE INDEX IF NOT EXISTS idx_{trackingName.ObjectNameNormalized}_session ON {trackingName.FullQuotedString} ([sync_session_id]);");
 
             return stringBuilder.ToString();
         }
@@ -296,7 +306,8 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.Append("[create_timestamp], ");
             stringBuilder.Append("[update_timestamp], ");
             stringBuilder.Append("[timestamp], "); // timestamp is not a column we update, it's auto
-            stringBuilder.Append("[sync_row_is_tombstone] ");
+            stringBuilder.Append("[sync_row_is_tombstone], ");
+            stringBuilder.Append("[is_dirty] ");
             stringBuilder.AppendLine(string.Concat(stringBuilder6.ToString(), ") "));
             stringBuilder.Append(string.Concat("SELECT ", stringBuilder2.ToString(), ", "));
             stringBuilder.Append("NULL, ");
@@ -304,7 +315,8 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.Append($"{SqliteObjectNames.TimestampValue}, ");
             stringBuilder.Append("0, ");
             stringBuilder.Append($"{SqliteObjectNames.TimestampValue}, ");
-            stringBuilder.Append("0");
+            stringBuilder.Append("0, ");
+            stringBuilder.Append("1"); // by default, every row is dirty and needs to be synced
             stringBuilder.AppendLine(string.Concat(stringBuilder5.ToString(), " "));
             string[] localName = new string[] { "FROM ", tableName.FullQuotedString, " ", baseTable, " LEFT OUTER JOIN ", trackingName.FullQuotedString, " ", sideTable, " " };
             stringBuilder.AppendLine(string.Concat(localName));

@@ -15,9 +15,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using DbColumn = Dotmim.Sync.Manager.DbColumn;
 
 namespace Dotmim.Sync
 {
@@ -199,6 +197,8 @@ namespace Dotmim.Sync
                                 tableDescription.SyncDirection == SyncDirection.UploadOnly)
                                 continue;
 
+                            await OnGettingChanges(context, tableDescription, connection, transaction);
+
                             var builder = this.GetDatabaseBuilder(tableDescription);
                             using (var syncAdapter = builder.CreateSyncAdapter(connection, transaction))
                             {
@@ -342,7 +342,7 @@ namespace Dotmim.Sync
 
                                 // add the stats to global stats
                                 changes.TableChangesSelected.Add(tableSelectedChanges);
-
+                                
                                 // Raise event for this table
                                 context.SyncStage = SyncStage.TableChangesSelected;
                                 var args = new TableChangesSelectedEventArgs(this.ProviderTypeName,
@@ -373,6 +373,11 @@ namespace Dotmim.Sync
                 }
 
             }
+        }
+
+        protected virtual Task OnGettingChanges(SyncContext context, DmTable tableDescription, DbConnection connection, DbTransaction transaction)
+        {
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -468,6 +473,8 @@ namespace Dotmim.Sync
                             if (context.SyncWay == SyncWay.Download &&
                                 tableDescription.SyncDirection == SyncDirection.UploadOnly)
                                 continue;
+                            
+                            await OnGettingChanges(context, tableDescription, connection, transaction);
 
                             var builder = this.GetDatabaseBuilder(tableDescription);
                             using (var syncAdapter = builder.CreateSyncAdapter(connection, transaction))
@@ -915,55 +922,6 @@ namespace Dotmim.Sync
                               $"\n\t{string.Join(" | ", values)}";
                     LogError(msg);
                 }
-
-                //// Check if a row is modified :
-                //// 1) Row is not new
-                //// 2) Row update is AFTER last sync of asker
-                //// 3) Row insert is BEFORE last sync of asker (if insert is after last sync, it's not an update, it's an insert)
-                //if (scopeInfo.IsNewScope)
-                //    dmRowState = DmRowState.Added;
-                //// We check for an update first as it has precedence over inserts (if update AND insert => we send an update)
-                //else if (syncUpdate && updatedTimeStamp > scopeInfo.Timestamp &&
-                //         // however, we check if this row was not inserted AND updated on the same device (scope) **before** syncing
-                //         // if we did not do this, a newly inserted AND updated row would be sent as "update" to the remove scope and break the sync (as there is no row to update yet)
-                //         // So in that edge case, it must be send as "insert"
-                //         (createdTimeStamp <= scopeInfo.Timestamp || !isLocallyCreated))
-                //    dmRowState = DmRowState.Modified;
-                //else if (syncCreation && createdTimeStamp >= scopeInfo.Timestamp)
-                //    dmRowState = DmRowState.Added;
-                //// if there was a conflict because another client inserted a row with the same id as the server with "ClientWins"
-                //// the tracking table will show "creationtimestamp" of the client, but an "update_timestamp" of 0 (which is lower than the update timestamp of another client that has already synced before)
-                //// TODO: Solve this by including the [timestamp] column of the _tracking table
-                //else if (syncUpdate && wasUpdatedOnOtherClient)
-                //    dmRowState = DmRowState.Modified;
-                //else
-                //{
-                //    dmRowState = DmRowState.Unchanged;
-                //    var t = dataRow.Table;
-                //    var columns = t.Columns.Select(c => c.ColumnName).ToList();
-                //    var values = dataRow.ItemArray.Select((a) => (a?.ToString() ?? "<null>")).ToList();
-
-                //    // pad values and columns for better formatting in output
-                //    for (int i = 0; i < t.Columns.Count; i++)
-                //    {
-                //        var cN = columns[i];
-                //        var vN = values[i];
-
-                //        var toPad = Math.Max(cN.Length, vN.Length);
-                //        columns[i] = cN.PadRight(toPad, ' ');
-                //        values[i] = vN.PadRight(toPad, ' ');
-                //    }
-
-
-                //    var ids = string.Join(", ",
-                //        t.PrimaryKey.Columns.Select(c => $"{c.ColumnName}: " + dataRow[columnCache[c.ColumnName]]));
-                //    var msg = $"Row {ids} of table {dataRow.Table.TableName} is in 'Unchanged' state ({this.GetType().Name})" +
-                //              $"\n\tscopeInfo.Id:{scopeInfo.Id}, scopeInfo.IsNewScope :{scopeInfo.IsNewScope}, scopeInfo.LastTimestamp:{scopeInfo.Timestamp}" +
-                //              $"\n\tcreateScopeId:{createScopeId}, updateScopeId:{updateScopeId}, createdTimeStamp:{createdTimeStamp}, updatedTimeStamp:{updatedTimeStamp}." +
-                //              $"\n\t{string.Join(" | ", columns)}" +
-                //              $"\n\t{string.Join(" | ", values)}";
-                //    LogError(msg);
-                //}
 
                 return dmRowState;
             }

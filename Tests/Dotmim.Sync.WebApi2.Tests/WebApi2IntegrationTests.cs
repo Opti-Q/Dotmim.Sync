@@ -129,12 +129,14 @@ namespace Dotmim.Sync.Tests
         public void Dispose()
         {
             helperDb.DeleteDatabase(this.ServerDbName);
+            
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            // if (File.Exists(this.ClientSqliteFilePath))
-            //     File.Delete(this.ClientSqliteFilePath);
+            if (File.Exists(this.ClientSqliteFilePath))
+                File.Delete(this.ClientSqliteFilePath);
 
         }
     }
@@ -1183,7 +1185,7 @@ namespace Dotmim.Sync.Tests
             configurationProvider = () => conf;
 
             // set ridiculously low timeout
-            proxyClientProvider.RequestTimeout = TimeSpan.FromMilliseconds(1);
+            proxyClientProvider.RequestTimeout = TimeSpan.FromMilliseconds(0.00001);
 
             try
             {

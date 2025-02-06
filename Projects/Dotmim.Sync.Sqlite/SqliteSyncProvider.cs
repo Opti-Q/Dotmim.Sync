@@ -6,6 +6,8 @@ using System;
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using System.IO;
+using System.Threading.Tasks;
+using Dotmim.Sync.Messages;
 
 namespace Dotmim.Sync.Sqlite
 {
@@ -129,6 +131,38 @@ namespace Dotmim.Sync.Sqlite
             this.filePath = sQLiteConnectionStringBuilder.DataSource;
 
             this.ConnectionString = sQLiteConnectionStringBuilder.ConnectionString;
+        }
+
+        protected override async Task OnGettingChanges(SyncContext context, DmTable tableDescription, DbConnection connection,
+            DbTransaction transaction)
+        {
+            // Use the session ID from the context
+            var sessionId = context.SessionId;
+            
+            var builder = this.GetDatabaseBuilder(tableDescription);
+            using (var syncAdapter = builder.CreateSyncAdapter(connection, transaction))
+            {
+                var markRowsCommand = syncAdapter.GetCommand(DbCommandType.MarkRowsAsSyncing);
+                DbManager.SetParameterValue(markRowsCommand, "sync_session_id", sessionId);
+                var changed = await markRowsCommand.ExecuteNonQueryAsync();
+                System.Diagnostics.Debug.WriteLine($"OnGettingChanges.{tableDescription.TableName} {context.SessionId:N}: {changed}");
+            }
+        }
+
+        protected override async Task OnApplyingChangesAsync(SyncContext context, MessageApplyChanges message, DbConnection connection,
+            DbTransaction applyTransaction)
+        {
+            foreach (var table in message.Schema.Tables)
+            {
+                var builder = GetDatabaseBuilder(table);
+                using (var syncAdapter = builder.CreateSyncAdapter(connection, applyTransaction))
+                {
+                    var markRowsSyncedCommand = syncAdapter.GetCommand(DbCommandType.MarkRowsAsSynced);
+                    DbManager.SetParameterValue(markRowsSyncedCommand, "sync_session_id", context.SessionId);
+                    var changed = await markRowsSyncedCommand.ExecuteNonQueryAsync();
+                    System.Diagnostics.Debug.WriteLine($"OnApplyingChanges.{table.TableName} {context.SessionId:N}: {changed}");
+                }
+            }
         }
 
         public override DbConnection CreateConnection() => new SqliteConnection(this.ConnectionString);

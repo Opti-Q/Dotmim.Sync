@@ -137,6 +137,7 @@ namespace Dotmim.Sync.Tests
         public void Dispose()
         {
             helperDb.DeleteDatabase(this.ServerDbName);
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
             GC.Collect();
             GC.WaitForPendingFinalizers();

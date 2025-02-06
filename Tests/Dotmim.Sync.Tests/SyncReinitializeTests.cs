@@ -81,6 +81,8 @@ namespace Dotmim.Sync.Test
             helperDb.DeleteDatabase(serverDbName);
             helperDb.DeleteDatabase(client1DbName);
 
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+            
             var filepathSqlite = Path.Combine(Directory.GetCurrentDirectory(), "Test_TwoTables_Client.sdf");
             if (File.Exists(filepathSqlite))
                 File.Delete(filepathSqlite);

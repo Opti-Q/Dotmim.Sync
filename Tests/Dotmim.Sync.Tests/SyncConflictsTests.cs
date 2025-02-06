@@ -71,12 +71,11 @@ namespace Dotmim.Sync.Tests
         {
             helperDb.DeleteDatabase(serverDbName);
             helperDb.DeleteDatabase(client1DbName);
+            
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 
-            //GC.Collect();
-            //GC.WaitForPendingFinalizers();
-
-            //if (File.Exists(ClientSqliteFilePath))
-            //    File.Delete(ClientSqliteFilePath);
 
         }
 

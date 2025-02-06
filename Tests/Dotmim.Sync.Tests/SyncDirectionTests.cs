@@ -40,6 +40,7 @@ namespace Dotmim.Sync.Tests
 
         public SyncDirectionFixture()
         {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
@@ -58,6 +59,7 @@ namespace Dotmim.Sync.Tests
         {
             helperDb.DeleteDatabase(serverDbName);
             helperDb.DeleteDatabase(client1DbName);
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
             GC.Collect();
             GC.WaitForPendingFinalizers();

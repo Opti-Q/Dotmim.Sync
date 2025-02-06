@@ -207,6 +207,7 @@ namespace Dotmim.Sync.Test
         {
             var builder = new SqliteConnectionStringBuilder { DataSource = ClientSqliteFilePath };
             this.ClientSqliteConnectionString = builder.ConnectionString;
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -231,6 +232,7 @@ namespace Dotmim.Sync.Test
         public void Dispose()
         {
             helperDb.DeleteDatabase(serverDbName);
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -328,6 +330,7 @@ namespace Dotmim.Sync.Test
         [Fact, TestPriority(3)]
         public async Task OneRowFromServer()
         {
+            var _= await agent.SynchronizeAsync();
 
             var clientId = InsertARow(fixture.ServerConnectionString);
 
@@ -359,7 +362,7 @@ namespace Dotmim.Sync.Test
 
         private void AssertReader(Guid clientId, DbDataReader dbReader)
         {
-            Assert.Equal(clientId, new Guid((byte[])dbReader["ClientID"]));
+            Assert.Equal(clientId, new Guid((string)dbReader["ClientID"]));
 
             var dbBytes = (Byte[])dbReader["CBinary"];
             Assert.Equal(byteArray50.Length, dbBytes.Length);
@@ -429,6 +432,7 @@ namespace Dotmim.Sync.Test
                     ,'<root><client name=''Doe''>inner Doe client</client></root>')";
 
 
+            var _ = await agent.SynchronizeAsync();
             using (var sqlConnection = new SqliteConnection(fixture.ClientSqliteConnectionString))
             {
                 using (var sqlCmd = new SqliteCommand(insertRowScript, sqlConnection))

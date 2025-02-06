@@ -317,7 +317,11 @@ namespace Dotmim.Sync.Sqlite
             stringBuilder.AppendLine("\t-- Update made by the local instance");
             stringBuilder.AppendLine("\t[side].[update_scope_id] IS NULL"); // only ever send local changes on sqlite!!!
             stringBuilder.AppendLine("\t-- And Timestamp is > from remote timestamp");
-            stringBuilder.AppendLine("\tAND [side].[timestamp] > @sync_min_timestamp");
+            stringBuilder.AppendLine("\t-- And row is marked as dirty");
+            stringBuilder.AppendLine("\tAND [side].[is_dirty] = 1");
+            // we need to risk to double-send changes, since the sync process could be interrupted (crash) and a row would never be synced because the sync_session_id is not reset
+            // stringBuilder.AppendLine("\t-- And not already being synced in another session");
+            // stringBuilder.AppendLine("\tAND [side].[sync_session_id] IS NULL");
             stringBuilder.AppendLine("AND (");
             stringBuilder.AppendLine("\t[side].[sync_row_is_tombstone] = 1 ");
             stringBuilder.AppendLine("\tOR");
@@ -334,8 +338,20 @@ namespace Dotmim.Sync.Sqlite
 
             var sqlString = stringBuilder.ToString();
 
-             this.AddName(DbCommandType.SelectChanges, sqlString);
+            this.AddName(DbCommandType.SelectChanges, sqlString);
             this.AddName(DbCommandType.SelectChangesWitFilters, sqlString);
+
+            // Add command to mark rows as being synced
+            var markRowsCommand = $@"UPDATE {trackingName.FullQuotedString} 
+                SET [sync_session_id] = @sync_session_id 
+                WHERE [is_dirty] = 1";
+            this.AddName(DbCommandType.MarkRowsAsSyncing, markRowsCommand);
+
+            // Add command to mark rows as synced
+            var markRowsSyncedCommand = $@"UPDATE {trackingName.FullQuotedString} 
+                SET [is_dirty] = 0, [sync_session_id] = NULL 
+                WHERE [sync_session_id] = @sync_session_id";
+            this.AddName(DbCommandType.MarkRowsAsSynced, markRowsSyncedCommand);
         }
 
     }

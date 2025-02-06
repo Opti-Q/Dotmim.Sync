@@ -23,6 +23,8 @@ namespace Dotmim.Sync.Builders
         BulkInsertRows,
         BulkUpdateRows,
         BulkDeleteRows,
-        Reset
+        Reset,
+        MarkRowsAsSyncing,
+        MarkRowsAsSynced,
     }
 }

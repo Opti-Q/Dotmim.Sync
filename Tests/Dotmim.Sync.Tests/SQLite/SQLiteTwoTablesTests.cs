@@ -68,6 +68,7 @@ namespace Dotmim.Sync.Test
         public SqliteTwoTablesFixture()
         {
             //var builder = new SqliteConnectionStringBuilder { DataSource = ClientSqliteFilePath };
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
@@ -86,6 +87,8 @@ namespace Dotmim.Sync.Test
         public void Dispose()
         {
             helperDb.DeleteDatabase(serverDbName);
+            
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
