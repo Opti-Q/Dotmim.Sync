@@ -2,6 +2,7 @@
 using Dotmim.Sync.Enumerations;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Text;
 
 namespace Dotmim.Sync
@@ -25,12 +26,14 @@ namespace Dotmim.Sync
     /// </summary>
     public class TableChangesApplyingEventArgs : BaseProgressEventArgs
     {
-        public TableChangesApplyingEventArgs(string providerTypeName, SyncStage stage, string tableName, DmRowState state, SyncContext context, DmView changes) : base(providerTypeName, stage)
+        public TableChangesApplyingEventArgs(string providerTypeName, SyncStage stage, string tableName,
+            DmRowState state, SyncContext context, DmView changes, DbConnection connection) : base(providerTypeName, stage)
         {
             this.TableName = tableName;
             this.State = state;
             Context = context;
             Changes = changes;
+            Connection = connection;
         }
 
         /// <summary>
@@ -47,6 +50,11 @@ namespace Dotmim.Sync
         /// The changes to be applied
         /// </summary>
         public DmView Changes { get; }
+
+        /// <summary>
+        /// The current connection - do NOT dispose
+        /// </summary>
+        public DbConnection Connection { get; private set; }
 
         /// <summary>
         /// Gets the table name where changes are going to be applied

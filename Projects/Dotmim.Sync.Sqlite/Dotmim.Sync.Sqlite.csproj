@@ -9,10 +9,14 @@
     <Description>SQLite Sync Provider. Actually can be used as Client provider (Don't use it as a Server provider)</Description>
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
     <PackageTags>Dotmim.Sync, SQLite Sync Core Provider, SQLite Sync, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
-    <Version>0.2.12.0</Version>
-    <AssemblyVersion>0.2.1.0</AssemblyVersion>
+    <Version>0.3.0.0</Version>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
     <Product>Dotmim.Sync.Sqlite OPTI-Q</Product>
     <PackageReleaseNotes>
+      #0.3.0.0
+      - allowed sqlite to use IsDirty column for change tracking
+      - updated to Microsoft.Data.Sqlite 9.0.1
+      - guids MUST now be stored as texts/strings and NOT as blobs
       #0.2.12.0
       - TableChangesApplyingEventArgs contains the canges view and sync context
       #0.2.11.0
