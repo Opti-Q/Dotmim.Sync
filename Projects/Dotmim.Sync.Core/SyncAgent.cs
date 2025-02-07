@@ -28,7 +28,7 @@ namespace Dotmim.Sync
         public SyncConfiguration Configuration
         {
             get => _configuration;
-            private set
+            protected set
             {
                 var batchDir = _configuration?.BatchDirectory;
                 _configuration = value;
@@ -199,7 +199,7 @@ namespace Dotmim.Sync
         /// <summary>
         /// Launch a synchronization with the specified mode
         /// </summary>
-        public async Task<SyncContext> SynchronizeAsync(SyncType syncType, CancellationToken cancellationToken)
+        public virtual async Task<SyncContext> SynchronizeAsync(SyncType syncType, CancellationToken cancellationToken)
         {
             // Context, used to back and forth data between servers
             SyncContext context = new SyncContext(Guid.NewGuid())

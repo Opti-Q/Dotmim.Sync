@@ -17,6 +17,8 @@ namespace Dotmim.Sync.Web.Client
         ApplyChanges,
         WriteScopes,
         GetLocalTimestamp,
-        EndSession
+        EndSession,
+        // single request/response mode
+        EfficientSync
     }
 }

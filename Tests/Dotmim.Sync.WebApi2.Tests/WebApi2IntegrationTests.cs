@@ -245,7 +245,8 @@ namespace Dotmim.Sync.Tests
             proxyClientProvider = new WebProxyClientProvider(new Uri(fixture.BaseAddress, "api/values"));
 
             agent = new SyncAgent(clientProvider, proxyClientProvider);
-            agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
+            agent = new EfficientSyncAgent(clientProvider, proxyClientProvider);
+            // agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
         }
 
         [Fact, TestPriority(1)]

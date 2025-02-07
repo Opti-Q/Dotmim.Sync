@@ -25,7 +25,7 @@ namespace Dotmim.Sync.Web.Client
     /// <summary>
     /// Class used when you have to deal with a Web Server
     /// </summary>
-    public class WebProxyClientProvider : IProvider, IDisposable
+    public partial class WebProxyClientProvider : IProvider, IDisposable
     {
         private HttpRequestHandler httpRequestHandler;
         private CancellationToken cancellationToken;

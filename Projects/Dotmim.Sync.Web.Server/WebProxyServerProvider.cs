@@ -36,7 +36,7 @@ namespace Dotmim.Sync.Web.Server
     /// <summary>
     /// Class used when you have to deal with a Web Server
     /// </summary>
-    public class WebProxyServerProvider : IProvider
+    public partial class WebProxyServerProvider : IProvider
     {
         public CoreProvider LocalProvider { get; private set; }
 
@@ -269,6 +269,9 @@ namespace Dotmim.Sync.Web.Server
                         case HttpStep.EndSession:
                             httpMessageResponse = await EndSessionAsync(httpMessage);
                             break;
+                        case HttpStep.EfficientSync:
+                            httpMessageResponse = await HandleEfficientSyncAsync(httpMessage);
+                            break;
                     }
 
                     var binaryData = serializer.Serialize(httpMessageResponse);
@@ -389,6 +392,9 @@ namespace Dotmim.Sync.Web.Server
                             break;
                         case HttpStep.EndSession:
                             httpMessageResponse = await EndSessionAsync(httpMessage);
+                            break;
+                        case HttpStep.EfficientSync:
+                            httpMessageResponse = await HandleEfficientSyncAsync(httpMessage);
                             break;
                     } 
                     
