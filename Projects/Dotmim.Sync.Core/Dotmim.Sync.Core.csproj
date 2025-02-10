@@ -1,44 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Sébastien Pertus</Authors>
-    <Company>Microsoft</Company>
-    <RootNamespace>Dotmim.Sync</RootNamespace>
-    <Title>Dotmim.Sync.Core</Title>
-    <Summary>Manage a sync process beetween two relational databases provider. Core assembly</Summary>
-    <Description>Dotmim Sync core assembly. Manage a sync process beetween two relational databases provider.
-Can't be used alone. Choose a server and a client provider such as Dotmim.Sync.SqlServerProvider or Dotmim.Sync.SqliteProvider</Description>
-    <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
-    <PackageTags>Dotmim.Sync, Sync Core Provider, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
-    <Version>0.3.0.0</Version>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
-    <Product>Dotmim.Sync.Core OPTI-Q</Product>
-    <PackageReleaseNotes>
-        #0.3.0.0
-        - allowed sqlite to use IsDirty column for change tracking
-        #0.2.12.0
-        - TableChangesApplyingEventArgs contains the canges view and sync context 
-	    #0.2.11.0
-	    - WebProxyClientProvider throws TimeoutException on request timeout instead of TaskCanceledException
-		#0.2.10.0
-		- JsonConverter does not close stream
-	</PackageReleaseNotes>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Sébastien Pertus</Authors>
+        <Company>Microsoft</Company>
+        <RootNamespace>Dotmim.Sync</RootNamespace>
+        <Title>Dotmim.Sync.Core</Title>
+        <Summary>Manage a sync process beetween two relational databases provider. Core assembly</Summary>
+        <Description>Dotmim Sync core assembly. Manage a sync process beetween two relational databases provider.
+            Can't be used alone. Choose a server and a client provider such as Dotmim.Sync.SqlServerProvider or Dotmim.Sync.SqliteProvider
+        </Description>
+        <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
+        <PackageTags>Dotmim.Sync, Sync Core Provider, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
+        <Version>0.3.0.0</Version>
+        <AssemblyVersion>0.3.0.0</AssemblyVersion>
+        <Product>Dotmim.Sync.Core OPTI-Q</Product>
+        <PackageId>Opti.Sync.Core</PackageId>
+        <PackageReleaseNotes>
+            #0.3.0.0
+            - allowed sqlite to use IsDirty column for change tracking
+            #0.2.12.0
+            - TableChangesApplyingEventArgs contains the canges view and sync context
+            #0.2.11.0
+            - WebProxyClientProvider throws TimeoutException on request timeout instead of TaskCanceledException
+            #0.2.10.0
+            - JsonConverter does not close stream
+        </PackageReleaseNotes>
+    </PropertyGroup>
 
-  <!--generate NUGET package including symbols ans source on each release build -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <IncludeSource>True</IncludeSource>
-    <IncludeSymbols>True</IncludeSymbols>
-  </PropertyGroup>
+    <!--generate NUGET package including symbols ans source on each release build -->
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeSource>True</IncludeSource>
+        <IncludeSymbols>True</IncludeSymbols>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-    <PackageReference Include="System.Data.Common" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CSharp" Version="4.5.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
+        <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0"/>
+        <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0"/>
+        <PackageReference Include="System.Data.Common" Version="4.3.0"/>
+        <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.0"/>
+    </ItemGroup>
 </Project>
