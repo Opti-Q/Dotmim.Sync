@@ -16,7 +16,7 @@ using Dotmim.Sync.Messages;
 using Dotmim.Sync.Web.Client;
 using Newtonsoft.Json.Linq;
 using Polly;
-#if NETSTANDARD
+#if NETSTANDARD || NET9_0_OR_GREATER
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.Primitives;
@@ -172,7 +172,7 @@ namespace Dotmim.Sync.Web.Server
         /// </summary>
         public SyncConfiguration Configuration { get; set; }
 
-#if NETSTANDARD
+#if NETSTANDARD || NET9_0_OR_GREATER
         /// <summary>
         /// Call this method to handle requests on the server, sent by the client
         /// </summary>
@@ -925,7 +925,7 @@ namespace Dotmim.Sync.Web.Server
         }
 
 
-#if NETSTANDARD
+#if NETSTANDARD || NET9_0_OR_GREATER
         public bool IsSessionEnabled(HttpContext context)
         {
             // try to get the session store service from DI
@@ -950,7 +950,7 @@ namespace Dotmim.Sync.Web.Server
 
     internal static class Extensions
     {
-#if NETSTANDARD
+#if NETSTANDARD || NET9_0_OR_GREATER
         public static bool TryGetHeaderValue(this IHeaderDictionary n, string key, out string header)
         {
             if (n.TryGetValue(key, out StringValues vs))

@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
-#if NETSTANDARD
+#if NETSTANDARD || NET9_0_OR_GREATER
 using Microsoft.AspNetCore.Http;
 #else
 using System.Web;
@@ -72,7 +72,7 @@ namespace Dotmim.Sync.Web.Server
         }
     }
 
-#if !NETSTANDARD
+#if !NETSTANDARD && !NET9_0_OR_GREATER
     internal static class SessionExtensions
     {
         public static void SetString(this HttpSessionStateBase session, string cacheKey, string value)

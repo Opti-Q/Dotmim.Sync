@@ -79,7 +79,7 @@ namespace Dotmim.Sync.Serialization
 
         public override void Write(byte value)
         {
-            WriteToConsole(BitConverter.GetBytes(value));
+            WriteToConsole(BitConverter.GetBytes((short)value));
             base.Write(value);
         }
 
@@ -121,7 +121,7 @@ namespace Dotmim.Sync.Serialization
 
         public override void Write(sbyte value)
         {
-            WriteToConsole(BitConverter.GetBytes(value));
+            WriteToConsole(BitConverter.GetBytes((short)value));
             base.Write(value);
         }
 
