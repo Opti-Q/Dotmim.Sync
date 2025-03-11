@@ -9,10 +9,13 @@
         <PackageTags>Dotmim.Sync,Sync, Sql Server Provider, .Net Standard 2.0</PackageTags>
         <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
         <PackageId>Opti.Sync.SqlServer</PackageId>
-        <Version>0.3.0.0</Version>
+        <Version>0.3.1.0</Version>
         <AssemblyVersion>0.3.0.0</AssemblyVersion>
         <Product>Dotmim.Sync.SqlServer OPTI-Q</Product>
         <PackageReleaseNotes>
+            #0.3.1.0
+            - added .net9 and BinaryFormatter backward compatibility
+            
             #0.3.0.0
             - allowed sqlite to use IsDirty column for change tracking
 

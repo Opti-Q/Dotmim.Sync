@@ -12,11 +12,13 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <AssemblyName>Dotmim.Sync.Web.Server</AssemblyName>
         <RootNamespace>Dotmim.Sync.Web.Server</RootNamespace>
-        <Version>0.3.0.0</Version>
+        <Version>0.3.1.0</Version>
         <AssemblyVersion>0.3.0.0</AssemblyVersion>
         <Product>Dotmim.Sync.Web.Server OPTI-Q</Product>
         <PackageId>Opti.Sync.Web.Server</PackageId>
         <PackageReleaseNotes>
+            #0.3.1.0
+            - added .net9 and BinaryFormatter backward compatibility
             #0.3.0.0
             - allowed sqlite to use IsDirty column for change tracking
             #0.2.12.0

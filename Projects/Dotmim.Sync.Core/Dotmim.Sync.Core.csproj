@@ -12,11 +12,13 @@
         </Description>
         <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
         <PackageTags>Dotmim.Sync, Sync Core Provider, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
-        <Version>0.3.0.0</Version>
+        <Version>0.3.1.0</Version>
         <AssemblyVersion>0.3.0.0</AssemblyVersion>
         <Product>Dotmim.Sync.Core OPTI-Q</Product>
         <PackageId>Opti.Sync.Core</PackageId>
         <PackageReleaseNotes>
+            #0.3.1.0
+            - added .net9 and BinaryFormatter backward compatibility
             #0.3.0.0
             - allowed sqlite to use IsDirty column for change tracking
             #0.2.12.0
