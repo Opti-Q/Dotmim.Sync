@@ -9,22 +9,26 @@
     <Description>SQLite Sync Provider. Actually can be used as Client provider (Don't use it as a Server provider)</Description>
     <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
     <PackageTags>Dotmim.Sync, SQLite Sync Core Provider, SQLite Sync, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
-    <Version>0.3.1.0</Version>
+    <Version>0.3.3.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
     <Product>Dotmim.Sync.Sqlite OPTI-Q</Product>
     <PackageId>Opti.Sync.Sqlite</PackageId>
     <PackageReleaseNotes>
-      #0.3.1.0
-      - added .net9 and BinaryFormatter backward compatibility
-      #0.3.0.0
-      - allowed sqlite to use IsDirty column for change tracking
-      - updated to Microsoft.Data.Sqlite 9.0.1
-      - guids MUST now be stored as texts/strings and NOT as blobs
-      #0.2.12.0
-      - TableChangesApplyingEventArgs contains the canges view and sync context
-      #0.2.11.0
-      coreprovider.getstatefromdmrow greatly simplified,
-      sqlite select_changes query only returns local changes and ignores "reinit" (it is the client db after all...)
+        #0.3.3.0
+        - all GUID columns are stoed as TEXT COLLATE NOCASE
+        #0.3.2.0
+        - no more requirement for BinaryFormatter in BatchPart (uses Json as alternative)
+        #0.3.1.0
+        - added .net9 and BinaryFormatter backward compatibility
+        #0.3.0.0
+        - allowed sqlite to use IsDirty column for change tracking
+        - updated to Microsoft.Data.Sqlite 9.0.1
+        - guids MUST now be stored as texts/strings and NOT as blobs
+        #0.2.12.0
+        - TableChangesApplyingEventArgs contains the canges view and sync context
+        #0.2.11.0
+        coreprovider.getstatefromdmrow greatly simplified,
+        sqlite select_changes query only returns local changes and ignores "reinit" (it is the client db after all...)
     </PackageReleaseNotes>
   </PropertyGroup>
 

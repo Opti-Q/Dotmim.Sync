@@ -9,13 +9,17 @@
         <PackageTags>Dotmim.Sync,Sync, Sql Server Provider, .Net Standard 2.0</PackageTags>
         <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
         <PackageId>Opti.Sync.SqlServer</PackageId>
-        <Version>0.3.1.0</Version>
+        <Version>0.3.3.0</Version>
         <AssemblyVersion>0.3.0.0</AssemblyVersion>
         <Product>Dotmim.Sync.SqlServer OPTI-Q</Product>
         <PackageReleaseNotes>
+            #0.3.3.0
+            - all GUID columns are stoed as TEXT COLLATE NOCASE
+            #0.3.2.0
+            - no more requirement for BinaryFormatter in BatchPart (uses Json as alternative)
             #0.3.1.0
             - added .net9 and BinaryFormatter backward compatibility
-            
+
             #0.3.0.0
             - allowed sqlite to use IsDirty column for change tracking
 
@@ -38,11 +42,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CSharp" Version="4.5.0"/>
-        <PackageReference Include="System.Data.SqlClient" Version="4.5.1"/>
+        <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.5.1" />
 
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Dotmim.Sync.Core\Dotmim.Sync.Core.csproj"/>
+        <ProjectReference Include="..\Dotmim.Sync.Core\Dotmim.Sync.Core.csproj" />
     </ItemGroup>
 </Project>
