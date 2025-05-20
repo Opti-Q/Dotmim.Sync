@@ -11,11 +11,13 @@
 		<PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
 		<PackageTags>Dotmim.Sync, ASP.NET Core, ASP.NET Core Web Sync Proxy, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>0.3.3.0</Version>
+		<Version>0.3.4.0</Version>
 		<AssemblyVersion>0.3.0.0</AssemblyVersion>
 		<Product>Dotmim.Sync.Web.Client OPTI-Q</Product>
 		<PackageId>Opti.Sync.Web.Client</PackageId>
 		<PackageReleaseNotes>
+            #0.3.4.0
+            - also, internal (scopeinfo, _tracking) GUID columns are stoed as TEXT COLLATE NOCASE
             #0.3.3.0
             - all GUID columns are stoed as TEXT COLLATE NOCASE
             #0.3.2.0

@@ -9,10 +9,12 @@
         <PackageTags>Dotmim.Sync,Sync, Sql Server Provider, .Net Standard 2.0</PackageTags>
         <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
         <PackageId>Opti.Sync.SqlServer</PackageId>
-        <Version>0.3.3.0</Version>
+        <Version>0.3.4.0</Version>
         <AssemblyVersion>0.3.0.0</AssemblyVersion>
         <Product>Dotmim.Sync.SqlServer OPTI-Q</Product>
         <PackageReleaseNotes>
+            #0.3.4.0
+            - also, internal (scopeinfo, _tracking) GUID columns are stoed as TEXT COLLATE NOCASE
             #0.3.3.0
             - all GUID columns are stoed as TEXT COLLATE NOCASE
             #0.3.2.0
