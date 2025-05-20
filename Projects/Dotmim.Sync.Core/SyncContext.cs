@@ -74,6 +74,8 @@ namespace Dotmim.Sync
         /// </summary>
         public SyncParameterCollection Parameters { get; set; }
 
+        public bool NoBinarySerializer { get; set; }
+
         /// <summary>
         /// Ctor. New sync context with a new Guid
         /// </summary>

@@ -32,6 +32,7 @@ namespace Dotmim.Sync
             DbConnection connection = null;
             ChangesApplied changesApplied = new ChangesApplied();
 
+            context.NoBinarySerializer = message.NoBinarySerializer;
 
             try
             {

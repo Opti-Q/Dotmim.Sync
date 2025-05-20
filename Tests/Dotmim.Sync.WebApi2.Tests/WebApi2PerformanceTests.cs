@@ -205,6 +205,7 @@ namespace Dotmim.Sync.Tests
 
             agent = new SyncAgent(clientProvider, proxyClientProvider);
             agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
+            agent.Configuration.NoBinarySerializer = true;
         }
 
         [Fact, TestPriority(1)]

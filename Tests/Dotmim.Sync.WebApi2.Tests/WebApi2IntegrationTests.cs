@@ -234,6 +234,8 @@ namespace Dotmim.Sync.Tests
                     () =>
                     {
                         var syncConfig = configurationProvider();
+                        // the server never expects to use anything else than the binaryformatter
+                        syncConfig.NoBinarySerializer = false;
                         syncConfig.BatchDirectory = Path.Combine(batchDir, "server");
                         proxyServerProvider.Configuration = syncConfig;
                         return proxyServerProvider;
@@ -248,9 +250,14 @@ namespace Dotmim.Sync.Tests
             agent.Configuration.BatchDirectory = Path.Combine(batchDir, "client");
         }
 
-        [Fact, TestPriority(1)]
-        public async Task Initialize()
+        [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(1)]
+        public async Task Initialize(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
+            conf.Add(fixture.Tables);
+            configurationProvider = () => conf;
+
             // Act
             var session = await agent.SynchronizeAsync();
 
@@ -262,6 +269,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(2)]
         public async Task SyncNoRows(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
 
@@ -276,6 +285,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(3)]
         public async Task InsertFromServer(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             await agent.SynchronizeAsync();
@@ -306,6 +317,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(4)]
         public async Task InsertFromClient(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
@@ -344,6 +357,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(5)]
         public async Task UpdateFromClient(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
@@ -404,6 +419,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(6)]
         public async Task UpdateFromServer(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             _ = await agent.SynchronizeAsync();
 
             conf.Add(fixture.Tables);
@@ -434,6 +451,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(7)]
         public async Task DeleteFromServer(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
 
@@ -462,6 +481,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(8)]
         public async Task DeleteFromClient(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
@@ -502,6 +523,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(9)]
         public async Task ConflictInsertInsertServerWins(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
@@ -572,6 +595,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(10)]
         public async Task ConflictUpdateUpdateServerWins(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
@@ -662,6 +687,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(11)]
         public async Task ConflictUpdateUpdateClientWins(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
@@ -764,6 +791,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(12)]
         public async Task ConflictInsertInsertConfigurationClientWins(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.ConflictResolutionPolicy = ConflictResolutionPolicy.ClientWins;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
@@ -832,6 +861,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(13)]
         public async Task InsertAndUpdateOnClient_DataIsSentToServer(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
@@ -906,6 +937,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(14)]
         public async Task InsertFromClient_WhenConnectionInterrupted_ThenUpdatedOnClientAndRetried_UpdateIsSentToServer(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
@@ -1003,6 +1036,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(15)]
         public async Task InsertFromServer_ThenUpdatedOnServer_UpdateIsSentToClient(SyncConfiguration conf)
         {
+            // Arrange
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist
@@ -1102,6 +1137,8 @@ namespace Dotmim.Sync.Tests
         [Theory, ClassData(typeof(InlineConfigurations)), TestPriority(16)]
         public async Task InsertAndUpdateOnServer_DataIsSyncedToClient(SyncConfiguration conf)
         {
+            agent.Configuration.NoBinarySerializer = conf.NoBinarySerializer;
+
             conf.Add(fixture.Tables);
             configurationProvider = () => conf;
             // provision client infrastructure - otherwise this test will fail when run separately, because the sqlite db table won't yet exist

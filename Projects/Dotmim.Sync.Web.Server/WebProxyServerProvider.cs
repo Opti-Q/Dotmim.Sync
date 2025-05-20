@@ -611,7 +611,8 @@ namespace Dotmim.Sync.Web.Server
                         DownloadBatchSizeInKB = httpMessageContent.DownloadBatchSizeInKB,
                         BatchDirectory = httpMessageContent.BatchDirectory,
                         Policy = httpMessageContent.Policy,
-                        Filters = httpMessageContent.Filters
+                        Filters = httpMessageContent.Filters,
+                        NoBinarySerializer = httpMessageContent.NoBinarySerializer
                     });
 
                 // Select the first bpi needed (index == 0)
@@ -720,7 +721,8 @@ namespace Dotmim.Sync.Web.Server
                         Policy = httpMessageContent.Policy,
                         UseBulkOperations = httpMessageContent.UseBulkOperations,
                         ScopeInfoTableName = httpMessageContent.ScopeInfoTableName,
-                        Changes = batchInfo
+                        Changes = batchInfo,
+                        NoBinarySerializer = httpMessageContent.NoBinarySerializer
                     });
 
                 httpMessageContent.ChangesApplied = s;
@@ -764,7 +766,7 @@ namespace Dotmim.Sync.Web.Server
             // to save the file, we should use the local configuration batch directory
             var fileName = Path.Combine(this.Configuration.BatchDirectory, batchInfo.Directory, bpId);
 
-            BatchPart.Serialize(httpMessageContent.Set, fileName);
+            BatchPart.Serialize(httpMessageContent.Set, fileName, !httpMessageContent.NoBinarySerializer);
             bpi.FileName = fileName;
 
             this.LocalProvider.CacheManager.Set("ApplyChanges_BatchInfo", batchInfo);

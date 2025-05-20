@@ -3,6 +3,7 @@ using Dotmim.Sync.Serialization;
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Newtonsoft.Json;
 
 namespace Dotmim.Sync.Batch
 {
@@ -18,7 +19,7 @@ namespace Dotmim.Sync.Batch
         /// </summary>
         public DmSetSurrogate DmSetSurrogate { get; private set; }
 
-        public static BatchPart Deserialize(string fileName)
+        public static BatchPart Deserialize(string fileName, bool useBinarySerializer)
         {
             if (String.IsNullOrEmpty(fileName))
                 throw new ArgumentNullException("Cant get a Batch part if fileName doesn't exist");
@@ -30,15 +31,23 @@ namespace Dotmim.Sync.Batch
 
             using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
             {
-                BinaryFormatter serializer = new BinaryFormatter();
-                bp.DmSetSurrogate = serializer.Deserialize(fs) as DmSetSurrogate;
+                if (useBinarySerializer)
+                {
+                    BinaryFormatter serializer = new BinaryFormatter();
+                    bp.DmSetSurrogate = serializer.Deserialize(fs) as DmSetSurrogate;
+                }
+                else
+                {
+                    var json = new Dotmim.Sync.Serialization.JsonConverter<DmSetSurrogate>();
+                    bp.DmSetSurrogate = json.Deserialize(fs);
+                }
             }
 
             return bp;
         }
 
 
-        public static void Serialize(DmSetSurrogate set, string fileName)
+        public static void Serialize(DmSetSurrogate set, string fileName, bool useBinarySerializer)
         {
 
             FileInfo fi = new FileInfo(fileName);
@@ -49,8 +58,16 @@ namespace Dotmim.Sync.Batch
             // Serialize on disk.
             using (var f = new FileStream(fileName, FileMode.CreateNew, FileAccess.ReadWrite))
             {
-                BinaryFormatter serializer = new BinaryFormatter();
-                serializer.Serialize(f, set);
+                if (useBinarySerializer)
+                {
+                    BinaryFormatter serializer = new BinaryFormatter();
+                    serializer.Serialize(f, set);
+                }
+                else
+                {
+                    var json = new Dotmim.Sync.Serialization.JsonConverter<DmSetSurrogate>();
+                    json.Serialize(set, f);
+                }
             }
         }
 

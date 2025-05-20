@@ -28,7 +28,7 @@ namespace Dotmim.Sync.Batch
                 throw new ArgumentNullException("Cant get a batchpart if filename is null");
 
             // Get a Batch part, and deserialise the file into a DmSetSurrogate
-            batch = BatchPart.Deserialize(this.FileName);
+            batch = BatchPart.Deserialize(this.FileName, !NoBinarySerializer);
 
             return batch;
         }
@@ -51,6 +51,8 @@ namespace Dotmim.Sync.Batch
         }
 
         public String FileName { get; set; }
+
+        public bool NoBinarySerializer { get; set; }
 
         public int Index { get; set; }
 
@@ -118,7 +120,7 @@ namespace Dotmim.Sync.Batch
         /// <summary>
         /// Create a new BPI, and serialize the changeset if not in memory
         /// </summary>
-        internal static BatchPartInfo CreateBatchPartInfo(int batchIndex, DmSet changesSet, string fileName, Boolean isLastBatch, Boolean inMemory)
+        internal static BatchPartInfo CreateBatchPartInfo(int batchIndex, DmSet changesSet, string fileName, Boolean isLastBatch, Boolean inMemory, bool noBinarySerializer)
         {
             BatchPartInfo bpi = null;
 
@@ -127,13 +129,13 @@ namespace Dotmim.Sync.Batch
             if (!inMemory)
             {
                 // Serialize the file !
-                BatchPart.Serialize(new DmSetSurrogate(changesSet), fileName);
+                BatchPart.Serialize(new DmSetSurrogate(changesSet), fileName, !noBinarySerializer);
 
-                bpi = new BatchPartInfo { FileName = fileName };
+                bpi = new BatchPartInfo { FileName = fileName, NoBinarySerializer = noBinarySerializer};
             }
             else
             {
-                bpi = new BatchPartInfo { Set = changesSet };
+                bpi = new BatchPartInfo { Set = changesSet, NoBinarySerializer = noBinarySerializer };
             }
 
             bpi.Index = batchIndex;

@@ -15,7 +15,16 @@ namespace Dotmim.Sync.Test.SqlUtils
                 
                 DownloadBatchSizeInKB = 100,
                 UseBulkOperations = true,
-                SerializationFormat= Enumerations.SerializationFormat.Json
+                SerializationFormat= Enumerations.SerializationFormat.Json,
+                NoBinarySerializer = false
+            } });
+
+            confs.Add(new object[] { new SyncConfiguration{
+
+                DownloadBatchSizeInKB = 100,
+                UseBulkOperations = true,
+                SerializationFormat= Enumerations.SerializationFormat.Json,
+                NoBinarySerializer = true // for .net9 compatibility, do not use BinaryFormatter anymore
             } });
 
             //confs.Add(new object[] { new SyncConfiguration{

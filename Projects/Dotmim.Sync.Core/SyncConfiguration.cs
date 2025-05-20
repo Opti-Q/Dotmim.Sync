@@ -79,6 +79,9 @@ namespace Dotmim.Sync
         [DataMember(Name = "SF")]
         public SerializationFormat SerializationFormat { get; set; }
 
+        [DataMember(Name="NBS")]
+        public bool NoBinarySerializer { get; set; }
+
         /// <summary>
         /// Gets/Sets the log level for sync operations. Default value is false.
         /// </summary>

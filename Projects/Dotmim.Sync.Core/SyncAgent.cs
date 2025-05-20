@@ -201,6 +201,8 @@ namespace Dotmim.Sync
         /// </summary>
         public async Task<SyncContext> SynchronizeAsync(SyncType syncType, CancellationToken cancellationToken)
         {
+            var noBinarySerializer = this.Configuration.NoBinarySerializer;
+
             // Context, used to back and forth data between servers
             SyncContext context = new SyncContext(Guid.NewGuid())
             {
@@ -214,7 +216,9 @@ namespace Dotmim.Sync
                 SyncType = syncType,
 
                 // set the scopename
-                ScopeName = this.Configuration.ScopeName
+                ScopeName = this.Configuration.ScopeName,
+
+                NoBinarySerializer = noBinarySerializer
             };
 
             this.SessionState = SyncSessionState.Synchronizing;
@@ -424,7 +428,8 @@ namespace Dotmim.Sync
                             BatchDirectory = batchDirectory,//this.Configuration.BatchDirectory,
                             Policy = clientPolicy,
                             Filters = this.Configuration.Filters,
-                            SerializationFormat = this.Configuration.SerializationFormat
+                            SerializationFormat = this.Configuration.SerializationFormat,
+                            NoBinarySerializer = noBinarySerializer
                         });
 
                 if (cancellationToken.IsCancellationRequested)
@@ -448,7 +453,8 @@ namespace Dotmim.Sync
                          UseBulkOperations = this.Configuration.UseBulkOperations,
                          ScopeInfoTableName = this.Configuration.ScopeInfoTableName,
                          Changes = clientBatchInfo,
-                         SerializationFormat = this.Configuration.SerializationFormat
+                         SerializationFormat = this.Configuration.SerializationFormat,
+                         NoBinarySerializer = noBinarySerializer
                      });
 
 
@@ -525,7 +531,8 @@ namespace Dotmim.Sync
                             BatchDirectory = batchDirectory,// this.Configuration.BatchDirectory,
                             Policy = serverPolicy,
                             Filters = this.Configuration.Filters,
-                            SerializationFormat = this.Configuration.SerializationFormat
+                            SerializationFormat = this.Configuration.SerializationFormat,
+                            NoBinarySerializer = noBinarySerializer
                         });
 
                 if (cancellationToken.IsCancellationRequested)
@@ -552,7 +559,8 @@ namespace Dotmim.Sync
                             UseBulkOperations = this.Configuration.UseBulkOperations,
                             ScopeInfoTableName = this.Configuration.ScopeInfoTableName,
                             Changes = serverBatchInfo,
-                            SerializationFormat = this.Configuration.SerializationFormat
+                            SerializationFormat = this.Configuration.SerializationFormat,
+                            NoBinarySerializer = noBinarySerializer
                         });
 
                 context.TotalChangesDownloaded = clientChangesApplied.TotalAppliedChanges;

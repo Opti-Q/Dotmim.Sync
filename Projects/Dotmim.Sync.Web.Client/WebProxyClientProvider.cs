@@ -350,8 +350,8 @@ namespace Dotmim.Sync.Web.Client
                         Schema = new DmSetSurrogate(message.Schema),
                         Filters = message.Filters,
                         Policy = message.Policy,
-                        SerializationFormat = message.SerializationFormat
-
+                        SerializationFormat = message.SerializationFormat,
+                        NoBinarySerializer = message.NoBinarySerializer,
                     }
                 };
 
@@ -400,7 +400,7 @@ namespace Dotmim.Sync.Web.Client
                     // Serialize the file !
                     var bpId = BatchInfo.GenerateNewFileName(changes.BatchIndex.ToString());
                     var fileName = Path.Combine(message.BatchDirectory, changes.Directory, bpId);
-                    BatchPart.Serialize(httpMessageContent.Set, fileName);
+                    BatchPart.Serialize(httpMessageContent.Set, fileName, !context.NoBinarySerializer);
                     bpi.FileName = fileName;
                     bpi.Clear();
 

@@ -36,6 +36,8 @@ namespace Dotmim.Sync
                 if (message.ScopeInfo == null)
                     throw new ArgumentNullException("scopeInfo", "Client scope info is null");
 
+                context.NoBinarySerializer = message.NoBinarySerializer;
+
                 // Check if the provider is not outdated
                 var isOutdated = this.IsRemoteOutdated();
 
@@ -151,7 +153,7 @@ namespace Dotmim.Sync
                 batchInfo.Directory = BatchInfo.GenerateNewDirectoryName();
 
             // generate the batchpartinfo
-            var bpi = batchInfo.GenerateBatchInfo(0, changesSet, batchDirectory);
+            var bpi = batchInfo.GenerateBatchInfo(0, changesSet, batchDirectory, context.NoBinarySerializer);
             bpi.IsLastBatch = true;
 
             // Create a new in-memory batch info with an the changes DmSet
@@ -354,7 +356,7 @@ namespace Dotmim.Sync
                         transaction.Commit();
 
                         // generate the batchpartinfo
-                        batchInfo.GenerateBatchInfo(0, changesSet, batchDirectory);
+                        batchInfo.GenerateBatchInfo(0, changesSet, batchDirectory, context.NoBinarySerializer);
 
                         // Create a new in-memory batch info with an the changes DmSet
                         return (batchInfo, changes);
@@ -634,7 +636,7 @@ namespace Dotmim.Sync
                                                 changesSet.Tables.Add(dmTable);
 
                                                 // generate the batch part info
-                                                batchInfo.GenerateBatchInfo(batchIndex, changesSet, batchDirectory);
+                                                batchInfo.GenerateBatchInfo(batchIndex, changesSet, batchDirectory, context.NoBinarySerializer);
 
                                                 // increment batch index
                                                 batchIndex++;
@@ -696,7 +698,7 @@ namespace Dotmim.Sync
                     // We are in batch mode, and we are at the last batchpart info
                     if (changesSet != null && changesSet.HasTables && changesSet.HasChanges())
                     {
-                        var batchPartInfo = batchInfo.GenerateBatchInfo(batchIndex, changesSet, batchDirectory);
+                        var batchPartInfo = batchInfo.GenerateBatchInfo(batchIndex, changesSet, batchDirectory, context.NoBinarySerializer);
 
                         if (batchPartInfo != null)
                             batchPartInfo.IsLastBatch = true;

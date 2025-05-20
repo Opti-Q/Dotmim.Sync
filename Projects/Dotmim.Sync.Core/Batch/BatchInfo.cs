@@ -91,7 +91,7 @@ namespace Dotmim.Sync.Batch
         /// <summary>
         /// Generate a new BatchPartInfo and add it to the current batchInfo
         /// </summary>
-        internal BatchPartInfo GenerateBatchInfo(int batchIndex, DmSet changesSet, string batchDirectory )
+        internal BatchPartInfo GenerateBatchInfo(int batchIndex, DmSet changesSet, string batchDirectory, bool noBinarySerializer )
         {
             var hasData = true;
 
@@ -112,11 +112,11 @@ namespace Dotmim.Sync.Batch
                 var bpId = GenerateNewFileName(batchIndex.ToString());
                 var fileName = Path.Combine(batchDirectory, this.Directory, bpId);
 
-                bpi = BatchPartInfo.CreateBatchPartInfo(batchIndex, changesSet, fileName, false, false);
+                bpi = BatchPartInfo.CreateBatchPartInfo(batchIndex, changesSet, fileName, false, false, noBinarySerializer);
             }
             else
             {
-                bpi = BatchPartInfo.CreateBatchPartInfo(batchIndex, changesSet, null, true, true);
+                bpi = BatchPartInfo.CreateBatchPartInfo(batchIndex, changesSet, null, true, true, noBinarySerializer);
             }
 
             // add the batchpartinfo tp the current batchinfo

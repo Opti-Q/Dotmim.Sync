@@ -52,5 +52,10 @@ namespace Dotmim.Sync.Messages
         /// Gets or Sets the Serialization format used during the sync
         /// </summary>
         public SerializationFormat SerializationFormat { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether BinarySerializer is supported
+        /// </summary>
+        public bool NoBinarySerializer { get; set; }
     }
 }
