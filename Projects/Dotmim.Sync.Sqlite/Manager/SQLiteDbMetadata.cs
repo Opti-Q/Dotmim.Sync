@@ -55,8 +55,8 @@ namespace Dotmim.Sync.Sqlite
                 case DbType.Xml:
                 case DbType.Time:
                 case DbType.DateTimeOffset:
-                    return "text";
                 case DbType.Guid:
+                    return "text";
                 case DbType.Binary:
                 case DbType.Object:
                     return "blob";
@@ -108,6 +108,7 @@ namespace Dotmim.Sync.Sqlite
                 case DbType.String:
                 case DbType.StringFixedLength:
                 case DbType.Xml:
+                    case DbType.Guid:
                     return true;
             }
             return false;

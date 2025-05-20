@@ -163,8 +163,8 @@ namespace Dotmim.Sync.Sqlite
             }
 
             // adding the tracking columns
-            stringBuilder.AppendLine($"[create_scope_id] [blob] NULL COLLATE NOCASE, ");
-            stringBuilder.AppendLine($"[update_scope_id] [blob] NULL COLLATE NOCASE, ");
+            stringBuilder.AppendLine($"[create_scope_id] [text] NULL COLLATE NOCASE, ");
+            stringBuilder.AppendLine($"[update_scope_id] [text] NULL COLLATE NOCASE, ");
             stringBuilder.AppendLine($"[create_timestamp] [integer] NULL, ");
             stringBuilder.AppendLine($"[update_timestamp] [integer] NULL, ");
             stringBuilder.AppendLine($"[timestamp] [integer] NULL, ");

@@ -36,7 +36,7 @@ namespace Dotmim.Sync.Sqlite
 
                 command.CommandText =
                     $@"CREATE TABLE {scopeTableName.ObjectNameNormalized}(
-                        sync_scope_id blob NOT NULL PRIMARY KEY,
+                        sync_scope_id text NOT NULL COLLATE NOCASE PRIMARY KEY,
 	                    sync_scope_name text NOT NULL,
 	                    scope_timestamp integer NULL,
                         scope_is_local integer NOT NULL DEFAULT(0), 
