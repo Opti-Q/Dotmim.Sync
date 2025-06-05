@@ -414,8 +414,10 @@ namespace Dotmim.Sync
                 lastSyncTS = localScopeInfo.LastSyncTimestamp;
                 // isNew : If isNew, lasttimestamp is not correct, so grab all
                 isNew = localScopeInfo.IsNewScope;
-                //Direction set to Upload
+                // Direction set to Upload
                 context.SyncWay = SyncWay.Upload;
+                // set nobinaryserializer
+                context.NoBinarySerializer = noBinarySerializer;
 
                 scope = new ScopeInfo { Id = fromId, IsNewScope = isNew, Timestamp = lastSyncTS };
                 (context, clientBatchInfo, clientChangesSelected) =
@@ -442,6 +444,8 @@ namespace Dotmim.Sync
                 // isNew : not needed
                 isNew = false;
                 scope = new ScopeInfo { Id = fromId, IsNewScope = isNew, Timestamp = lastSyncTS };
+                // set nobinaryserializer
+                context.NoBinarySerializer = noBinarySerializer;
 
                 (context, serverChangesApplied) =
                     await this.RemoteProvider.ApplyChangesAsync(context,
@@ -519,6 +523,8 @@ namespace Dotmim.Sync
                 scope = new ScopeInfo { Id = fromId, IsNewScope = isNew, Timestamp = lastSyncTS };
                 //Direction set to Download
                 context.SyncWay = SyncWay.Download;
+                // set nobinaryserializer
+                context.NoBinarySerializer = noBinarySerializer;
 
 
                 (context, serverBatchInfo, serverChangesSelected) =
@@ -548,6 +554,8 @@ namespace Dotmim.Sync
                 // isNew : if IsNew, don't apply deleted rows from server
                 isNew = localScopeInfo.IsNewScope;
                 scope = new ScopeInfo { Id = fromId, IsNewScope = isNew, Timestamp = lastSyncTS };
+                // set nobinaryserializer
+                context.NoBinarySerializer = noBinarySerializer;
 
                 (context, clientChangesApplied) =
                     await this.LocalProvider.ApplyChangesAsync(context,

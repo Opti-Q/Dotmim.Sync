@@ -12,11 +12,13 @@
         </Description>
         <PackageProjectUrl>https://mimetis.github.io/Dotmim.Sync/</PackageProjectUrl>
         <PackageTags>Dotmim.Sync, Sync Core Provider, .Net Standard 2.0, Sync, Synchronization, Sync Framework</PackageTags>
-        <Version>0.3.4.0</Version>
+        <Version>0.3.4.1</Version>
         <AssemblyVersion>0.3.0.0</AssemblyVersion>
         <Product>Dotmim.Sync.Core OPTI-Q</Product>
         <PackageId>Opti.Sync.Core</PackageId>
         <PackageReleaseNotes>
+            #0.3.4.1
+            - fixed missing "nobinaryserializer" parameter forwarding
             #0.3.4.0
             - also, internal (scopeinfo, _tracking) GUID columns are stoed as TEXT COLLATE NOCASE
             #0.3.3.0
